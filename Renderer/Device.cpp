@@ -265,7 +265,7 @@ void VDR::LoadFont()
 	wstring fontPath = L"../Assets/Fonts/";
 	if (!filesystem::exists(fontPath))
 	{
-		MessageBoxW(0, L"Font directory does not exist", L"Error", MB_OK);
+		MessageBoxW(nullptr, L"Font directory does not exist", L"Error", MB_OK);
 		return;
 	}
 	for (const auto& entry : filesystem::directory_iterator(fontPath))
