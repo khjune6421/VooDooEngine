@@ -1,0 +1,6 @@
+﻿  Device.cpp
+C:\Users\User\Desktop\VooDooEngine\Renderer\Device.cpp(162,19): warning C4244: 'initializing': conversion from 'ULONGLONG' to 'double', possible loss of data
+  Render.cpp
+  TestMain.cpp
+  Generating Code...
+  Renderer.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\Renderer.exe
