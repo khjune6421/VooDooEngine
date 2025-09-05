@@ -46,11 +46,14 @@ namespace VDR
 		ID3D11DeviceContext* context = nullptr;
 		IDXGISwapChain* swapChain = nullptr;
 		ID3D11RenderTargetView* renderTargetView = nullptr;
+		ID3D11Texture2D* depthStencilBuffer = nullptr;
+		ID3D11DepthStencilView* depthStencilView = nullptr;
 
 		bool isFullscreen = false;
 		bool isVSync = false;
+		DWORD antiAliasingLevel = 4;
 
-		DXGI_MODE_DESC displayMode = { 1280, 720, { 60, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM };
+		DXGI_MODE_DESC displayMode = { 1920, 1080, { 60, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM };
 		D3D_FEATURE_LEVEL featureLevels = D3D_FEATURE_LEVEL_11_0;
 
 		std::vector<HardwareInfo> hardwareInfos = {};
@@ -59,7 +62,11 @@ namespace VDR
 	extern DeviceInfo g_DeviceInfo;
 
 	inline void ClearBackBuffer(DirectX::XMFLOAT4 color) { g_DeviceInfo.context->ClearRenderTargetView(g_DeviceInfo.renderTargetView, reinterpret_cast<const float*>(&color)); }
+	void ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth = 1.0f, UINT8 stencil = 0);
+
 	inline void PresentBackBuffer() { g_DeviceInfo.swapChain->Present(g_DeviceInfo.isVSync, 0); }
+
+	void CreateBuffer(ID3D11Device* device, UINT size, _Out_ ID3D11Buffer** buffer, const void* initData = nullptr, UINT stride = 0);
 
 	inline DeviceInfo* GetDeviceInfo() { return &g_DeviceInfo; }
 	void DisplayDeviceInfo();

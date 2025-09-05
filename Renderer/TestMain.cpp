@@ -65,7 +65,7 @@ void InitWindow(LONG width, LONG height, HINSTANCE hInstance, int nShowCmd)
 		hInstance,
 		nullptr
 	);
-	if (!g_hWnd) MessageBoxW(0, L"Failed to create window", L"Error", MB_OK);
+	if (!g_hWnd) MessageBoxW(nullptr, L"Failed to create window", L"Error", MB_OK);
 
 	ResizeWindow(g_hWnd, width, height);
 
