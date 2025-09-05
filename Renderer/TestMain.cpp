@@ -44,13 +44,17 @@ void InitWindow(LONG width, LONG height, HINSTANCE hInstance, int nShowCmd)
 		MsgProc,
 		0, 0,
 		hInstance,
-		0, 0,
+		nullptr, nullptr,
 		reinterpret_cast<HBRUSH>(GetStockObject(DKGRAY_BRUSH)),
 		nullptr,
 		g_className,
-		0
+		nullptr
 	};
-	if (!RegisterClassEx(&wc)) MessageBoxW(0, L"Failed to register window class", L"Error", MB_OK);
+	if (!RegisterClassEx(&wc))
+	{
+		MessageBoxW(nullptr, L"Failed to register window class", L"Error", MB_OK);
+		return;
+	}
 
 	RECT rect = { 0, 0, width, height };
 	g_hWnd = CreateWindow
@@ -65,7 +69,11 @@ void InitWindow(LONG width, LONG height, HINSTANCE hInstance, int nShowCmd)
 		hInstance,
 		nullptr
 	);
-	if (!g_hWnd) MessageBoxW(nullptr, L"Failed to create window", L"Error", MB_OK);
+	if (!g_hWnd)
+	{
+		MessageBoxW(nullptr, L"Failed to create window", L"Error", MB_OK);
+		return;
+	}
 
 	ResizeWindow(g_hWnd, width, height);
 
