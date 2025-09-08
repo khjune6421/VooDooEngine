@@ -1,7 +1,7 @@
 #include "Device.h"
 #include "Render.h"
 
-#define DEVICE VDR::g_DeviceInfo
+#define DEVICE VDD::g_deviceInfo
 
 HWND g_hWnd = nullptr;
 bool g_isRunning = true;
@@ -26,11 +26,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	InitWindow(DEVICE.displayMode.Width, DEVICE.displayMode.Height, hInstance, nShowCmd);
 #endif
 	
-	VDR::Initialize();
+	VDD::Initialize();
+	VDR::LoadData();
 
-	while (g_isRunning && ProcessMessage()) SceneRender();
+	while (g_isRunning && ProcessMessage()) VDR::SceneRender();
 
-	VDR::Release();
+	VDD::Release();
+	VDR::ReleaseData();
 }
 
 void InitWindow(LONG width, LONG height, HINSTANCE hInstance, int nShowCmd)

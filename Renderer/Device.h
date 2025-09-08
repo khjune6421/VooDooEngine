@@ -3,6 +3,7 @@
 // Base header files
 #include <Windows.h>
 #include <vector>
+#include <wrl/client.h>
 
 // DirectX header files
 #include <d3d11.h>
@@ -21,16 +22,12 @@
 // DirectXTK libraries
 #pragma comment(lib, "DirectXTK.lib")
 
+using Microsoft::WRL::ComPtr;
+
 extern HWND g_hWnd;
 
-namespace VDR
+namespace VDD
 {
-	void Initialize();
-	void Release();
-
-	double GetdeltaTime();
-	void ShowFrameRate();
-
 	// Structure for hardware information such as GPU and monitor
 	struct HardwareInfo
 	{
@@ -39,15 +36,15 @@ namespace VDR
 		std::vector<std::pair<UINT, DXGI_OUTPUT_DESC>> outputDescs = {};
 	};
 
-	// Device information structure containing Direct3D device, context, hardware, etc.
+	// Device information structure containing Direct3D device, context, hardware, etc
 	struct DeviceInfo
 	{
-		ID3D11Device* device = nullptr;
-		ID3D11DeviceContext* context = nullptr;
-		IDXGISwapChain* swapChain = nullptr;
-		ID3D11RenderTargetView* renderTargetView = nullptr;
-		ID3D11Texture2D* depthStencilBuffer = nullptr;
-		ID3D11DepthStencilView* depthStencilView = nullptr;
+		ComPtr<ID3D11Device> device = nullptr;
+		ComPtr<ID3D11DeviceContext> context = nullptr;
+		ComPtr<IDXGISwapChain> swapChain = nullptr;
+		ComPtr<ID3D11RenderTargetView> renderTargetView = nullptr;
+		ComPtr<ID3D11Texture2D> depthStencilBuffer = nullptr;
+		ComPtr<ID3D11DepthStencilView> depthStencilView = nullptr;
 
 		bool isFullscreen = false;
 		bool isVSync = false;
@@ -59,16 +56,36 @@ namespace VDR
 		std::vector<HardwareInfo> hardwareInfos = {};
 	};
 
-	extern DeviceInfo g_DeviceInfo;
+	extern DeviceInfo g_deviceInfo;
 
-	inline void ClearBackBuffer(DirectX::XMFLOAT4 color) { g_DeviceInfo.context->ClearRenderTargetView(g_DeviceInfo.renderTargetView, reinterpret_cast<const float*>(&color)); }
+	void Initialize();
+	void Release();
+
+	template <typename T = float>
+	T GetdeltaTime()
+	{
+		static ULONGLONG previousTime = GetTickCount64();
+		ULONGLONG currentTime = GetTickCount64();
+		double deltaTime = static_cast<double>(currentTime - previousTime) / 1000.0;
+		previousTime = currentTime;
+		return static_cast<T>(deltaTime);
+	}
+
+	void ShowFrameRate();
+	
+	// Clear the back buffer without depth stencil buffer
+	inline void ClearBackBuffer(DirectX::XMFLOAT4 color) { g_deviceInfo.context->ClearRenderTargetView(g_deviceInfo.renderTargetView.Get(), reinterpret_cast<const float*>(&color)); }
+	// Clar the back buffer and depth stencil buffer
 	void ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth = 1.0f, UINT8 stencil = 0);
+	inline void PresentBackBuffer() { g_deviceInfo.swapChain->Present(g_deviceInfo.isVSync, 0); }
 
-	inline void PresentBackBuffer() { g_DeviceInfo.swapChain->Present(g_DeviceInfo.isVSync, 0); }
+	void CreateInputLayout(ComPtr<ID3D11Device> device, const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, ComPtr<ID3DBlob> shaderCode, _Out_ ComPtr<ID3D11InputLayout>* inputLayout);
+	
+	// Create Vertex and index buffer
+	void CreateVertexBuffer(ComPtr<ID3D11Device> device, UINT size, _Out_ ComPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride);
+	void CreateConstBuffer(ComPtr<ID3D11Device> device, UINT size, _Out_ ComPtr<ID3D11Buffer>* buffer);
 
-	void CreateBuffer(ID3D11Device* device, UINT size, _Out_ ID3D11Buffer** buffer, const void* initData = nullptr, UINT stride = 0);
-
-	inline DeviceInfo* GetDeviceInfo() { return &g_DeviceInfo; }
+	inline DeviceInfo* GetDeviceInfo() { return &g_deviceInfo; }
 	void DisplayDeviceInfo();
 
 	void LoadFont();

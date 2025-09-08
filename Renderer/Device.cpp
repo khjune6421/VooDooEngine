@@ -8,9 +8,9 @@
 using namespace std;
 using namespace DirectX;
 
-#define DEVICE VDR::g_DeviceInfo
+#define DEVICE VDD::g_deviceInfo
 
-VDR::DeviceInfo DEVICE = {};
+VDD::DeviceInfo DEVICE = {};
 UINT DxVersion;
 UINT DxSubVersion;
 
@@ -59,21 +59,19 @@ static void CreateDeviceSwapChain()
 
 static void CreateRenderTarget()
 {
-	ID3D11Texture2D* backBuffer = nullptr;
+	ComPtr<ID3D11Texture2D> backBuffer;
 
-	if (FAILED(DEVICE.swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer))))
+	if (FAILED(DEVICE.swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()))))
 	{
 		MessageBoxW(nullptr, L"Failed to get back buffer", L"Error", MB_OK);
 		exit(-1);
 	}
 
-	if (FAILED(DEVICE.device->CreateRenderTargetView(backBuffer, nullptr, &DEVICE.renderTargetView)))
+	if (FAILED(DEVICE.device->CreateRenderTargetView(backBuffer.Get(), nullptr, DEVICE.renderTargetView.GetAddressOf())))
 	{
-		if (backBuffer) { backBuffer->Release(); backBuffer = nullptr; }
 		MessageBox(nullptr, L"Failed to create render target view", L"Error", MB_OK);
 		exit(-1);
 	}
-	if (backBuffer) { backBuffer->Release(); backBuffer = nullptr; }
 }
 
 static void CreateDepthStencil()
@@ -91,7 +89,7 @@ static void CreateDepthStencil()
 	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	depthStencilDesc.CPUAccessFlags = 0;
 	depthStencilDesc.MiscFlags = 0;
-	if (FAILED(DEVICE.device->CreateTexture2D(&depthStencilDesc, nullptr, &DEVICE.depthStencilBuffer)))
+	if (FAILED(DEVICE.device->CreateTexture2D(&depthStencilDesc, nullptr, DEVICE.depthStencilBuffer.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create depth stencil texture", L"Error", MB_OK);
 		return;
@@ -101,9 +99,8 @@ static void CreateDepthStencil()
 	depthStencilViewDesc.Format = depthStencilDesc.Format;
 	depthStencilViewDesc.ViewDimension = (DEVICE.antiAliasingLevel > 1) ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
-	if (FAILED(DEVICE.device->CreateDepthStencilView(DEVICE.depthStencilBuffer, &depthStencilViewDesc, &DEVICE.depthStencilView)))
+	if (FAILED(DEVICE.device->CreateDepthStencilView(DEVICE.depthStencilBuffer.Get(), &depthStencilViewDesc, DEVICE.depthStencilView.GetAddressOf())))
 	{
-		if (DEVICE.depthStencilBuffer) { DEVICE.depthStencilBuffer->Release(); DEVICE.depthStencilBuffer = nullptr; }
 		MessageBoxW(nullptr, L"Failed to create depth stencil view", L"Error", MB_OK);
 		return;
 	}
@@ -134,7 +131,7 @@ static void GetHardwareInfo()
 
 	for (UINT adapterIndex = 0; pfactory->EnumAdapters1(adapterIndex, &padapter) != DXGI_ERROR_NOT_FOUND; ++adapterIndex)
 	{
-		VDR::HardwareInfo hardwareInfo = {};
+		VDD::HardwareInfo hardwareInfo = {};
 		hardwareInfo.adapterIndex = adapterIndex;
 		if (FAILED(padapter->GetDesc1(&hardwareInfo.adapterDesc)))
 		{
@@ -164,43 +161,35 @@ static void GetHardwareInfo()
 	if (pfactory) { pfactory->Release(); pfactory = nullptr; }
 }
 
-void VDR::Initialize()
+void VDD::Initialize()
 {
 	CreateDeviceSwapChain();
 	CreateRenderTarget();
 	CreateDepthStencil();
-	DEVICE.context->OMSetRenderTargets(1, &DEVICE.renderTargetView, DEVICE.depthStencilView);
+	DEVICE.context->OMSetRenderTargets(1, DEVICE.renderTargetView.GetAddressOf(), DEVICE.depthStencilView.Get());
 	SetViewport();
-	VDR::LoadFont();
+	VDD::LoadFont();
 
 	GetHardwareInfo();
 	DxVersion = (DeviceInfo().featureLevels & 0xf000) >> 12;
 	DxSubVersion = (DeviceInfo().featureLevels & 0x0f00) >> 8;
 }
 
-void VDR::Release()
+void VDD::Release()
 {
 	g_SpriteFontMap.clear();
 	g_SpriteBatchMap.clear();
 
-	if (DEVICE.renderTargetView) { DEVICE.renderTargetView->Release(); DEVICE.renderTargetView = nullptr; }
-	if (DEVICE.depthStencilView) { DEVICE.depthStencilView->Release(); DEVICE.depthStencilView = nullptr; }
-	if (DEVICE.swapChain) { DEVICE.swapChain->Release(); DEVICE.swapChain = nullptr; }
-	if (DEVICE.context) { DEVICE.context->ClearState(); DEVICE.context->Flush(); DEVICE.context->Release(); DEVICE.context = nullptr; }
 	if (DEVICE.device) { DEVICE.device->Release(); DEVICE.device = nullptr; }
+	if (DEVICE.context) { DEVICE.context->ClearState(); DEVICE.context->Flush(); DEVICE.context->Release(); DEVICE.context = nullptr; }
+	if (DEVICE.swapChain) { DEVICE.swapChain->Release(); DEVICE.swapChain = nullptr; }
+	if (DEVICE.renderTargetView) { DEVICE.renderTargetView->Release(); DEVICE.renderTargetView = nullptr; }
+	if (DEVICE.depthStencilBuffer) { DEVICE.depthStencilBuffer->Release(); DEVICE.depthStencilBuffer = nullptr; }
+	if (DEVICE.depthStencilView) { DEVICE.depthStencilView->Release(); DEVICE.depthStencilView = nullptr; }
+	DEVICE.hardwareInfos.clear();
 }
 
-double VDR::GetdeltaTime()
-{
-	static ULONGLONG previousTime = GetTickCount64();
-	ULONGLONG currentTime = GetTickCount64();
-	double deltaTime = static_cast<double>(currentTime - previousTime) / 1000.0;
-	previousTime = currentTime;
-
-	return deltaTime;
-}
-
-void VDR::ShowFrameRate()
+void VDD::ShowFrameRate()
 {
 	static UINT frameCount = 0;
 	static double elapsedTime = 0.0;
@@ -208,7 +197,7 @@ void VDR::ShowFrameRate()
 
 	frameCount++;
 
-	elapsedTime += GetdeltaTime();
+	elapsedTime += GetdeltaTime<double>();
 
 	if (elapsedTime >= 1.0)
 	{
@@ -218,110 +207,134 @@ void VDR::ShowFrameRate()
 	}
 
 	wstring fpsText = L"FPS: " + to_wstring(static_cast<int>(fps));
-	VDR::DrawText(fpsText.c_str(), XMFLOAT2(20.0f, 20.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	VDD::DrawText(fpsText.c_str(), XMFLOAT2(20.0f, 20.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
-void VDR::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, UINT8 stencil)
+void VDD::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, UINT8 stencil)
 {
-	DEVICE.context->ClearRenderTargetView(DEVICE.renderTargetView, reinterpret_cast<const float*>(&color));
-	DEVICE.context->ClearDepthStencilView(DEVICE.depthStencilView, flag, depth, stencil);
+	DEVICE.context->ClearRenderTargetView(DEVICE.renderTargetView.Get(), reinterpret_cast<const float*>(&color));
+	DEVICE.context->ClearDepthStencilView(DEVICE.depthStencilView.Get(), flag, depth, stencil);
 }
 
-void VDR::CreateBuffer(ID3D11Device* device, UINT size, _Out_ ID3D11Buffer** buffer, const void* initData, UINT stride)
+void VDD::CreateInputLayout(ComPtr<ID3D11Device> device, const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, ComPtr<ID3DBlob> shaderCode, _Out_ ComPtr<ID3D11InputLayout>* inputLayout)
+{
+	if (FAILED(device->CreateInputLayout(layoutDesc, numElements, shaderCode->GetBufferPointer(), shaderCode->GetBufferSize(), inputLayout->GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create input layout", L"Error", MB_OK);
+		return;
+	}
+}
+
+void VDD::CreateVertexBuffer(ComPtr<ID3D11Device> device, UINT size, _Out_ ComPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
-	bufferDesc.Usage = (initData) ? D3D11_USAGE_DEFAULT : D3D11_USAGE_DYNAMIC;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.CPUAccessFlags = (initData) ? 0 : D3D11_CPU_ACCESS_WRITE;
-	bufferDesc.MiscFlags = 0;
+	bufferDesc.CPUAccessFlags = 0;
 	bufferDesc.StructureByteStride = stride;
 
 	D3D11_SUBRESOURCE_DATA subresourceData = {};
 	subresourceData.pSysMem = initData;
 
-	if (FAILED(device->CreateBuffer(&bufferDesc, (initData) ? &subresourceData : nullptr, buffer)))
+	if (FAILED(device->CreateBuffer(&bufferDesc, &subresourceData, buffer->GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create buffer", L"Error", MB_OK);
 		return;
 	}
 }
 
-void VDR::DisplayDeviceInfo()
+void VDD::CreateConstBuffer(ComPtr<ID3D11Device> device, UINT size, _Out_ ComPtr<ID3D11Buffer>* buffer)
+{
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.ByteWidth = size;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.StructureByteStride = 0;
+
+	if (FAILED(device->CreateBuffer(&bufferDesc, nullptr, buffer->GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create constant buffer", L"Error", MB_OK);
+		return;
+	}
+}
+
+void VDD::DisplayDeviceInfo()
 {
 	constexpr float offset = 20.0f;
 	UINT posIndex = 2;
 
 	// System Information
 	posIndex++;
-	VDR::DrawText(L"SYSTEM", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	VDD::DrawText(L"SYSTEM", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	posIndex++;
 	wstring dxVersion = L"DX Version: " + to_wstring(DxVersion) + L"." + to_wstring(DxSubVersion);
-	VDR::DrawText(dxVersion.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	VDD::DrawText(dxVersion.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 	posIndex++;
 	wstring resolution = L"Resolution: " + to_wstring(DEVICE.displayMode.Width) + L"x" + to_wstring(DEVICE.displayMode.Height);
-	VDR::DrawText(resolution.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	VDD::DrawText(resolution.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 	posIndex++;
 
 	// Hardware Information
 	posIndex++;
-	VDR::DrawText(L"HARDWARE", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	VDD::DrawText(L"HARDWARE", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	for (const auto& hardwareInfo : DEVICE.hardwareInfos)
 	{
 		posIndex++;
 		wstring adapterIndex = L"GPU " + to_wstring(hardwareInfo.adapterIndex) + L": " + wstring(hardwareInfo.adapterDesc.Description);
-		VDR::DrawText(adapterIndex.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+		VDD::DrawText(adapterIndex.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
 
 		posIndex++;
 		wstring vendorId = L"Vendor ID: " + to_wstring(hardwareInfo.adapterDesc.VendorId);
-		VDR::DrawText(vendorId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		VDD::DrawText(vendorId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring deviceId = L"Device ID: " + to_wstring(hardwareInfo.adapterDesc.DeviceId);
-		VDR::DrawText(deviceId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		VDD::DrawText(deviceId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring subSysId = L"SubSystem ID: " + to_wstring(hardwareInfo.adapterDesc.SubSysId);
-		VDR::DrawText(subSysId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		VDD::DrawText(subSysId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring revision = L"Revision: " + to_wstring(hardwareInfo.adapterDesc.Revision);
-		VDR::DrawText(revision.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		VDD::DrawText(revision.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring vram = L"VRAM: " + to_wstring(hardwareInfo.adapterDesc.DedicatedVideoMemory / (1024 * 1024)) + L" MB";
-		VDR::DrawText(vram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		VDD::DrawText(vram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring sysram = L"System RAM: " + to_wstring(hardwareInfo.adapterDesc.DedicatedSystemMemory / (1024 * 1024)) + L" MB";
-		VDR::DrawText(sysram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		VDD::DrawText(sysram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring sharedram = L"Shared RAM: " + to_wstring(hardwareInfo.adapterDesc.SharedSystemMemory / (1024 * 1024)) + L" MB";
-		VDR::DrawText(sharedram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		VDD::DrawText(sharedram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring adapterLuid = L"Adapter LUID: " + to_wstring(hardwareInfo.adapterDesc.AdapterLuid.LowPart) + L"," + to_wstring(hardwareInfo.adapterDesc.AdapterLuid.HighPart);
-		VDR::DrawText(adapterLuid.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		VDD::DrawText(adapterLuid.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		for (const auto& outputDesc : hardwareInfo.outputDescs)
 		{
 			posIndex++;
 			wstring outputInfo = L"Monitor: " + wstring(outputDesc.second.DeviceName);
-			VDR::DrawText(outputInfo.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+			VDD::DrawText(outputInfo.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
 
 			posIndex++;
 			wstring resolution = L"Resolution: " + to_wstring(outputDesc.second.DesktopCoordinates.right - outputDesc.second.DesktopCoordinates.left) + L"x" + to_wstring(outputDesc.second.DesktopCoordinates.bottom - outputDesc.second.DesktopCoordinates.top);
-			VDR::DrawText(resolution.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+			VDD::DrawText(resolution.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 		}
 		posIndex++;
 	}
 }
 
-void VDR::LoadFont()
+void VDD::LoadFont()
 {
 	wstring fontPath = L"../Assets/Fonts/";
 	if (!filesystem::exists(fontPath))
@@ -334,15 +347,15 @@ void VDR::LoadFont()
 		if (entry.path().extension() == L".spritefont")
 		{
 			wstring fontName = entry.path().stem().wstring();
-			unique_ptr<SpriteFont> spriteFont = make_unique<SpriteFont>(DEVICE.device, entry.path().c_str());
-			unique_ptr<SpriteBatch> spriteBatch = make_unique<SpriteBatch>(DEVICE.context);
+			unique_ptr<SpriteFont> spriteFont = make_unique<SpriteFont>(DEVICE.device.Get(), entry.path().c_str());
+			unique_ptr<SpriteBatch> spriteBatch = make_unique<SpriteBatch>(DEVICE.context.Get());
 			g_SpriteFontMap[fontName] = move(spriteFont);
 			g_SpriteBatchMap[fontName] = move(spriteBatch);
 		}
 	}
 }
 
-void VDR::DrawText(const wchar_t* text, DirectX::XMFLOAT2 position, DirectX::XMFLOAT4 color, float scale, const wchar_t* font)
+void VDD::DrawText(const wchar_t* text, DirectX::XMFLOAT2 position, DirectX::XMFLOAT4 color, float scale, const wchar_t* font)
 {
 	wchar_t buffer[256] = {};
 	wcsncpy_s(buffer, text, _TRUNCATE);

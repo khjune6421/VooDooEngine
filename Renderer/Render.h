@@ -1,3 +1,11 @@
 #pragma once
 
-void SceneRender();
+namespace VDR
+{
+	void LoadData();
+	void ReleaseData();
+
+	void SceneRender();
+
+	void UpdateRenderMode();
+}
