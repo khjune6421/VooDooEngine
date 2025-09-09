@@ -5,18 +5,9 @@
 
 using namespace DirectX;
 
-Camera::Camera(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 rotation, int screenWidth, int screenHeight, float nearPlane, float farPlane, float fov)
+Camera::Camera(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 rotation, int screenWidth, int screenHeight, float nearPlane, float farPlane, float fov) : m_position(position), m_rotation(rotation), m_screenWidth(screenWidth), m_screenHeight(screenHeight), m_nearPlane(nearPlane), m_farPlane(farPlane), m_fov(fov)
 {
-	m_position = position;
-	m_rotation = rotation;
-
-	m_screenWidth = screenWidth;
-	m_screenHeight = screenHeight;
 	m_aspectRatio = static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
-
-	m_nearPlane = nearPlane;
-	m_farPlane = farPlane;
-	m_fov = fov;
 
 	m_projectionMatrix = XMMatrixPerspectiveFovLH(m_fov, m_aspectRatio, m_nearPlane, m_farPlane);
 

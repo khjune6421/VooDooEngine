@@ -67,8 +67,10 @@ namespace VDD
 	{
 		static ULONGLONG previousTime = GetTickCount64();
 		ULONGLONG currentTime = GetTickCount64();
+
 		double deltaTime = static_cast<double>(currentTime - previousTime) / 1000.0;
 		previousTime = currentTime;
+
 		return static_cast<T>(deltaTime);
 	}
 
