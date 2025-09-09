@@ -53,7 +53,7 @@ void VDS::CompileVertexShader(const wchar_t* filePath, const char* entryPoint, c
 	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-	if (FAILED(D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, VSCode->GetAddressOf(), errorBlob.GetAddressOf())))
+	if (FAILED(D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, VSCode->GetAddressOf(), errorBlob.GetAddressOf())) && FAILED(D3DReadFileToBlob(L"VertexShader.cso", VSCode->GetAddressOf())))
 	{
 		if (errorBlob)
 		{
@@ -80,7 +80,7 @@ void VDS::CompilePixelShader(const wchar_t* filePath, const char* entryPoint, co
 	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-	if (FAILED(D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, PSCode.GetAddressOf(), errorBlob.GetAddressOf())))
+	if (FAILED(D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, PSCode.GetAddressOf(), errorBlob.GetAddressOf())) && FAILED(D3DReadFileToBlob(L"PixelShader.cso", PSCode.GetAddressOf())))
 	{
 		if (errorBlob)
 		{

@@ -25,7 +25,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #else
 	InitWindow(DEVICE.displayMode.Width, DEVICE.displayMode.Height, hInstance, nShowCmd);
 #endif
-	
+
 	VDD::Initialize();
 	VDR::LoadData();
 
@@ -94,6 +94,15 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		return 0;
 
+	case WM_SIZE:
+		if (wParam != SIZE_MINIMIZED)
+		{
+			LONG width = LOWORD(lParam);
+			LONG height = HIWORD(lParam);
+			if (width != 0 && height != 0) ResizeWindow(hWnd, width, height);
+		}
+		return 0;
+
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
@@ -133,6 +142,8 @@ void ResizeWindow(HWND hWnd, LONG width, LONG height)
 	);
 
 	MoveWindow(hWnd, oldRect.left, oldRect.top, newWidth, newHeight, TRUE);
+
+	if (DEVICE.device) VDD::Resize(static_cast<UINT>(width), static_cast<UINT>(height));
 }
 
 bool ProcessMessage()

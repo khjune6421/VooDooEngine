@@ -51,7 +51,7 @@ namespace VDD
 		bool isVSync = false;
 		DWORD antiAliasingLevel = 4;
 
-		DXGI_MODE_DESC displayMode = { 1920, 1080, { 60, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM };
+		DXGI_MODE_DESC displayMode = { 1920, 1080, { 0, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM };
 		D3D_FEATURE_LEVEL featureLevels = D3D_FEATURE_LEVEL_11_0;
 
 		std::vector<HardwareInfo> hardwareInfos = {};
@@ -60,6 +60,7 @@ namespace VDD
 	extern DeviceInfo g_deviceInfo;
 
 	void Initialize();
+	void Resize(UINT width, UINT height);
 	void Release();
 
 	template <typename T = float>

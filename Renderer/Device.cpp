@@ -170,6 +170,28 @@ void VDD::Initialize()
 	DxSubVersion = (DeviceInfo().featureLevels & 0x0f00) >> 8;
 }
 
+void VDD::Resize(UINT width, UINT height)
+{
+	if (width == 0 || height == 0) return;
+
+	DEVICE.context->OMSetRenderTargets(0, nullptr, nullptr);
+	DEVICE.renderTargetView.Reset();
+	DEVICE.depthStencilView.Reset();
+	DEVICE.depthStencilBuffer.Reset();
+	if (FAILED(DEVICE.swapChain->ResizeBuffers(1, width, height, DEVICE.displayMode.Format, 0)))
+	{
+		MessageBoxW(nullptr, L"Failed to resize swap chain buffers", L"Error", MB_OK);
+		return;
+	}
+
+	DEVICE.displayMode.Width = width;
+	DEVICE.displayMode.Height = height;
+	CreateRenderTarget();
+	CreateDepthStencil();
+	DEVICE.context->OMSetRenderTargets(1, DEVICE.renderTargetView.GetAddressOf(), DEVICE.depthStencilView.Get());
+	SetViewport();
+}
+
 void VDD::Release()
 {
 	g_SpriteFontMap.clear();
