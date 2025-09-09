@@ -149,41 +149,33 @@ void CreateTestObject()
 {
 	Vertex vertices[] =
 	{
-		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
 
-		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
 
-		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
 
-		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.75f, 0.8f, 1.0f) },
-
-		{ XMFLOAT3(0.25f, -0.25f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.25f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-
-		{ XMFLOAT3(-0.25f, -0.25f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-0.25f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
 	};
 	VDD::CreateVertexBuffer(DEVICE.device, sizeof(vertices), &g_vertexBuffer, vertices, sizeof(Vertex));
 
@@ -226,5 +218,5 @@ void DrawTestObject()
 	DEVICE.context->IASetInputLayout(g_inputLayout.Get());
 	DEVICE.context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	DEVICE.context->Draw(30, 0);
+	DEVICE.context->Draw(24, 0);
 }
