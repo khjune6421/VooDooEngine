@@ -189,10 +189,10 @@ void CreateTestObject()
 
 void UpdateTestObject(float deltaTime)
 {
-	static float aTime = 0.0f; // Accumulated time
-	aTime += deltaTime * 1.0f;
+	static float ATime = 0.0f; // Accumulated time
+	ATime += deltaTime * 1.0f;
 
-	XMMATRIX worldMatrix = XMMatrixRotationY(aTime);
+	XMMATRIX worldMatrix = XMMatrixRotationY(ATime);
 
 	VDS::ConstBuffer constBufferData = {};
 	XMMATRIX viewMatrix = g_testCamera.GetViewMatrix();
@@ -203,7 +203,7 @@ void UpdateTestObject(float deltaTime)
 	constBufferData.projection = XMMatrixTranspose(projMatrix);
 
 	constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
-	constBufferData.time = aTime;
+	constBufferData.time = ATime;
 
 	DEVICE.context->UpdateSubresource(VDS::g_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
 }
