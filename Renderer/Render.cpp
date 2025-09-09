@@ -192,15 +192,15 @@ void CreateTestObject()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	VDD::CreateInputLayout(DEVICE.device, inputElementDesc, _countof(inputElementDesc), VDS::g_VSCode, &g_inputLayout); // Used _countof in modern C++ instead of ARRAYSIZE for safety
+	VDD::CreateInputLayout(DEVICE.device, inputElementDesc, _countof(inputElementDesc), VDS::g_VSCode, &g_inputLayout); // Used _countof in modern C++ instead of ARRAYSIZE for safety // Not sure why
 }
 
 void UpdateTestObject(float deltaTime)
 {
-	static float rotationAngle = 0.0f;
-	rotationAngle += deltaTime * 1.0f;
+	static float aTime = 0.0f; // Accumulated time
+	aTime += deltaTime * 1.0f;
 
-	XMMATRIX worldMatrix = XMMatrixRotationY(rotationAngle);
+	XMMATRIX worldMatrix = XMMatrixRotationY(aTime);
 
 	VDS::ConstBuffer constBufferData = {};
 	XMMATRIX viewMatrix = g_testCamera.GetViewMatrix();
@@ -209,7 +209,9 @@ void UpdateTestObject(float deltaTime)
 	constBufferData.world = XMMatrixTranspose(worldMatrix);
 	constBufferData.view = XMMatrixTranspose(viewMatrix);
 	constBufferData.projection = XMMatrixTranspose(projMatrix);
+
 	constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
+	constBufferData.time = aTime;
 
 	DEVICE.context->UpdateSubresource(VDS::g_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
 }
@@ -219,6 +221,7 @@ void DrawTestObject()
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	ID3D11Buffer* vertexBuffer = g_vertexBuffer.Get();
+
 	DEVICE.context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	DEVICE.context->IASetInputLayout(g_inputLayout.Get());
 	DEVICE.context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

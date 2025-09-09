@@ -9,14 +9,17 @@
 #define DEVICE VDD::g_deviceInfo
 
 ComPtr<ID3D11VertexShader> VDS::g_vertexShader = nullptr;
-ComPtr<ID3D11PixelShader> VDS::g_pixelShader = nullptr;
 ComPtr<ID3DBlob> VDS::g_VSCode = nullptr;
+
+ComPtr<ID3D11PixelShader> VDS::g_pixelShader = nullptr;
+
 ComPtr<ID3D11Buffer> VDS::g_constantBuffer = nullptr;
 
 void VDS::CreateShader()
 {
 	VDS::CompileVertexShader(L"../Renderer/VertexShader.hlsl", "main", "vs_5_0", &VDS::g_vertexShader, &VDS::g_VSCode);
 	VDS::CompilePixelShader(L"../Renderer/PixelShader.hlsl", "main", "ps_5_0", &VDS::g_pixelShader);
+	// Need to make something that can use cso flies if there is one already compiled and hlsl has not changed
 
 	DEVICE.context->VSSetShader(VDS::g_vertexShader.Get(), nullptr, 0);
 	DEVICE.context->PSSetShader(VDS::g_pixelShader.Get(), nullptr, 0);
@@ -27,7 +30,7 @@ void VDS::CreateShader()
 void VDS::UpdateShader()
 {
     DEVICE.context->VSSetShader(VDS::g_vertexShader.Get(), nullptr, 0);
-    DEVICE.context->PSSetShader(VDS::g_pixelShader.Get(), nullptr, 0);
+	DEVICE.context->PSSetShader(VDS::g_pixelShader.Get(), nullptr, 0);
 
     ID3D11Buffer* constantBuffer = VDS::g_constantBuffer.Get();
     DEVICE.context->VSSetConstantBuffers(0, 1, &constantBuffer);

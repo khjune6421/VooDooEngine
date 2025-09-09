@@ -3,7 +3,10 @@ cbuffer ConstBuffer : register(b0)
     matrix world;
     matrix view;
     matrix projection;
+    
     matrix WVP;
+    
+    float time;
 }
 
 struct VSInput
@@ -16,6 +19,7 @@ struct VSOutput
 {
     float4 pos : SV_POSITION;
     float4 col : COLOR0;
+    float time : TEXCOORD0;
 };
 
 VSOutput main(VSInput input)
@@ -27,6 +31,8 @@ VSOutput main(VSInput input)
     
     output.pos = input.pos;
     output.col = input.col;
+    
+    output.time = time;
     
     return output;
 }

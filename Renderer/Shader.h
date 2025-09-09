@@ -9,16 +9,22 @@ using Microsoft::WRL::ComPtr;
 namespace VDS
 {
 	extern ComPtr<ID3D11VertexShader> g_vertexShader;
-	extern ComPtr<ID3D11PixelShader> g_pixelShader;
 	extern ComPtr<ID3DBlob> g_VSCode;
+
+	extern ComPtr<ID3D11PixelShader> g_pixelShader;
+
 	extern ComPtr<ID3D11Buffer> g_constantBuffer;
 
 	struct ConstBuffer
 	{
+		// Not sure if needed
 		DirectX::XMMATRIX world; // world matrix
 		DirectX::XMMATRIX view; // view matrix
 		DirectX::XMMATRIX projection; // projection matrix
+
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
+
+		float time;
 	};
 
 	void CreateShader();
