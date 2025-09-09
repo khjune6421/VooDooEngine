@@ -45,28 +45,24 @@ void VDS::ReleaseShader()
 
 void VDS::CompileVertexShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11VertexShader>* vertexShader, ComPtr<ID3DBlob>* shaderCode)
 {
-	ComPtr<ID3DBlob> errorBlob = nullptr;
+	ComPtr<ID3DBlob> errorBlob;
 	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 #ifdef _DEBUG
-	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION; // Disabled optimizations to improve shader debugging // Dont know why but MS recommends it
+	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-	if (FAILED(D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, shaderCode->GetAddressOf(), &errorBlob)))
+	if (FAILED(D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, shaderCode->GetAddressOf(), errorBlob.GetAddressOf())))
 	{
 		if (errorBlob)
 		{
 			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-			errorBlob->Release();
 		}
-		if (*shaderCode) (*shaderCode)->Release();
 		MessageBoxW(nullptr, L"Failed to compile vertex shader", L"Error", MB_OK);
 		return;
 	}
-	if (errorBlob) errorBlob->Release();
 
 	if (FAILED(DEVICE.device->CreateVertexShader((*shaderCode)->GetBufferPointer(), (*shaderCode)->GetBufferSize(), nullptr, vertexShader->GetAddressOf())))
 	{
-		if (*shaderCode) (*shaderCode)->Release();
 		MessageBoxW(nullptr, L"Failed to create vertex shader", L"Error", MB_OK);
 		return;
 	}
@@ -74,31 +70,26 @@ void VDS::CompileVertexShader(const wchar_t* filePath, const char* entryPoint, c
 
 void VDS::CompilePixelShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11PixelShader>* pixelShader)
 {
-	ComPtr<ID3DBlob> psCode = nullptr;
-	ComPtr<ID3DBlob> errorBlob = nullptr;
+	ComPtr<ID3DBlob> psCode;
+	ComPtr<ID3DBlob> errorBlob;
 	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 #ifdef _DEBUG
 	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-	if (FAILED(D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, &psCode, &errorBlob)))
+	if (FAILED(D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, psCode.GetAddressOf(), errorBlob.GetAddressOf())))
 	{
 		if (errorBlob)
 		{
 			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-			errorBlob->Release();
 		}
-		if (psCode) psCode->Release();
 		MessageBoxW(nullptr, L"Failed to compile pixel shader", L"Error", MB_OK);
 		return;
 	}
-	if (errorBlob) errorBlob->Release();
 
 	if (FAILED(DEVICE.device->CreatePixelShader(psCode->GetBufferPointer(), psCode->GetBufferSize(), nullptr, pixelShader->GetAddressOf())))
 	{
-		if (psCode) psCode->Release();
 		MessageBoxW(nullptr, L"Failed to create pixel shader", L"Error", MB_OK);
 		return;
 	}
-	if (psCode) psCode->Release();
 }

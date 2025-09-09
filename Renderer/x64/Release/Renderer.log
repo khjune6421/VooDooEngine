@@ -1,11 +1,8 @@
-﻿  Camera.cpp
-  Device.cpp
-  Render.cpp
+﻿  Device.cpp
   Shader.cpp
-  TestMain.cpp
   Generating code
-  287 of 1121 functions (25.6%) were compiled, the rest were copied from previous compilation.
-    276 functions were new in current compilation
-    16 functions had inline decision re-evaluated but remain unchanged
+  63 of 1140 functions ( 5.5%) were compiled, the rest were copied from previous compilation.
+    30 functions were new in current compilation
+    4 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Renderer.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\Renderer.exe

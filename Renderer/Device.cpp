@@ -120,10 +120,10 @@ static void SetViewport()
 
 static void GetHardwareInfo()
 {
-	IDXGIAdapter1* padapter = nullptr;
-	IDXGIFactory1* pfactory = nullptr;
+	ComPtr<IDXGIAdapter1> padapter;
+	ComPtr<IDXGIFactory1> pfactory;
 
-	if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&pfactory))))
+	if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), &pfactory)))
 	{
 		MessageBoxW(nullptr, L"Failed to create DXGI factory", L"Error", MB_OK);
 		return;
@@ -135,30 +135,26 @@ static void GetHardwareInfo()
 		hardwareInfo.adapterIndex = adapterIndex;
 		if (FAILED(padapter->GetDesc1(&hardwareInfo.adapterDesc)))
 		{
-			if (padapter) { padapter->Release(); padapter = nullptr; }
 			MessageBoxW(nullptr, L"Failed to get adapter description", L"Error", MB_OK);
 			return;
 		}
 
-		IDXGIOutput* poutput = nullptr;
+		ComPtr<IDXGIOutput> poutput;
 		for (UINT outputIndex = 0; padapter->EnumOutputs(outputIndex, &poutput) != DXGI_ERROR_NOT_FOUND; ++outputIndex)
 		{
 			DXGI_OUTPUT_DESC outputDesc = {};
 			if (FAILED(poutput->GetDesc(&outputDesc)))
 			{
-				if (poutput) { poutput->Release(); poutput = nullptr; }
-				if (padapter) { padapter->Release(); padapter = nullptr; }
 				MessageBoxW(nullptr, L"Failed to get output description", L"Error", MB_OK);
 				return;
 			}
 			hardwareInfo.outputDescs.emplace_back(outputIndex, outputDesc);
-			if (poutput) { poutput->Release(); poutput = nullptr; }
+			poutput.Reset();
 		}
 
 		DEVICE.hardwareInfos.push_back(hardwareInfo);
-		if (padapter) { padapter->Release(); padapter = nullptr; }
+		padapter.Reset();
 	}
-	if (pfactory) { pfactory->Release(); pfactory = nullptr; }
 }
 
 void VDD::Initialize()
@@ -180,12 +176,17 @@ void VDD::Release()
 	g_SpriteFontMap.clear();
 	g_SpriteBatchMap.clear();
 
-	if (DEVICE.device) { DEVICE.device->Release(); DEVICE.device = nullptr; }
-	if (DEVICE.context) { DEVICE.context->ClearState(); DEVICE.context->Flush(); DEVICE.context->Release(); DEVICE.context = nullptr; }
-	if (DEVICE.swapChain) { DEVICE.swapChain->Release(); DEVICE.swapChain = nullptr; }
-	if (DEVICE.renderTargetView) { DEVICE.renderTargetView->Release(); DEVICE.renderTargetView = nullptr; }
-	if (DEVICE.depthStencilBuffer) { DEVICE.depthStencilBuffer->Release(); DEVICE.depthStencilBuffer = nullptr; }
-	if (DEVICE.depthStencilView) { DEVICE.depthStencilView->Release(); DEVICE.depthStencilView = nullptr; }
+	DEVICE.device.Reset();
+	if (DEVICE.context)
+	{
+		DEVICE.context->ClearState();
+		DEVICE.context->Flush();
+	}
+	DEVICE.context.Reset();
+	DEVICE.swapChain.Reset();
+	DEVICE.renderTargetView.Reset();
+	DEVICE.depthStencilBuffer.Reset();
+	DEVICE.depthStencilView.Reset();
 	DEVICE.hardwareInfos.clear();
 }
 
