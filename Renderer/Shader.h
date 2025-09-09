@@ -31,6 +31,6 @@ namespace VDS
 	void UpdateShader();
 	void ReleaseShader();
 
-	void CompileVertexShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11VertexShader>* vertexShader, ComPtr<ID3DBlob>* shaderCode = nullptr);
-	void CompilePixelShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11PixelShader>* pixelShader);
+	void LoadVertexShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11VertexShader>* vertexShader, ComPtr<ID3DBlob>* shaderCode = nullptr);
+	void LoadPixelShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11PixelShader>* pixelShader);
 }

@@ -130,6 +130,8 @@ void ResizeWindow(HWND hWnd, LONG width, LONG height)
 
 	AdjustWindowRectEx(&newRect, style, FALSE, exStyle);
 
+
+
 	LONG newWidth = newRect.right - newRect.left;
 	LONG newHeight = newRect.bottom - newRect.top;
 

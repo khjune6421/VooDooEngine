@@ -1,6 +1,2 @@
-﻿  Device.cpp
-  Render.cpp
-  Shader.cpp
-  TestMain.cpp
-  Generating Code...
+﻿  TestMain.cpp
   Renderer.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\Renderer.exe

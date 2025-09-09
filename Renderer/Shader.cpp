@@ -17,8 +17,8 @@ ComPtr<ID3D11Buffer> VDS::g_constantBuffer = nullptr;
 
 void VDS::CreateShader()
 {
-	VDS::CompileVertexShader(L"../Renderer/VertexShader.hlsl", "main", "vs_5_0", &VDS::g_vertexShader, &VDS::g_VSCode);
-	VDS::CompilePixelShader(L"../Renderer/PixelShader.hlsl", "main", "ps_5_0", &VDS::g_pixelShader);
+	VDS::LoadVertexShader(L"../Renderer/VertexShader.hlsl", "main", "vs_5_0", &VDS::g_vertexShader, &VDS::g_VSCode);
+	VDS::LoadPixelShader(L"../Renderer/PixelShader.hlsl", "main", "ps_5_0", &VDS::g_pixelShader);
 	// Need to make something that can use cso flies if there is one already compiled and hlsl has not changed
 
 	DEVICE.context->VSSetShader(VDS::g_vertexShader.Get(), nullptr, 0);
@@ -44,7 +44,7 @@ void VDS::ReleaseShader()
 	VDS::g_vertexShader.Reset();
 }
 
-void VDS::CompileVertexShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11VertexShader>* vertexShader, ComPtr<ID3DBlob>* VSCode)
+void VDS::LoadVertexShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11VertexShader>* vertexShader, ComPtr<ID3DBlob>* VSCode)
 {
 	ComPtr<ID3DBlob> errorBlob;
 
@@ -70,7 +70,7 @@ void VDS::CompileVertexShader(const wchar_t* filePath, const char* entryPoint, c
 	}
 }
 
-void VDS::CompilePixelShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11PixelShader>* pixelShader)
+void VDS::LoadPixelShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, ComPtr<ID3D11PixelShader>* pixelShader)
 {
 	ComPtr<ID3DBlob> PSCode;
 	ComPtr<ID3DBlob> errorBlob;
