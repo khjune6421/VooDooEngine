@@ -29,8 +29,6 @@ void VDS::UpdateShader()
     DEVICE.context->VSSetShader(VDS::g_vertexShader.Get(), nullptr, 0);
     DEVICE.context->PSSetShader(VDS::g_pixelShader.Get(), nullptr, 0);
 
-    // Update constant buffer
-
     ID3D11Buffer* constantBuffer = VDS::g_constantBuffer.Get();
     DEVICE.context->VSSetConstantBuffers(0, 1, &constantBuffer);
 }

@@ -1,6 +1,5 @@
 #include "Device.h"
 
-#include <string>
 #include <memory>
 #include <unordered_map>
 #include <filesystem>

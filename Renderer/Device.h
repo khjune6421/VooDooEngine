@@ -22,6 +22,7 @@
 // DirectXTK libraries
 #pragma comment(lib, "DirectXTK.lib")
 
+// I usually don't use 'using' or #define macro in header files but I'll make this one an exception
 using Microsoft::WRL::ComPtr;
 
 extern HWND g_hWnd;
