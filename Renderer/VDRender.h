@@ -154,8 +154,8 @@ class VDRender
 	void CreateShaders();
 	void UpdateShaders();
 
-	void LoadVertexShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode);
-	void LoadPixelShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader);
+	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode);
+	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader);
 
 	// Render
 	void CreateRasterState();

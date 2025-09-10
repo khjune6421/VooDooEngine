@@ -314,17 +314,17 @@ void VDRender::DisplayDeviceInfo()
 
 // Default shader paths and names
 constexpr const wchar_t* DEFAULT_SHADER_PATH = L"../Renderer/";
-constexpr const wchar_t* DEFAULT_VS = L"VertexShader.hlsl";
-constexpr const wchar_t* DEFAULT_PS = L"PixelShader.hlsl";
-constexpr const wchar_t* NullPS = L"NullPixelShader.hlsl";
-constexpr const wchar_t* AllPS = L"AllPixelShader.hlsl";
+constexpr const wchar_t* DEFAULT_VS = L"VertexShader";
+constexpr const wchar_t* DEFAULT_PS = L"PixelShader";
+constexpr const wchar_t* NullPS = L"NullPixelShader";
+constexpr const wchar_t* AllPS = L"AllPixelShader";
 constexpr const char* DEFAULT_ENTRY_POINT = "main";
 constexpr const char* DEFAULT_SHADERMODEL = "5_0";
 
 void VDRender::CreateShaders()
 {
-	LoadVertexShader((wstring(DEFAULT_SHADER_PATH) + DEFAULT_VS).c_str(), DEFAULT_ENTRY_POINT, ("vs_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_vertexShader, &m_VSCode);
-	LoadPixelShader((wstring(DEFAULT_SHADER_PATH) + DEFAULT_PS).c_str(), DEFAULT_ENTRY_POINT, ("ps_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_pixelShader);
+	LoadVertexShader(DEFAULT_VS, DEFAULT_ENTRY_POINT, ("vs_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_vertexShader, &m_VSCode);
+	LoadPixelShader(DEFAULT_PS, DEFAULT_ENTRY_POINT, ("ps_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_pixelShader);
 
 	m_deviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
@@ -336,7 +336,7 @@ constexpr const wchar_t* SHADERS[3] = { DEFAULT_PS, NullPS, AllPS };
 
 void VDRender::ChangeShader(UINT id)
 {
-	LoadPixelShader((wstring(DEFAULT_SHADER_PATH) + SHADERS[id]).c_str(), DEFAULT_ENTRY_POINT, ("ps_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_pixelShader);
+	LoadPixelShader(SHADERS[id], DEFAULT_ENTRY_POINT, ("ps_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_pixelShader);
 
 	m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
@@ -352,7 +352,7 @@ void VDRender::UpdateShaders()
 	m_deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
 }
 
-void VDRender::LoadVertexShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode)
+void VDRender::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode)
 {
 	comPtr<ID3DBlob> errorBlob;
 
@@ -363,15 +363,15 @@ void VDRender::LoadVertexShader(const wchar_t* filePath, const char* entryPoint,
 
 	HRESULT hr;
 
-	hr = D3DReadFileToBlob(L"VertexShader.cso", VSCode->GetAddressOf()); // Try to load precompiled shader first
-	if (FAILED(hr)) hr = D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, VSCode->GetAddressOf(), errorBlob.GetAddressOf());
+	hr = D3DReadFileToBlob((wstring(file) + L".cso").c_str(), VSCode->GetAddressOf()); // Try to load precompiled shader first
+	if (FAILED(hr)) hr = D3DCompileFromFile(((wstring(DEFAULT_SHADER_PATH) + file) + L".hlsl").c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, VSCode->GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr)) MessageBoxW(nullptr, L"Failed to compile vertex shader", L"Error", MB_OK);
 
 	hr = m_device->CreateVertexShader(VSCode->Get()->GetBufferPointer(), VSCode->Get()->GetBufferSize(), nullptr, vertexShader->GetAddressOf());
 	if (FAILED(hr)) MessageBoxW(nullptr, L"Failed to create vertex shader", L"Error", MB_OK);
 }
 
-void VDRender::LoadPixelShader(const wchar_t* filePath, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader)
+void VDRender::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader)
 {
 	comPtr<ID3DBlob> psCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -383,8 +383,8 @@ void VDRender::LoadPixelShader(const wchar_t* filePath, const char* entryPoint, 
 
 	HRESULT hr;
 
-	hr = D3DReadFileToBlob(L"PixelShader.cso", psCode.GetAddressOf());
-	if (FAILED(hr)) hr = D3DCompileFromFile(filePath, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, psCode.GetAddressOf(), errorBlob.GetAddressOf());
+	hr = D3DReadFileToBlob((wstring(file) + L".cso").c_str(), psCode.GetAddressOf());
+	if (FAILED(hr)) hr = D3DCompileFromFile(((wstring(DEFAULT_SHADER_PATH) + file) + L".hlsl").c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, shaderModel, compileFlags, 0, psCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr)) MessageBoxW(nullptr, L"Failed to compile pixel shader", L"Error", MB_OK);
 
 	hr = m_device->CreatePixelShader(psCode->GetBufferPointer(), psCode->GetBufferSize(), nullptr, pixelShader->GetAddressOf());
