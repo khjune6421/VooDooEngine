@@ -1,12 +1,11 @@
-#include "Device.h"
-#include "Render.h"
-
-#define DEVICE VDD::g_deviceInfo
+#include "VDRender.h"
 
 constexpr LONG WINDOW_WIDTH = 1920;
 constexpr LONG WINDOW_HEIGHT = 1080;
 
 HWND g_hWnd = nullptr;
+std::unique_ptr<VDRender> g_renderer = nullptr;
+
 bool g_isRunning = true;
 
 const wchar_t g_className[256] = L"VooDoo Class";
@@ -29,13 +28,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, nShowCmd);
 #endif
 
-	VDD::Initialize();
-	VDR::LoadData();
+	g_renderer = std::make_unique<VDRender>(g_hWnd, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-	while (g_isRunning && ProcessMessage()) VDR::SceneRender();
-
-	VDD::Release();
-	VDR::ReleaseData();
+	while (g_isRunning && ProcessMessage()) g_renderer->SceneRender();
 }
 
 void InitWindow(LONG width, LONG height, HINSTANCE hInstance, int nShowCmd)
@@ -148,7 +143,7 @@ void ResizeWindow(HWND hWnd, LONG width, LONG height)
 
 	MoveWindow(hWnd, oldRect.left, oldRect.top, newWidth, newHeight, TRUE);
 
-	if (DEVICE.device) VDD::Resize(static_cast<UINT>(width), static_cast<UINT>(height));
+	if (g_renderer) g_renderer->Resize(static_cast<UINT>(width), static_cast<UINT>(height));
 }
 
 bool ProcessMessage()

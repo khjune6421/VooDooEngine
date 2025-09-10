@@ -118,17 +118,16 @@ class VDRender
 	Camera m_testCamera;
 
 	// I might later move this function
-	template<typename T = float>
-	static T GetdeltaTime()
+	template <typename T = float>
+	T GetdeltaTime()
 	{
-		static LARGE_INTEGER frequency = {};
-		static LARGE_INTEGER prevTime = {};
-		LARGE_INTEGER currentTime = {};
-		if (frequency.QuadPart == 0) QueryPerformanceFrequency(&frequency);
-		QueryPerformanceCounter(&currentTime);
-		T deltaTime = static_cast<T>(currentTime.QuadPart - prevTime.QuadPart) / static_cast<T>(frequency.QuadPart);
-		prevTime = currentTime;
-		return deltaTime;
+		static ULONGLONG previousTime = GetTickCount64();
+		ULONGLONG currentTime = GetTickCount64();
+
+		double deltaTime = static_cast<double>(currentTime - previousTime) / 1000.0;
+		previousTime = currentTime;
+
+		return static_cast<T>(deltaTime);
 	}
 
 	// Functions
@@ -166,7 +165,6 @@ class VDRender
 	void UpdateTestObject(float deltaTime);
 	void DrawTestObject();
 
-	void SceneRender();
 	void UpdateRenderMode();
 
 public:
@@ -175,7 +173,9 @@ public:
 
 	void Resize(UINT width, UINT height);
 
-	void DrawText(const wchar_t* text, DirectX::XMFLOAT2 position, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), float scale = 1.0f, const wchar_t* fontName = L"Arial");
+	void DrawText(const wchar_t* text, DirectX::XMFLOAT2 position, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), float scale = 1.0f, const wchar_t* fontName = L"Gugi");
+
+	void SceneRender();
 };
 
 #undef comPtr

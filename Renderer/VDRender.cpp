@@ -211,7 +211,6 @@ void VDRender::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bufferDesc.CPUAccessFlags = 0;
 	bufferDesc.StructureByteStride = 0;
-
 	if (FAILED(m_device->CreateBuffer(&bufferDesc, nullptr, buffer->GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create constant buffer", L"Error", MB_OK);
@@ -389,8 +388,8 @@ void VDRender::CreateRasterState()
 	rasterDesc.DepthBiasClamp = 0.0f;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 	rasterDesc.DepthClipEnable = TRUE;
-	rasterDesc.MultisampleEnable = FALSE; // Base value is FALSE
-	rasterDesc.AntialiasedLineEnable = FALSE; // Base value is FALSE
+	rasterDesc.MultisampleEnable = TRUE; // Base value is FALSE
+	rasterDesc.AntialiasedLineEnable = TRUE; // Base value is FALSE
 	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[0].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
@@ -502,29 +501,13 @@ void VDRender::DrawTestObject()
 {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
+	ID3D11Buffer* vertexBuffer = m_vertexBuffer.Get();
 
-	m_deviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+	m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	m_deviceContext->IASetInputLayout(m_inputLayout.Get());
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	m_deviceContext->Draw(24, 0);
-}
-
-constexpr XMFLOAT4 CLEAR_COLOR = { 0.5f, 0.5f, 0.5f, 1.0f };
-
-void VDRender::SceneRender()
-{
-	EngineUpdate();
-
-	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, CLEAR_COLOR, 1.0f, 0);
-
-	DrawTestObject();
-
-#ifdef _DEBUG
-	DisplayDeviceInfo();
-#endif
-
-	Present();
 }
 
 void VDRender::UpdateRenderMode()
@@ -541,6 +524,7 @@ VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 	CreateDeviceSwapChain();
 	CreateRenderTarget();
 	CreateDepthStencil();
+	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 	SetViewport();
 	LoadFonts();
 
@@ -624,6 +608,23 @@ void VDRender::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 		g_SpriteFontMap[fontName]->DrawString(g_SpriteBatchMap[fontName].get(), buffer, position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
 		g_SpriteBatchMap[fontName]->End();
 	}
+}
+
+constexpr XMFLOAT4 CLEAR_COLOR = { 0.5f, 0.5f, 0.5f, 1.0f };
+
+void VDRender::SceneRender()
+{
+	EngineUpdate();
+
+	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, CLEAR_COLOR, 1.0f, 0);
+
+	DrawTestObject();
+
+#ifdef _DEBUG
+	DisplayDeviceInfo();
+#endif
+
+	Present();
 }
 
 #undef comPtr
