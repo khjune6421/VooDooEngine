@@ -316,6 +316,8 @@ void VDRender::DisplayDeviceInfo()
 constexpr const wchar_t* DEFAULT_SHADER_PATH = L"../Renderer/";
 constexpr const wchar_t* DEFAULT_VS = L"VertexShader.hlsl";
 constexpr const wchar_t* DEFAULT_PS = L"PixelShader.hlsl";
+constexpr const wchar_t* NullPS = L"NullPixelShader.hlsl";
+constexpr const wchar_t* AllPS = L"AllPixelShader.hlsl";
 constexpr const char* DEFAULT_ENTRY_POINT = "main";
 constexpr const char* DEFAULT_SHADERMODEL = "5_0";
 
@@ -325,6 +327,17 @@ void VDRender::CreateShaders()
 	LoadPixelShader((wstring(DEFAULT_SHADER_PATH) + DEFAULT_PS).c_str(), DEFAULT_ENTRY_POINT, ("ps_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_pixelShader);
 
 	m_deviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
+	m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+
+	CreateConstBuffer(sizeof(ConstBuffer), &m_constantBuffer);
+}
+
+constexpr const wchar_t* SHADERS[3] = { DEFAULT_PS, NullPS, AllPS };
+
+void VDRender::ChangeShader(UINT id)
+{
+	LoadPixelShader((wstring(DEFAULT_SHADER_PATH) + SHADERS[id]).c_str(), DEFAULT_ENTRY_POINT, ("ps_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_pixelShader);
+
 	m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
 	CreateConstBuffer(sizeof(ConstBuffer), &m_constantBuffer);
@@ -417,7 +430,7 @@ void VDRender::CreateRasterState()
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
 	}
-	m_deviceContext->RSSetState(g_rasterState[3].Get());
+	m_deviceContext->RSSetState(g_rasterState[2].Get());
 }
 
 float VDRender::EngineUpdate()

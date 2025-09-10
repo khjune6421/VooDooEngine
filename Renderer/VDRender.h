@@ -110,7 +110,7 @@ class VDRender
 
 	// Render
 	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr }; // 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
-	RasterState m_currentRasterState = RasterState::Wireframe_CullNone;
+	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
 	comPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
 	comPtr<ID3D11InputLayout> m_inputLayout = nullptr;
@@ -176,6 +176,8 @@ public:
 	void DrawText(const wchar_t* text, DirectX::XMFLOAT2 position, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), float scale = 1.0f, const wchar_t* fontName = L"Gugi");
 
 	void SceneRender();
+
+	void ChangeShader(UINT id);
 };
 
 #undef comPtr
