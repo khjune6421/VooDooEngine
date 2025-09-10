@@ -3,6 +3,9 @@
 
 #define DEVICE VDD::g_deviceInfo
 
+constexpr LONG WINDOW_WIDTH = 1920;
+constexpr LONG WINDOW_HEIGHT = 1080;
+
 HWND g_hWnd = nullptr;
 bool g_isRunning = true;
 
@@ -21,9 +24,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 #ifdef _DEBUG
-	InitWindow(DEVICE.displayMode.Width, DEVICE.displayMode.Height);
+	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT);
 #else
-	InitWindow(DEVICE.displayMode.Width, DEVICE.displayMode.Height, hInstance, nShowCmd);
+	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, nShowCmd);
 #endif
 
 	VDD::Initialize();
