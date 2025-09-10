@@ -3,15 +3,21 @@
 constexpr LONG WINDOW_WIDTH = 1920;
 constexpr LONG WINDOW_HEIGHT = 1080;
 
-HWND g_hWnd = nullptr;
-std::unique_ptr<VDRender> g_renderer = nullptr;
+HWND g_hWnd1 = nullptr;
+HWND g_hWnd2 = nullptr;
+
+std::unique_ptr<VDRender> g_renderer1 = nullptr;
+std::unique_ptr<VDRender> g_renderer2 = nullptr;
 
 bool g_isRunning = true;
 
-const wchar_t g_className[256] = L"VooDoo Class";
-const wchar_t g_windowName[256] = L"VooDoo Engine";
+const wchar_t g_className1[256] = L"VooDoo Class";
+const wchar_t g_windowName1[256] = L"VooDoo Engine";
 
-void InitWindow(LONG width, LONG height, HINSTANCE hInstance = nullptr, int nShowCmd = SW_SHOW);
+const wchar_t g_className2[256] = L"VooDoo Class 2";
+const wchar_t g_windowName2[256] = L"VooDoo Engine 2";
+
+HWND InitWindow(const wchar_t* className, const wchar_t* windowName, LONG width, LONG height, HINSTANCE hInstance = nullptr, int nShowCmd = SW_SHOW);
 void ResizeWindow(HWND hWnd, LONG width, LONG height);
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 bool ProcessMessage();
@@ -23,17 +29,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 #ifdef _DEBUG
-	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT);
+	g_hWnd1 = InitWindow(g_className1, g_windowName1, WINDOW_WIDTH, WINDOW_HEIGHT);
+	g_hWnd2 = InitWindow(g_className2, g_windowName2, WINDOW_WIDTH, WINDOW_HEIGHT);
 #else
-	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, nShowCmd);
+	g_hWnd1 = InitWindow(g_className1, g_windowName1, WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, nShowCmd);
+	g_hWnd2 = InitWindow(g_className2, g_windowName2, WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, nShowCmd);
 #endif
 
-	g_renderer = std::make_unique<VDRender>(g_hWnd, WINDOW_WIDTH, WINDOW_HEIGHT);
+	g_renderer1 = std::make_unique<VDRender>(g_hWnd1, WINDOW_WIDTH, WINDOW_HEIGHT);
+	g_renderer2 = std::make_unique<VDRender>(g_hWnd2, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-	while (g_isRunning && ProcessMessage()) g_renderer->SceneRender();
+	while (g_isRunning && ProcessMessage())
+	{
+		g_renderer1->SceneRender();
+		g_renderer2->SceneRender();
+	}
 }
 
-void InitWindow(LONG width, LONG height, HINSTANCE hInstance, int nShowCmd)
+HWND InitWindow(const wchar_t* className, const wchar_t* windowName, LONG width, LONG height, HINSTANCE hInstance, int nShowCmd)
 {
 	if (!hInstance) hInstance = GetModuleHandleW(nullptr);
 
@@ -47,20 +60,20 @@ void InitWindow(LONG width, LONG height, HINSTANCE hInstance, int nShowCmd)
 		nullptr, nullptr,
 		reinterpret_cast<HBRUSH>(GetStockObject(DKGRAY_BRUSH)),
 		nullptr,
-		g_className,
+		className,
 		nullptr
 	};
 	if (!RegisterClassEx(&wc))
 	{
 		MessageBoxW(nullptr, L"Failed to register window class", L"Error", MB_OK);
-		return;
+		return nullptr;
 	}
 
 	RECT rect = { 0, 0, width, height };
-	g_hWnd = CreateWindow
+	HWND hWnd = CreateWindow
 	(
-		g_className,
-		g_windowName,
+		className,
+		windowName,
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		width, height,
@@ -69,17 +82,19 @@ void InitWindow(LONG width, LONG height, HINSTANCE hInstance, int nShowCmd)
 		hInstance,
 		nullptr
 	);
-	if (!g_hWnd)
+	if (!hWnd)
 	{
 		MessageBoxW(nullptr, L"Failed to create window", L"Error", MB_OK);
-		return;
+		return nullptr;
 	}
 
-	ResizeWindow(g_hWnd, width, height);
+	ResizeWindow(hWnd, width, height);
 
-	ShowWindow(g_hWnd, nShowCmd);
-	UpdateWindow(g_hWnd);
+	ShowWindow(hWnd, nShowCmd);
+	UpdateWindow(hWnd);
 	SetCursor(LoadCursorW(nullptr, IDC_ARROW));
+
+	return hWnd;
 }
 
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -143,7 +158,7 @@ void ResizeWindow(HWND hWnd, LONG width, LONG height)
 
 	MoveWindow(hWnd, oldRect.left, oldRect.top, newWidth, newHeight, TRUE);
 
-	if (g_renderer) g_renderer->Resize(static_cast<UINT>(width), static_cast<UINT>(height));
+	//if (g_renderer) g_renderer->Resize(static_cast<UINT>(width), static_cast<UINT>(height));
 }
 
 bool ProcessMessage()
