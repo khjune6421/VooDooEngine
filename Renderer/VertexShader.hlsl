@@ -6,7 +6,9 @@ cbuffer ConstBuffer : register(b0)
     matrix WVP;
     
     float time;
-    int dummy[3];
+    float dummy1;
+    float dummy2;
+    float dummy3;
 }
 
 struct VSInput

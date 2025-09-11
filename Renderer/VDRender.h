@@ -66,8 +66,11 @@ class VDRender
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
 
 		float time;
+
 		// Dummy variables to make the size of the constant buffer a multiple of 16 bytes
-		int dummy[3] = { 0, 0, 0 };
+		float dummy1;
+		float dummy2;
+		float dummy3;
 	};
 
 	// Render
