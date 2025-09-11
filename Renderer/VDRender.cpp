@@ -8,6 +8,9 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
+// Global variables
+comPtr<ID3D11Buffer> g_vertexBuffer = nullptr;
+
 void VDRender::CreateDeviceSwapChain()
 {
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
@@ -122,10 +125,8 @@ void VDRender::LoadFonts()
 		if (entry.path().extension() == L".spritefont")
 		{
 			wstring fontName = entry.path().stem().wstring();
-			unique_ptr<SpriteFont> spriteFont = make_unique<SpriteFont>(m_device.Get(), entry.path().c_str());
-			unique_ptr<SpriteBatch> spriteBatch = make_unique<SpriteBatch>(m_deviceContext.Get());
-			g_SpriteFontMap[fontName] = move(spriteFont);
-			g_SpriteBatchMap[fontName] = move(spriteBatch);
+			m_SpriteFontMap[fontName] = make_shared<SpriteFont>(m_device.Get(), entry.path().c_str());
+			m_SpriteBatchMap[fontName] = make_shared<SpriteBatch>(m_deviceContext.Get());
 		}
 	}
 }
@@ -449,6 +450,14 @@ float VDRender::EngineUpdate()
 
 void VDRender::CreateTestObject()
 {
+	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	CreateInputLayout(layoutDesc, _countof(layoutDesc), m_VSCode, &m_inputLayout);
+
+	if (g_vertexBuffer) return;
 	Vertex vertices[] =
 	{
 		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
@@ -479,14 +488,7 @@ void VDRender::CreateTestObject()
 		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
 		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
 	};
-	CreateVertexBuffer(sizeof(vertices), &m_vertexBuffer, vertices, sizeof(Vertex));
-
-	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	CreateInputLayout(layoutDesc, _countof(layoutDesc), m_VSCode, &m_inputLayout);
+	CreateVertexBuffer(sizeof(vertices), &g_vertexBuffer, vertices, sizeof(Vertex));
 }
 
 void VDRender::UpdateTestObject(float deltaTime)
@@ -514,7 +516,7 @@ void VDRender::DrawTestObject()
 {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-	ID3D11Buffer* vertexBuffer = m_vertexBuffer.Get();
+	ID3D11Buffer* vertexBuffer = g_vertexBuffer.Get();
 
 	m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	m_deviceContext->IASetInputLayout(m_inputLayout.Get());
@@ -556,8 +558,8 @@ VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 VDRender::~VDRender()
 {
 	// Clear device
-	g_SpriteFontMap.clear();
-	g_SpriteBatchMap.clear();
+	m_SpriteFontMap.clear();
+	m_SpriteBatchMap.clear();
 	m_device.Reset();
 	if (m_deviceContext)
 	{
@@ -579,7 +581,7 @@ VDRender::~VDRender()
 
 	// Clear render
 	for (auto& state : g_rasterState) state.Reset();
-	m_vertexBuffer.Reset();
+	g_vertexBuffer.Reset();
 	m_inputLayout.Reset();
 }
 
@@ -615,11 +617,11 @@ void VDRender::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 
 	FXMVECTOR colorVector = XMLoadFloat4(&color);
 
-	if (g_SpriteFontMap.find(fontName) != g_SpriteFontMap.end())
+	if (m_SpriteFontMap.find(fontName) != m_SpriteFontMap.end())
 	{
-		g_SpriteBatchMap[fontName]->Begin();
-		g_SpriteFontMap[fontName]->DrawString(g_SpriteBatchMap[fontName].get(), buffer, position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
-		g_SpriteBatchMap[fontName]->End();
+		m_SpriteBatchMap[fontName]->Begin();
+		m_SpriteFontMap[fontName]->DrawString(m_SpriteBatchMap[fontName].get(), buffer, position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
+		m_SpriteBatchMap[fontName]->End();
 	}
 }
 

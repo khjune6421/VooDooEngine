@@ -24,10 +24,10 @@
     <ClCompile Include="VDRender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RendererMain.cpp">
+    <ClCompile Include="RenderTestMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WindowManager.cpp">
+    <ClCompile Include="VDWindowManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,7 +38,7 @@
     <ClInclude Include="VDRender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WindowManager.h">
+    <ClInclude Include="VDWindowManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

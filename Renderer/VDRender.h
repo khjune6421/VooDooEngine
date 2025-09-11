@@ -99,8 +99,9 @@ class VDRender
 	UINT m_DXVersion = 0;
 	UINT m_DXSubVersion = 0;
 
-	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> g_SpriteBatchMap;
-	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> g_SpriteFontMap;
+	// Need to make this global variable later // if possible
+	std::unordered_map<std::wstring, std::shared_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
+	std::unordered_map<std::wstring, std::shared_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
 	// Shader
 	comPtr<ID3D11VertexShader> m_vertexShader = nullptr;
@@ -112,12 +113,11 @@ class VDRender
 	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr }; // 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
-	comPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
 	comPtr<ID3D11InputLayout> m_inputLayout = nullptr;
 
 	Camera m_testCamera;
 
-	// I might later move this function
+	// I might need to move this function later
 	template <typename T = float>
 	T GetdeltaTime()
 	{
