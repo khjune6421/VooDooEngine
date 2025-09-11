@@ -115,6 +115,9 @@ class VDRender
 
 	comPtr<ID3D11InputLayout> m_inputLayout = nullptr;
 
+	// Static vertex buffer for rendering objects
+	static comPtr<ID3D11Buffer> s_vertexBuffer;
+
 	Camera m_testCamera;
 
 	// I might need to move this function later
