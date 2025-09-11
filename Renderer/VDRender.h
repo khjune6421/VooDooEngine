@@ -139,7 +139,6 @@ class VDRender
 	void CreateDeviceSwapChain();
 	void CreateRenderTarget();
 	void CreateDepthStencil();
-	void SetViewport();
 	void LoadFonts();
 	void GetHardwareInfo();
 
@@ -175,12 +174,14 @@ public:
 	~VDRender();
 
 	void Resize(UINT width, UINT height);
+	void SetViewport(float topLeftX = 0.0f, float topLeftY = 0.0f);
 
 	void DrawText(const wchar_t* text, DirectX::XMFLOAT2 position, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), float scale = 1.0f, const wchar_t* fontName = L"Gugi");
 
 	void SceneRender();
 
 	void ChangeShader(UINT id);
+	void ChangeState();
 };
 
 #undef comPtr
