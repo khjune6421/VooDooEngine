@@ -99,18 +99,6 @@ void VDRender::CreateDepthStencil()
 	}
 }
 
-void VDRender::SetViewport()
-{
-	D3D11_VIEWPORT viewport = {};
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-	viewport.Width = static_cast<FLOAT>(m_deviceInfo.displayMode.Width);
-	viewport.Height = static_cast<FLOAT>(m_deviceInfo.displayMode.Height);
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	m_deviceContext->RSSetViewports(1, &viewport);
-}
-
 void VDRender::LoadFonts()
 {
 	wstring fontPath = L"../Assets/Fonts/";
@@ -581,6 +569,8 @@ VDRender::~VDRender()
 	// Clear render
 	for (auto& state : g_rasterState) state.Reset();
 	m_inputLayout.Reset();
+
+	if (s_vertexBuffer) s_vertexBuffer.Reset();
 }
 
 void VDRender::Resize(UINT width, UINT height)
@@ -605,7 +595,18 @@ void VDRender::Resize(UINT width, UINT height)
 	CreateDepthStencil();
 
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
-	SetViewport();
+}
+
+void VDRender::SetViewport(float topLeftX, float topLeftY)
+{
+	D3D11_VIEWPORT viewport = {};
+	viewport.TopLeftX = -topLeftX;
+	viewport.TopLeftY = -topLeftY;
+	viewport.Width = static_cast<FLOAT>(m_deviceInfo.displayMode.Width);
+	viewport.Height = static_cast<FLOAT>(m_deviceInfo.displayMode.Height);
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	m_deviceContext->RSSetViewports(1, &viewport);
 }
 
 void VDRender::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)

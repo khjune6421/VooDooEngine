@@ -23,6 +23,15 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 
+	case WM_MOVE:
+		if (g_windows[hWnd])
+		{
+			RECT rect = {};
+			GetWindowRect(hWnd, &rect);
+			g_windows[hWnd]->SetViewport(rect.left, rect.top);
+		}
+		return 0;
+
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
@@ -126,5 +135,9 @@ void VDW::ResizeWindow(HWND hWnd, LONG width, LONG height)
 
 	MoveWindow(hWnd, oldRect.left, oldRect.top, newWidth, newHeight, TRUE);
 
-	if (g_windows[hWnd]) g_windows[hWnd]->Resize(width, height);
+	if (g_windows[hWnd])
+	{
+		g_windows[hWnd]->Resize(width, height);
+		g_windows[hWnd]->SetViewport(oldRect.left, oldRect.top);
+	}
 }

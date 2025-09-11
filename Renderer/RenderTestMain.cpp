@@ -13,7 +13,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 #endif
 
 	VDW::CreateWindowAndRenderer(L"VooDoo Class1", L"VooDoo Engine1", 1280, 720);
-	VDW::CreateWindowAndRenderer(L"VooDoo Class2", L"VooDoo Engine2", 800, 600);
+	VDW::CreateWindowAndRenderer(L"VooDoo Class2", L"VooDoo Engine2", 1280, 720);
+	VDW::CreateWindowAndRenderer(L"VooDoo Class3", L"VooDoo Engine3", 1280, 720);
+	VDW::CreateWindowAndRenderer(L"VooDoo Class4", L"VooDoo Engine4", 1280, 720);
+	VDW::CreateWindowAndRenderer(L"VooDoo Class5", L"VooDoo Engine5", 1280, 720);
 
 	while (VDW::ProcessMessage()) for (auto& render : VDW::g_renders) render->SceneRender();
 
