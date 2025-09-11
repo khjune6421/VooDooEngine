@@ -1,8 +1,4 @@
-﻿  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Debug\AllPixelShader.cso
-  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Debug\PixelShader.cso
-  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Debug\NullPixelShader.cso
-  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Debug\VertexShader.cso
-  RenderTestMain.cpp
+﻿  RenderTestMain.cpp
   VDRender.cpp
   VDWindowManager.cpp
 C:\Users\User\Desktop\VooDooEngine\Renderer\VDWindowManager.cpp(31,48): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data

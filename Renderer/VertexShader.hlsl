@@ -1,4 +1,4 @@
-cbuffer ConstBuffer : register(b0)
+cbuffer TestConstBuffer : register(b0)
 {
     matrix world;
     matrix view;

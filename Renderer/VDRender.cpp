@@ -112,8 +112,8 @@ void VDRender::LoadFonts()
 		if (entry.path().extension() == L".spritefont")
 		{
 			wstring fontName = entry.path().stem().wstring();
-			m_SpriteFontMap[fontName] = make_shared<SpriteFont>(m_device.Get(), entry.path().c_str());
-			m_SpriteBatchMap[fontName] = make_shared<SpriteBatch>(m_deviceContext.Get());
+			m_SpriteFontMap[fontName] = make_unique<SpriteFont>(m_device.Get(), entry.path().c_str());
+			m_SpriteBatchMap[fontName] = make_unique<SpriteBatch>(m_deviceContext.Get());
 		}
 	}
 }
@@ -495,8 +495,8 @@ void VDRender::UpdateTestObject(float deltaTime)
 	constBufferData.world = XMMatrixTranspose(worldMatrix);
 	constBufferData.view = XMMatrixTranspose(viewMatrix);
 	constBufferData.projection = XMMatrixTranspose(projMatrix);
-
 	constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
+
 	constBufferData.sinTime = sinf(ATime);
 	constBufferData.cosTime = cosf(ATime);
 	constBufferData.negsinTime = -constBufferData.sinTime;

@@ -59,7 +59,6 @@ class VDRender
 	// Shader
 	struct TestConstBuffer
 	{
-		// Not sure if these three are needed
 		DirectX::XMMATRIX world; // world matrix
 		DirectX::XMMATRIX view; // view matrix
 		DirectX::XMMATRIX projection; // projection matrix
@@ -103,8 +102,8 @@ class VDRender
 	UINT m_DXSubVersion = 0;
 
 	// Need to make this global variable later // if possible
-	std::unordered_map<std::wstring, std::shared_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
-	std::unordered_map<std::wstring, std::shared_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
+	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
+	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
 	// Shader
 	comPtr<ID3D11VertexShader> m_vertexShader = nullptr;
