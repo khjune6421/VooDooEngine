@@ -8,8 +8,7 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
-// Global variables
-comPtr<ID3D11Buffer> g_vertexBuffer = nullptr;
+comPtr<ID3D11Buffer> VDRender::s_vertexBuffer = nullptr;
 
 void VDRender::CreateDeviceSwapChain()
 {
@@ -457,7 +456,7 @@ void VDRender::CreateTestObject()
 	};
 	CreateInputLayout(layoutDesc, _countof(layoutDesc), m_VSCode, &m_inputLayout);
 
-	if (g_vertexBuffer) return;
+	if (s_vertexBuffer) return;
 	Vertex vertices[] =
 	{
 		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
@@ -488,7 +487,7 @@ void VDRender::CreateTestObject()
 		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
 		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
 	};
-	CreateVertexBuffer(sizeof(vertices), &g_vertexBuffer, vertices, sizeof(Vertex));
+	CreateVertexBuffer(sizeof(vertices), &s_vertexBuffer, vertices, sizeof(Vertex));
 }
 
 void VDRender::UpdateTestObject(float deltaTime)
@@ -516,7 +515,7 @@ void VDRender::DrawTestObject()
 {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-	ID3D11Buffer* vertexBuffer = g_vertexBuffer.Get();
+	ID3D11Buffer* vertexBuffer = s_vertexBuffer.Get();
 
 	m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	m_deviceContext->IASetInputLayout(m_inputLayout.Get());
@@ -581,7 +580,6 @@ VDRender::~VDRender()
 
 	// Clear render
 	for (auto& state : g_rasterState) state.Reset();
-	g_vertexBuffer.Reset();
 	m_inputLayout.Reset();
 }
 

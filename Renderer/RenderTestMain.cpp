@@ -15,7 +15,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	VDW::CreateWindowAndRenderer(L"VooDoo Class1", L"VooDoo Engine1", 1280, 720);
 	VDW::CreateWindowAndRenderer(L"VooDoo Class2", L"VooDoo Engine2", 800, 600);
 
-	while (VDW::ProcessMessage()) for (auto& window : VDW::g_windows) window.second->SceneRender();
+	while (VDW::ProcessMessage()) for (auto& render : VDW::g_renders) render->SceneRender();
+
+	for (auto& render : VDW::g_renders) delete render;
 
 	return 0;
 }
