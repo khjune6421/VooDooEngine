@@ -8,9 +8,6 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
-constexpr int VERTUAL_WIDTH = 1920;
-constexpr int VERTUAL_HEIGHT = 1080;
-
 comPtr<ID3D11Buffer> VDRender::s_vertexBuffer = nullptr;
 
 void VDRender::CreateDeviceSwapChain()
@@ -555,7 +552,7 @@ VDRender::~VDRender()
 	m_SpriteBatchMap.clear();
 	m_device.Reset();
 
-	// Not sure if this is necessary // microsoft doesnot recommends it
+	// Not sure if this is necessary // microsoft doesnot recommend it
 	if (m_deviceContext)
 	{
 		m_deviceContext->ClearState();

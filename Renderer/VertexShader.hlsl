@@ -3,10 +3,10 @@ cbuffer ConstBuffer : register(b0)
     matrix world;
     matrix view;
     matrix projection;
-    
     matrix WVP;
     
     float time;
+    int dummy[3];
 }
 
 struct VSInput
