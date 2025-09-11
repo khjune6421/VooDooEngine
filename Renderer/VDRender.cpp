@@ -554,6 +554,8 @@ VDRender::~VDRender()
 	m_SpriteFontMap.clear();
 	m_SpriteBatchMap.clear();
 	m_device.Reset();
+
+	// Not sure if this is necessary // microsoft doesnot recommends it
 	if (m_deviceContext)
 	{
 		m_deviceContext->ClearState();
