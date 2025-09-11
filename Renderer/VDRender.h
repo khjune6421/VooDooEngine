@@ -120,6 +120,7 @@ class VDRender
 	// Static vertex buffer for rendering objects
 	static comPtr<ID3D11Buffer> s_vertexBuffer;
 
+	// should this be general?
 	Camera m_testCamera;
 
 	// I might need to move this function later
