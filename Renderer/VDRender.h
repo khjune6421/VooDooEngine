@@ -57,7 +57,7 @@ class VDRender
 	};
 
 	// Shader
-	struct ConstBuffer
+	struct TestConstBuffer
 	{
 		// Not sure if these three are needed
 		DirectX::XMMATRIX world; // world matrix
@@ -65,12 +65,10 @@ class VDRender
 		DirectX::XMMATRIX projection; // projection matrix
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
 
-		float time;
-
-		// Dummy variables to make the size of the constant buffer a multiple of 16 bytes
-		float dummy1;
-		float dummy2;
-		float dummy3;
+		float sinTime;
+		float cosTime;
+		float negsinTime;
+		float negcosTime;
 	};
 
 	// Render

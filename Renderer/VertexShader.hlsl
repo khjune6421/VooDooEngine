@@ -5,10 +5,10 @@ cbuffer ConstBuffer : register(b0)
     matrix projection;
     matrix WVP;
     
-    float time;
-    float dummy1;
-    float dummy2;
-    float dummy3;
+    float sinTime;
+    float cosTime;
+    float negsinTime;
+    float negcosTime;
 }
 
 struct VSInput
@@ -21,7 +21,11 @@ struct VSOutput
 {
     float4 pos : SV_POSITION;
     float4 col : COLOR0;
-    float time : TEXCOORD0;
+    
+    float sinTime : TEXCOORD0;
+    float cosTime : TEXCOORD1;
+    float negsinTime : TEXCOORD2;
+    float negcosTime : TEXCOORD3;
 };
 
 VSOutput main(VSInput input)
@@ -34,7 +38,10 @@ VSOutput main(VSInput input)
     output.pos = input.pos;
     output.col = input.col;
     
-    output.time = time;
+    output.sinTime = sinTime;
+    output.cosTime = cosTime;
+    output.negsinTime = negsinTime;
+    output.negcosTime = negcosTime;
     
     return output;
 }

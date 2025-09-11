@@ -317,7 +317,7 @@ void VDRender::CreateShaders()
 	m_deviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
-	CreateConstBuffer(sizeof(ConstBuffer), &m_constantBuffer);
+	CreateConstBuffer(sizeof(TestConstBuffer), &m_constantBuffer);
 }
 
 constexpr const wchar_t* SHADERS[3] = { DEFAULT_PS, NullPS, AllPS };
@@ -328,7 +328,7 @@ void VDRender::ChangeShader(UINT id)
 
 	m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
-	CreateConstBuffer(sizeof(ConstBuffer), &m_constantBuffer);
+	CreateConstBuffer(sizeof(TestConstBuffer), &m_constantBuffer);
 }
 
 void VDRender::ChangeState()
@@ -488,7 +488,7 @@ void VDRender::UpdateTestObject(float deltaTime)
 
 	XMMATRIX worldMatrix = XMMatrixRotationY(ATime);
 
-	ConstBuffer constBufferData = {};
+	TestConstBuffer constBufferData = {};
 	XMMATRIX viewMatrix = m_testCamera.GetViewMatrix();
 	XMMATRIX projMatrix = m_testCamera.GetProjectionMatrix();
 
@@ -497,7 +497,10 @@ void VDRender::UpdateTestObject(float deltaTime)
 	constBufferData.projection = XMMatrixTranspose(projMatrix);
 
 	constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
-	constBufferData.time = ATime;
+	constBufferData.sinTime = sinf(ATime);
+	constBufferData.cosTime = cosf(ATime);
+	constBufferData.negsinTime = -constBufferData.sinTime;
+	constBufferData.negcosTime = -constBufferData.cosTime;
 
 	m_deviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
 }
