@@ -22,6 +22,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	while (VDW::ProcessMessage()) for (auto& render : VDW::g_renders) render->SceneRender();
 
+	VDW::g_windows.clear();
 	for (auto& render : VDW::g_renders) delete render;
 
 	return 0;

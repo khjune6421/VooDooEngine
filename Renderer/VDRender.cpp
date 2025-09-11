@@ -526,8 +526,9 @@ void VDRender::UpdateRenderMode()
 VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 {
 	// Initialize device
-	m_deviceInfo.displayMode.Width = VERTUAL_WIDTH;
-	m_deviceInfo.displayMode.Height = VERTUAL_HEIGHT;
+	GetHardwareInfo();
+	m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
+	m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
 
 	CreateDeviceSwapChain();
 	CreateRenderTarget();
@@ -536,7 +537,6 @@ VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 	SetViewport();
 	LoadFonts();
 
-	GetHardwareInfo();
 	m_DXVersion = (m_deviceInfo.featureLevels & 0xf000) >> 12;
 	m_DXSubVersion = (m_deviceInfo.featureLevels & 0x0f00) >> 8;
 
@@ -575,8 +575,6 @@ VDRender::~VDRender()
 	// Clear render
 	for (auto& state : g_rasterState) state.Reset();
 	m_inputLayout.Reset();
-
-	if (s_vertexBuffer) s_vertexBuffer.Reset();
 }
 
 void VDRender::Resize(UINT width, UINT height)
