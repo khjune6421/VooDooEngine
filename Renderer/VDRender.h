@@ -181,6 +181,7 @@ public:
 	void SceneRender();
 
 	void ChangeShader(UINT id);
+	void ChangeState();
 };
 
 #undef comPtr

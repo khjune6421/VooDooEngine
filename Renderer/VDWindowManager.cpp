@@ -23,7 +23,7 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 
-	case WM_MOVE:
+	case WM_MOVING:
 		if (g_windows[hWnd])
 		{
 			RECT rect = {};
@@ -37,6 +37,10 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 		case VK_ESCAPE:
 			PostQuitMessage(0);
+			return 0;
+
+		case  VK_F4:
+			g_windows[hWnd]->ChangeState();
 			return 0;
 		}
 		return 0;
@@ -63,7 +67,7 @@ bool VDW::ProcessMessage()
 	return true;
 }
 
-void VDW::CreateWindowAndRenderer(std::wstring className, std::wstring windowName, LONG width, LONG height)
+HWND VDW::CreateWindowAndRenderer(std::wstring className, std::wstring windowName, LONG width, LONG height)
 {
 	WNDCLASSEX wc =
 	{
@@ -81,7 +85,7 @@ void VDW::CreateWindowAndRenderer(std::wstring className, std::wstring windowNam
 	if (!RegisterClassExW(&wc))
 	{
 		MessageBoxW(nullptr, L"Failed to register window class", L"Error", MB_OK);
-		return;
+		return nullptr;
 	}
 
 	HWND hWnd = CreateWindow
@@ -99,7 +103,7 @@ void VDW::CreateWindowAndRenderer(std::wstring className, std::wstring windowNam
 	if (!hWnd)
 	{
 		MessageBoxW(nullptr, L"Failed to create window", L"Error", MB_OK);
-		return;
+		return nullptr;
 	}
 
 	ShowWindow(hWnd, SW_SHOW);
@@ -109,6 +113,8 @@ void VDW::CreateWindowAndRenderer(std::wstring className, std::wstring windowNam
 	g_renders.push_back(new VDRender(hWnd, width, height));
 	g_windows[hWnd] = g_renders.back();
 	ResizeWindow(hWnd, width, height);
+
+	return hWnd;
 }
 
 void VDW::ResizeWindow(HWND hWnd, LONG width, LONG height)

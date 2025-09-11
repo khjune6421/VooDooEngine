@@ -8,6 +8,9 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
+constexpr int VERTUAL_WIDTH = 1920;
+constexpr int VERTUAL_HEIGHT = 1080;
+
 comPtr<ID3D11Buffer> VDRender::s_vertexBuffer = nullptr;
 
 void VDRender::CreateDeviceSwapChain()
@@ -331,6 +334,11 @@ void VDRender::ChangeShader(UINT id)
 	CreateConstBuffer(sizeof(ConstBuffer), &m_constantBuffer);
 }
 
+void VDRender::ChangeState()
+{
+	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % 4);
+}
+
 void VDRender::UpdateShaders()
 {
 	m_deviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
@@ -425,8 +433,6 @@ float VDRender::EngineUpdate()
 {
 	float deltaTime = GetdeltaTime<float>();
 
-	if (GetAsyncKeyState(VK_F4) & 0x01) m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % 4);
-
 	UpdateRenderMode();
 	UpdateShaders();
 
@@ -520,8 +526,8 @@ void VDRender::UpdateRenderMode()
 VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 {
 	// Initialize device
-	m_deviceInfo.displayMode.Width = width;
-	m_deviceInfo.displayMode.Height = height;
+	m_deviceInfo.displayMode.Width = VERTUAL_WIDTH;
+	m_deviceInfo.displayMode.Height = VERTUAL_HEIGHT;
 
 	CreateDeviceSwapChain();
 	CreateRenderTarget();
@@ -588,11 +594,9 @@ void VDRender::Resize(UINT width, UINT height)
 		MessageBoxW(nullptr, L"Failed to resize swap chain buffers", L"Error", MB_OK);
 		return;
 	}
-	m_deviceInfo.displayMode.Width = width;
-	m_deviceInfo.displayMode.Height = height;
 
 	CreateRenderTarget();
-	CreateDepthStencil();
+	//CreateDepthStencil();
 
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }
