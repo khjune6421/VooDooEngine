@@ -9,6 +9,7 @@ using namespace DirectX;
 #define comPtr Microsoft::WRL::ComPtr
 
 comPtr<ID3D11Buffer> VDRender::s_vertexBuffer = nullptr;
+Camera VDRender::s_testCamera = Camera();
 
 void VDRender::CreateDeviceSwapChain()
 {
@@ -489,8 +490,8 @@ void VDRender::UpdateTestObject(float deltaTime)
 	XMMATRIX worldMatrix = XMMatrixRotationY(ATime);
 
 	TestConstBuffer constBufferData = {};
-	XMMATRIX viewMatrix = m_testCamera.GetViewMatrix();
-	XMMATRIX projMatrix = m_testCamera.GetProjectionMatrix();
+	XMMATRIX viewMatrix = s_testCamera.GetViewMatrix();
+	XMMATRIX projMatrix = s_testCamera.GetProjectionMatrix();
 
 	constBufferData.world = XMMatrixTranspose(worldMatrix);
 	constBufferData.view = XMMatrixTranspose(viewMatrix);
@@ -546,6 +547,9 @@ VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 	// Initialize render
 	CreateRasterState();
 	CreateTestObject();
+
+	// Initialize camera // this should be moved to somewhere else later
+	s_testCamera.SetScreenSize(static_cast<float>(m_deviceInfo.displayMode.Width), static_cast<float>(m_deviceInfo.displayMode.Height));
 }
 
 VDRender::~VDRender()
