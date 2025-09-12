@@ -8,6 +8,9 @@ unordered_map<HWND, VDRender*> VDW::g_windows = {};
 
 LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	static bool isDragging = false;
+	static POINT lastMousePos = {};
+
 	switch (msg)
 	{
 	case WM_DESTROY:
@@ -32,6 +35,48 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 
+	case WM_LBUTTONDOWN:
+		isDragging = true;
+		lastMousePos.x = LOWORD(lParam);
+		lastMousePos.y = HIWORD(lParam);
+		SetCapture(hWnd);
+		return 0;
+
+	case WM_LBUTTONUP:
+		isDragging = false;
+		ReleaseCapture();
+		return 0;
+
+	case WM_MOUSEMOVE:
+		if (isDragging)
+		{
+			POINT currentMousePos = {};
+			currentMousePos.x = LOWORD(lParam);
+			currentMousePos.y = HIWORD(lParam);
+
+			int deltaX = currentMousePos.x - lastMousePos.x;
+			int deltaY = currentMousePos.y - lastMousePos.y;
+
+			RECT windowRect = {};
+			GetWindowRect(hWnd, &windowRect);
+
+			SetWindowPos
+			(
+				hWnd, nullptr,
+				windowRect.left + deltaX,
+				windowRect.top + deltaY,
+				0, 0,
+				SWP_NOSIZE | SWP_NOZORDER
+			);
+			if (g_windows[hWnd])
+			{
+				RECT rect = {};
+				GetWindowRect(hWnd, &rect);
+				g_windows[hWnd]->SetViewport(rect.left, rect.top);
+			}
+		}
+		return 0;
+
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
@@ -39,7 +84,7 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			PostQuitMessage(0);
 			return 0;
 
-		case  VK_F4:
+		case VK_F4:
 			g_windows[hWnd]->ChangeState();
 			return 0;
 		}
@@ -92,7 +137,7 @@ HWND VDW::CreateWindowAndRenderer(std::wstring className, std::wstring windowNam
 	(
 		className.c_str(),
 		windowName.c_str(),
-		WS_OVERLAPPEDWINDOW,
+		WS_POPUP,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		width, height,
 		GetDesktopWindow(),
@@ -133,7 +178,7 @@ void VDW::ResizeWindow(HWND hWnd, LONG width, LONG height)
 
 	SetWindowPos
 	(
-		hWnd, nullptr,
+		hWnd, HWND_TOPMOST,
 		oldRect.left, oldRect.top,
 		newWidth, newHeight,
 		SWP_SHOWWINDOW
