@@ -24,9 +24,6 @@
     <ClCompile Include="VDRender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RendererTestMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VDWindowManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

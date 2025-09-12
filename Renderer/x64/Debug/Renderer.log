@@ -1,4 +1,2 @@
-﻿  RendererTestMain.cpp
-  VDRender.cpp
-  Generating Code...
-  Renderer.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\Renderer.exe
+﻿  VDWindowManager.cpp
+  Renderer.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\Renderer.lib
