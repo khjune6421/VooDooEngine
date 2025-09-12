@@ -26,7 +26,7 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return 0;
 
-	case WM_MOVING:
+	case WM_MOVE:
 		if (g_windows[hWnd])
 		{
 			RECT rect = {};
@@ -48,6 +48,7 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return 0;
 
 	case WM_MOUSEMOVE:
+		// Theres a bug when you move the mouse too fast // not sure why // have somethig to do with D3D renderer
 		if (isDragging)
 		{
 			POINT currentMousePos = {};

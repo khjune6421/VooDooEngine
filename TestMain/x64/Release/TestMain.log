@@ -1,7 +1,7 @@
 ﻿  TestMain.cpp
   Generating code
-  3 of 1320 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  116 of 1321 functions ( 8.8%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    31 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe

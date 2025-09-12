@@ -1,8 +1,10 @@
-﻿  VDWindowManager.cpp
+﻿  VDRender.cpp
+  VDWindowManager.cpp
 C:\Users\User\Desktop\VooDooEngine\Renderer\VDWindowManager.cpp(34,48): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
 C:\Users\User\Desktop\VooDooEngine\Renderer\VDWindowManager.cpp(34,37): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
 C:\Users\User\Desktop\VooDooEngine\Renderer\VDWindowManager.cpp(75,49): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
 C:\Users\User\Desktop\VooDooEngine\Renderer\VDWindowManager.cpp(75,38): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
 C:\Users\User\Desktop\VooDooEngine\Renderer\VDWindowManager.cpp(192,53): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
 C:\Users\User\Desktop\VooDooEngine\Renderer\VDWindowManager.cpp(192,39): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+  Generating Code...
   Renderer.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\Renderer.lib
