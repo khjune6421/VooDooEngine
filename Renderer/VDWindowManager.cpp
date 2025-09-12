@@ -31,7 +31,7 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			RECT rect = {};
 			GetWindowRect(hWnd, &rect);
-			g_windows[hWnd]->SetViewport(rect.left, rect.top);
+			g_windows[hWnd]->SetViewport(static_cast<float>(rect.left), static_cast<float>(rect.top));
 		}
 		return 0;
 
@@ -58,23 +58,18 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			int deltaX = currentMousePos.x - lastMousePos.x;
 			int deltaY = currentMousePos.y - lastMousePos.y;
 
-			RECT windowRect = {};
-			GetWindowRect(hWnd, &windowRect);
+			RECT rect = {};
+			GetWindowRect(hWnd, &rect);
 
 			SetWindowPos
 			(
 				hWnd, nullptr,
-				windowRect.left + deltaX,
-				windowRect.top + deltaY,
+				rect.left + deltaX,
+				rect.top + deltaY,
 				0, 0,
 				SWP_NOSIZE | SWP_NOZORDER
 			);
-			if (g_windows[hWnd])
-			{
-				RECT rect = {};
-				GetWindowRect(hWnd, &rect);
-				g_windows[hWnd]->SetViewport(rect.left, rect.top);
-			}
+			if (g_windows[hWnd]) g_windows[hWnd]->SetViewport(static_cast<float>(rect.left), static_cast<float>(rect.top));
 		}
 		return 0;
 
@@ -190,6 +185,6 @@ void VDW::ResizeWindow(HWND hWnd, LONG width, LONG height)
 	if (g_windows[hWnd])
 	{
 		g_windows[hWnd]->Resize(width, height);
-		g_windows[hWnd]->SetViewport(oldRect.left, oldRect.top);
+		g_windows[hWnd]->SetViewport(static_cast<float>(oldRect.left), static_cast<float>(oldRect.top));
 	}
 }
