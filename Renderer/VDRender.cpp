@@ -549,7 +549,7 @@ VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 	CreateTestObject();
 
 	// Initialize camera // this should be moved to somewhere else later
-	s_testCamera.SetScreenSize(static_cast<float>(m_deviceInfo.displayMode.Width), static_cast<float>(m_deviceInfo.displayMode.Height));
+	s_testCamera.SetScreenSize(static_cast<int>(m_deviceInfo.displayMode.Width), static_cast<int>(m_deviceInfo.displayMode.Height));
 }
 
 VDRender::~VDRender()
