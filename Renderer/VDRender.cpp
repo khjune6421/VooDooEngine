@@ -70,6 +70,20 @@ void VDRender::CreateRenderTarget()
 
 void VDRender::CreateDepthStencil()
 {
+	m_depthStencilView.Reset();
+	m_depthStencilBuffer.Reset();
+
+	if (!m_device.Get())
+	{
+		MessageBoxW(nullptr, L"Device is null", L"Error", MB_OK);
+		return;
+	}
+	if (m_deviceInfo.displayMode.Width == 0 || m_deviceInfo.displayMode.Height == 0)
+	{
+		MessageBoxW(nullptr, L"Invalid display size", L"Error", MB_OK);
+		return;
+	}
+
 	D3D11_TEXTURE2D_DESC depthStencilDesc = {};
 
 	depthStencilDesc.Width = m_deviceInfo.displayMode.Width;
@@ -96,6 +110,7 @@ void VDRender::CreateDepthStencil()
 	if (FAILED(m_device->CreateDepthStencilView(m_depthStencilBuffer.Get(), &depthStencilViewDesc, m_depthStencilView.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create depth stencil view", L"Error", MB_OK);
+		m_depthStencilBuffer.Reset();
 		return;
 	}
 }
@@ -161,7 +176,13 @@ void VDRender::GetHardwareInfo()
 void VDRender::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, UINT8 stencil)
 {
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView.Get(), reinterpret_cast<const float*>(&color));
-	m_deviceContext->ClearDepthStencilView(m_depthStencilView.Get(), flag, depth, stencil);
+
+	if (m_depthStencilView.Get() != nullptr) m_deviceContext->ClearDepthStencilView(m_depthStencilView.Get(), flag, depth, stencil);
+	else
+	{
+		MessageBoxW(nullptr, L"Failed to clear depth stencil view", L"Error", MB_OK);
+		return;
+	}
 }
 
 void VDRender::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout)
@@ -600,7 +621,7 @@ void VDRender::Resize(UINT width, UINT height)
 	}
 
 	CreateRenderTarget();
-	//CreateDepthStencil();
+	CreateDepthStencil();
 
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }

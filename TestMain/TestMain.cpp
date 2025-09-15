@@ -12,11 +12,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	VDW::g_hInstance = hInstance;
 #endif
 
-	HWND a = VDW::CreateWindowAndRenderer(L"VooDoo Class1", L"VooDoo Engine1", 640, 480);
-	VDW::g_windows[a]->ChangeShader(1);
-	HWND b = VDW::CreateWindowAndRenderer(L"VooDoo Class2", L"VooDoo Engine2", 640, 480);
-	VDW::g_windows[b]->ChangeShader(2);
-	VDW::CreateWindowAndRenderer(L"VooDoo Class3", L"VooDoo Engine3", 640, 480);
+	//HWND a = VDW::CreateWindowAndRenderer(L"VooDoo Class1", L"VooDoo Engine1", 640, 480);
+	//VDW::g_windows[a]->ChangeShader(1);
+	//HWND b = VDW::CreateWindowAndRenderer(L"VooDoo Class2", L"VooDoo Engine2", 640, 480);
+	//VDW::g_windows[b]->ChangeShader(2);
+	//VDW::CreateWindowAndRenderer(L"VooDoo Class3", L"VooDoo Engine3", 640, 480);
 	VDW::CreateWindowAndRenderer(L"VooDoo Class4", L"VooDoo Engine4", 640, 480);
 
 	while (VDW::ProcessMessage()) for (auto& render : VDW::g_renders) render->SceneRender();

@@ -37,8 +37,7 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_LBUTTONDOWN:
 		isDragging = true;
-		lastMousePos.x = LOWORD(lParam);
-		lastMousePos.y = HIWORD(lParam);
+		GetCursorPos(&lastMousePos);
 		SetCapture(hWnd);
 		return 0;
 
@@ -48,12 +47,10 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return 0;
 
 	case WM_MOUSEMOVE:
-		// Theres a bug when you move the mouse too fast // not sure why // have somethig to do with D3D renderer
 		if (isDragging)
 		{
 			POINT currentMousePos = {};
-			currentMousePos.x = LOWORD(lParam);
-			currentMousePos.y = HIWORD(lParam);
+			GetCursorPos(&currentMousePos);
 
 			int deltaX = currentMousePos.x - lastMousePos.x;
 			int deltaY = currentMousePos.y - lastMousePos.y;
@@ -61,15 +58,21 @@ LRESULT CALLBACK VDW::Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			RECT rect = {};
 			GetWindowRect(hWnd, &rect);
 
+			int newLeft = rect.left + deltaX;
+			int newTop = rect.top + deltaY;
+
 			SetWindowPos
 			(
 				hWnd, nullptr,
-				rect.left + deltaX,
-				rect.top + deltaY,
+				newLeft,
+				newTop,
 				0, 0,
 				SWP_NOSIZE | SWP_NOZORDER
 			);
-			if (g_windows[hWnd]) g_windows[hWnd]->SetViewport(static_cast<float>(rect.left), static_cast<float>(rect.top));
+
+			if (g_windows[hWnd]) g_windows[hWnd]->SetViewport(static_cast<float>(newLeft), static_cast<float>(newTop));
+
+			lastMousePos = currentMousePos;
 		}
 		return 0;
 
