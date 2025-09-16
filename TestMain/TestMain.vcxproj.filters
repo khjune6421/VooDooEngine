@@ -2,12 +2,31 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\Assets\ObjectPos\Trees.dat" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestMain.cpp" />
-    <ClCompile Include="TestScene.cpp" />
+    <ClCompile Include="TestScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Tree.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TestScene.h" />
+    <Filter Include="Scene">
+      <UniqueIdentifier>{5da4eda0-d8dd-467b-b1ee-bf1d941c9d2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{d1220df3-322f-4305-b0c9-7a6cc43490dd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TestScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Tree.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

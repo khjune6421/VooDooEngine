@@ -5,7 +5,7 @@
 class TestScene : public Scene
 {
 public:
-	TestScene();
+	TestScene(std::string dataFile);
 	~TestScene() override = default;
 	void Update(float deltaTime) override;
 };
