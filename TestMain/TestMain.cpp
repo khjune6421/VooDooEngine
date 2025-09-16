@@ -20,10 +20,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	HWND b = VDW::CreateWindowAndRenderer(L"VooDoo Class2", L"VooDoo Engine2", 640, 480);
 	VDW::g_windows[b]->ChangeShader(2);
 	VDW::CreateWindowAndRenderer(L"VooDoo Class3", L"VooDoo Engine3", 640, 480);
-	VDW::CreateWindowAndRenderer(L"VooDoo Class4", L"VooDoo Engine4", 640, 480);
+	VDW::CreateWindowAndRenderer(L"VooDoo Class4", L"VooDoo Engine4", 1280, 720);
 
 	// Create and set the test scene
-	VDGM::g_sceneMap[L"TestScene"] = std::make_unique<TestScene>();
+	VDGM::g_sceneMap[L"TestScene"] = std::make_unique<TestScene>("../Assets/ObjectPos/Trees.dat");
 	VDGM::ChangeScene(L"TestScene");
 
 	while (VDW::ProcessMessage())
