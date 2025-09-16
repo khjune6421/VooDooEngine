@@ -10,10 +10,10 @@
       <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Release\AllPixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Release\PixelShader.cso</FullPath>
+      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Release\NullPixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Release\NullPixelShader.cso</FullPath>
+      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Release\PixelShader.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Release\VertexShader.cso</FullPath>
