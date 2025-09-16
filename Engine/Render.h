@@ -64,6 +64,12 @@ class Object;
 // This is declared in GameManager.cpp
 extern std::vector<Object*> g_objects;
 
+namespace VDGM
+{
+	extern float g_deltaTimeF;
+	extern double g_deltaTimeD;
+}
+
 class Render
 {
 	// Structs and Enums
@@ -153,19 +159,6 @@ class Render
 	// Static vertex buffer for rendering objects
 	static comPtr<ID3D11Buffer> s_vertexBuffer;
 	static Camera s_testCamera;
-
-	// I might need to move this function later
-	template <typename T = float>
-	T GetdeltaTime()
-	{
-		static ULONGLONG previousTime = GetTickCount64();
-		ULONGLONG currentTime = GetTickCount64();
-
-		double deltaTime = static_cast<double>(currentTime - previousTime) / 1000.0;
-		previousTime = currentTime;
-
-		return static_cast<T>(deltaTime);
-	}
 
 	// Functions
 

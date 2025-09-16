@@ -243,7 +243,7 @@ void Render::DisplayDeviceInfo()
 
 	frameCount++;
 
-	elapsedTime += GetdeltaTime<double>();
+	elapsedTime += VDGM::g_deltaTimeD;
 
 	if (elapsedTime >= 1.0)
 	{
@@ -464,7 +464,7 @@ void Render::SetInputLayout()
 
 float Render::EngineUpdate()
 {
-	float deltaTime = GetdeltaTime<float>();
+	float deltaTime = VDGM::g_deltaTimeF;
 
 	UpdateRenderMode();
 	UpdateShaders();
@@ -787,7 +787,7 @@ void Render::SceneRender()
 
 	DrawObjects();
 
-	DrawTestObject();
+	//DrawTestObject();
 
 #ifdef _DEBUG
 	DisplayDeviceInfo();
