@@ -8,6 +8,9 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
+unordered_map<Shapes, pair<comPtr<ID3D11Buffer>, UINT>> g_shapeVertexBuffers;
+
+// Test object and camera
 comPtr<ID3D11Buffer> VDRender::s_vertexBuffer = nullptr;
 Camera VDRender::s_testCamera = Camera();
 
@@ -448,6 +451,16 @@ void VDRender::CreateRasterState()
 	m_deviceContext->RSSetState(g_rasterState[2].Get());
 }
 
+void VDRender::SetInputLayout()
+{
+	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	CreateInputLayout(layoutDesc, _countof(layoutDesc), m_VSCode, &m_inputLayout);
+}
+
 float VDRender::EngineUpdate()
 {
 	float deltaTime = GetdeltaTime<float>();
@@ -462,13 +475,6 @@ float VDRender::EngineUpdate()
 
 void VDRender::CreateTestObject()
 {
-	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-	CreateInputLayout(layoutDesc, _countof(layoutDesc), m_VSCode, &m_inputLayout);
-
 	if (s_vertexBuffer) return;
 	Vertex vertices[] =
 	{
@@ -567,6 +573,7 @@ VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 
 	// Initialize render
 	CreateRasterState();
+	SetInputLayout();
 	CreateTestObject();
 
 	// Initialize camera // this should be moved to somewhere else later
@@ -602,6 +609,85 @@ VDRender::~VDRender()
 	// Clear render
 	for (auto& state : g_rasterState) state.Reset();
 	m_inputLayout.Reset();
+}
+
+void VDRender::CreateShapeVertexBuffer()
+{
+	if (g_shapeVertexBuffers.find(Shapes::Triangle) == g_shapeVertexBuffers.end())
+	{
+		Vertex triangleVertices[] =
+		{
+			{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) }
+		};
+		CreateVertexBuffer(sizeof(triangleVertices), &g_shapeVertexBuffers[Shapes::Triangle].first, triangleVertices, sizeof(Vertex));
+		g_shapeVertexBuffers[Shapes::Triangle].second = 3;
+	}
+	if (g_shapeVertexBuffers.find(Shapes::Square) == g_shapeVertexBuffers.end())
+	{
+		Vertex squareVertices[] =
+		{
+			{ XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) }
+		};
+		CreateVertexBuffer(sizeof(squareVertices), &g_shapeVertexBuffers[Shapes::Square].first, squareVertices, sizeof(Vertex));
+		g_shapeVertexBuffers[Shapes::Square].second = 4;
+	}
+	if (g_shapeVertexBuffers.find(Shapes::Tetrahedron) == g_shapeVertexBuffers.end())
+	{
+		Vertex tetrahedronVertices[] =
+		{
+			{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) }
+		};
+		CreateVertexBuffer(sizeof(tetrahedronVertices), &g_shapeVertexBuffers[Shapes::Tetrahedron].first, tetrahedronVertices, sizeof(Vertex));
+		g_shapeVertexBuffers[Shapes::Tetrahedron].second = 12;
+	}
+	if (g_shapeVertexBuffers.find(Shapes::Cube) == g_shapeVertexBuffers.end())
+	{
+		Vertex cubeVertices[] =
+		{
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) }
+		};
+		CreateVertexBuffer(sizeof(cubeVertices), &g_shapeVertexBuffers[Shapes::Cube].first, cubeVertices, sizeof(Vertex));
+		g_shapeVertexBuffers[Shapes::Cube].second = 36;
+	}
 }
 
 void VDRender::Resize(UINT width, UINT height)

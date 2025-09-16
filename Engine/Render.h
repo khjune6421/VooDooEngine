@@ -31,6 +31,39 @@
 // I usually don't use 'using' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
+enum class Shapes
+{
+	Triangle = 0,
+	Square = 1,
+
+	Tetrahedron = 2,
+	Cube = 3
+};
+
+extern std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> g_shapeVertexBuffers;
+
+struct Transform
+{
+	DirectX::SimpleMath::Vector3 position = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f);
+	DirectX::SimpleMath::Vector3 rotation = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f); // in radians
+	DirectX::SimpleMath::Vector3 scale = DirectX::SimpleMath::Vector3(1.0f, 1.0f, 1.0f);
+
+	DirectX::SimpleMath::Matrix GetWorldMatrix() const
+	{
+		DirectX::SimpleMath::Matrix world =
+			DirectX::SimpleMath::Matrix::CreateScale(scale) *
+			DirectX::SimpleMath::Matrix::CreateRotationX(rotation.x) *
+			DirectX::SimpleMath::Matrix::CreateRotationY(rotation.y) *
+			DirectX::SimpleMath::Matrix::CreateRotationZ(rotation.z) *
+			DirectX::SimpleMath::Matrix::CreateTranslation(position);
+		return world;
+	}
+};
+
+class Object;
+// This is declared in GameManager.cpp
+extern std::vector<Object*> g_objects;
+
 class VDRender
 {
 	// Structs and Enums
@@ -162,8 +195,10 @@ class VDRender
 
 	// Render
 	void CreateRasterState();
+	void SetInputLayout();
 	float EngineUpdate();
 
+	// Test Object
 	void CreateTestObject();
 	void UpdateTestObject(float deltaTime);
 	void DrawTestObject();
@@ -173,6 +208,8 @@ class VDRender
 public:
 	VDRender(HWND hWnd, int width, int height);
 	~VDRender();
+
+	void CreateShapeVertexBuffer();
 
 	void Resize(UINT width, UINT height);
 	void SetViewport(float topLeftX = 0.0f, float topLeftY = 0.0f);

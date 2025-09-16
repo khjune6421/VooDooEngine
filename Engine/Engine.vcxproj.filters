@@ -10,6 +10,13 @@
     <ClCompile Include="WindowManager.cpp">
       <Filter>Window</Filter>
     </ClCompile>
+    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">
@@ -21,6 +28,12 @@
     <Filter Include="Window">
       <UniqueIdentifier>{375838a5-4901-4405-81d9-f6307aaf60e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{dbc7f6b9-a03c-40be-83ef-d4f57e1b095e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{bdc26316-3c48-4773-b232-e7a70ee7a6f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -31,6 +44,13 @@
     </ClInclude>
     <ClInclude Include="WindowManager.h">
       <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager.h" />
+    <ClInclude Include="Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

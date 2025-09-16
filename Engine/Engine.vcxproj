@@ -144,12 +144,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Render.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="GameManager.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>
