@@ -4,17 +4,16 @@ using namespace std;
 
 TestScene::TestScene()
 {
-	m_objects.emplace_back(make_unique<Object>(Shapes::Triangle));
-	m_objects.emplace_back(make_unique<Object>(Shapes::Cube));
+	//m_objects.emplace_back(make_unique<Object>(Shapes::Triangle));
+	//m_objects.emplace_back(make_unique<Object>(Shapes::Square));
 	m_objects.emplace_back(make_unique<Object>(Shapes::Tetrahedron));
-	m_objects.emplace_back(make_unique<Object>(Shapes::Square));
+	//m_objects.emplace_back(make_unique<Object>(Shapes::Cube));
 }
 
 void TestScene::Update(float deltaTime)
 {
-	for (size_t i = 0; i < m_objects.size(); ++i)
+	for (const auto & object : m_objects)
 	{
-		m_objects[i]->GetTransform().rotation.y += deltaTime;
-		//m_objects[i]->GetTransform().position.x = static_cast<float>(i * 3 - 4);
+		object->GetTransform().rotation.y += deltaTime;
 	}
 }
