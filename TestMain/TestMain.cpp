@@ -1,4 +1,4 @@
-#include "VDWindowManager.h"
+#include "WindowManager.h"
 
 #ifdef _DEBUG
 int main()

@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <ProjectOutputs>
-    <ProjectOutput>
-      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe</FullPath>
-    </ProjectOutput>
-  </ProjectOutputs>
+  <ProjectOutputs />
   <ContentFiles>
     <ContentFile>
       <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Release\AllPixelShader.cso</FullPath>
