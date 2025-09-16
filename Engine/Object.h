@@ -2,14 +2,19 @@
 
 #include "Render.h"
 
-extern std::vector<Object*> g_objects;
-
 class Object
 {
+	friend class Scene;
+	// is this a good idea?
+	friend class Render;
+
+	Shapes m_shape = Shapes::Triangle;
 	Transform m_transform;
 
+	bool m_isActive = true;
+
 public:
-	Object();
+	Object(Shapes shape = Shapes::Triangle);
 	~Object();
 
 	Transform& GetTransform() { return m_transform; }

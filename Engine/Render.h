@@ -64,7 +64,7 @@ class Object;
 // This is declared in GameManager.cpp
 extern std::vector<Object*> g_objects;
 
-class VDRender
+class Render
 {
 	// Structs and Enums
 
@@ -198,6 +198,8 @@ class VDRender
 	void SetInputLayout();
 	float EngineUpdate();
 
+	void DrawObjects();
+
 	// Test Object
 	void CreateTestObject();
 	void UpdateTestObject(float deltaTime);
@@ -206,8 +208,8 @@ class VDRender
 	void UpdateRenderMode();
 
 public:
-	VDRender(HWND hWnd, int width, int height);
-	~VDRender();
+	Render(HWND hWnd, int width, int height);
+	~Render();
 
 	void CreateShapeVertexBuffer();
 

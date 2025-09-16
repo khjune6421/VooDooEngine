@@ -1,4 +1,5 @@
 #include "Render.h"
+#include "Object.h"
 
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
@@ -11,10 +12,10 @@ using namespace DirectX;
 unordered_map<Shapes, pair<comPtr<ID3D11Buffer>, UINT>> g_shapeVertexBuffers;
 
 // Test object and camera
-comPtr<ID3D11Buffer> VDRender::s_vertexBuffer = nullptr;
-Camera VDRender::s_testCamera = Camera();
+comPtr<ID3D11Buffer> Render::s_vertexBuffer = nullptr;
+Camera Render::s_testCamera = Camera();
 
-void VDRender::CreateDeviceSwapChain()
+void Render::CreateDeviceSwapChain()
 {
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 
@@ -54,7 +55,7 @@ void VDRender::CreateDeviceSwapChain()
 	}
 }
 
-void VDRender::CreateRenderTarget()
+void Render::CreateRenderTarget()
 {
 	comPtr<ID3D11Texture2D> backBuffer;
 
@@ -71,7 +72,7 @@ void VDRender::CreateRenderTarget()
 	}
 }
 
-void VDRender::CreateDepthStencil()
+void Render::CreateDepthStencil()
 {
 	m_depthStencilView.Reset();
 	m_depthStencilBuffer.Reset();
@@ -118,7 +119,7 @@ void VDRender::CreateDepthStencil()
 	}
 }
 
-void VDRender::LoadFonts()
+void Render::LoadFonts()
 {
 	wstring fontPath = L"../Assets/Fonts/";
 	if (!filesystem::exists(fontPath))
@@ -137,7 +138,7 @@ void VDRender::LoadFonts()
 	}
 }
 
-void VDRender::GetHardwareInfo()
+void Render::GetHardwareInfo()
 {
 	comPtr<IDXGIAdapter1> padapter;
 	comPtr<IDXGIFactory1> pfactory;
@@ -176,7 +177,7 @@ void VDRender::GetHardwareInfo()
 	}
 }
 
-void VDRender::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, UINT8 stencil)
+void Render::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, UINT8 stencil)
 {
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView.Get(), reinterpret_cast<const float*>(&color));
 
@@ -188,7 +189,7 @@ void VDRender::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, 
 	}
 }
 
-void VDRender::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout)
+void Render::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout)
 {
 	if (FAILED(m_device->CreateInputLayout(layoutDesc, numElements, shaderCode->GetBufferPointer(), shaderCode->GetBufferSize(), inputLayout->GetAddressOf())))
 	{
@@ -197,7 +198,7 @@ void VDRender::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UIN
 	}
 }
 
-void VDRender::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride)
+void Render::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
@@ -216,7 +217,7 @@ void VDRender::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer,
 	}
 }
 
-void VDRender::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
+void Render::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
@@ -231,7 +232,7 @@ void VDRender::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
 	}
 }
 
-void VDRender::DisplayDeviceInfo()
+void Render::DisplayDeviceInfo()
 {
 	constexpr float offset = 20.0f;
 	UINT posIndex = 1;
@@ -334,7 +335,7 @@ constexpr const wchar_t* AllPS = L"AllPixelShader";
 constexpr const char* DEFAULT_ENTRY_POINT = "main";
 constexpr const char* DEFAULT_SHADERMODEL = "5_0";
 
-void VDRender::CreateShaders()
+void Render::CreateShaders()
 {
 	LoadVertexShader(DEFAULT_VS, DEFAULT_ENTRY_POINT, ("vs_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_vertexShader, &m_VSCode);
 	LoadPixelShader(DEFAULT_PS, DEFAULT_ENTRY_POINT, ("ps_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_pixelShader);
@@ -347,7 +348,7 @@ void VDRender::CreateShaders()
 
 constexpr const wchar_t* SHADERS[3] = { DEFAULT_PS, NullPS, AllPS };
 
-void VDRender::ChangeShader(UINT id)
+void Render::ChangeShader(UINT id)
 {
 	LoadPixelShader(SHADERS[id], DEFAULT_ENTRY_POINT, ("ps_" + string(DEFAULT_SHADERMODEL)).c_str(), &m_pixelShader);
 
@@ -356,12 +357,12 @@ void VDRender::ChangeShader(UINT id)
 	CreateConstBuffer(sizeof(TestConstBuffer), &m_constantBuffer);
 }
 
-void VDRender::ChangeState()
+void Render::ChangeState()
 {
 	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % 4);
 }
 
-void VDRender::UpdateShaders()
+void Render::UpdateShaders()
 {
 	m_deviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 	m_deviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
@@ -370,7 +371,7 @@ void VDRender::UpdateShaders()
 	m_deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
 }
 
-void VDRender::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode)
+void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode)
 {
 	comPtr<ID3DBlob> errorBlob;
 
@@ -389,7 +390,7 @@ void VDRender::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 	if (FAILED(hr)) MessageBoxW(nullptr, L"Failed to create vertex shader", L"Error", MB_OK);
 }
 
-void VDRender::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader)
+void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader)
 {
 	comPtr<ID3DBlob> psCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -409,7 +410,7 @@ void VDRender::LoadPixelShader(const wchar_t* file, const char* entryPoint, cons
 	if (FAILED(hr)) MessageBoxW(nullptr, L"Failed to create pixel shader", L"Error", MB_OK);
 }
 
-void VDRender::CreateRasterState()
+void Render::CreateRasterState()
 {
 	D3D11_RASTERIZER_DESC rasterDesc = {};
 	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
@@ -451,7 +452,7 @@ void VDRender::CreateRasterState()
 	m_deviceContext->RSSetState(g_rasterState[2].Get());
 }
 
-void VDRender::SetInputLayout()
+void Render::SetInputLayout()
 {
 	D3D11_INPUT_ELEMENT_DESC layoutDesc[] =
 	{
@@ -461,7 +462,7 @@ void VDRender::SetInputLayout()
 	CreateInputLayout(layoutDesc, _countof(layoutDesc), m_VSCode, &m_inputLayout);
 }
 
-float VDRender::EngineUpdate()
+float Render::EngineUpdate()
 {
 	float deltaTime = GetdeltaTime<float>();
 
@@ -473,7 +474,44 @@ float VDRender::EngineUpdate()
 	return deltaTime;
 }
 
-void VDRender::CreateTestObject()
+void Render::DrawObjects()
+{
+	for (const Object* object : g_objects)
+	{
+		if (!object || !object->m_isActive) continue;
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+
+		ID3D11Buffer* vertexBuffer = nullptr;
+		if (g_shapeVertexBuffers.find(object->m_shape) != g_shapeVertexBuffers.end()) vertexBuffer = g_shapeVertexBuffers[object->m_shape].first.Get();
+		else
+		{
+			MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK);
+			continue;
+		}
+
+		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetInputLayout(m_inputLayout.Get());
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		TestConstBuffer constBufferData = {};
+		XMMATRIX worldMatrix = object->m_transform.GetWorldMatrix();
+		XMMATRIX viewMatrix = s_testCamera.GetViewMatrix();
+		XMMATRIX projMatrix = s_testCamera.GetProjectionMatrix();
+
+		constBufferData.world = XMMatrixTranspose(worldMatrix);
+		constBufferData.view = XMMatrixTranspose(viewMatrix);
+		constBufferData.projection = XMMatrixTranspose(projMatrix);
+
+		constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
+
+		m_deviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
+
+		m_deviceContext->Draw(g_shapeVertexBuffers[object->m_shape].second, 0);
+	}
+}
+
+void Render::CreateTestObject()
 {
 	if (s_vertexBuffer) return;
 	Vertex vertices[] =
@@ -509,7 +547,7 @@ void VDRender::CreateTestObject()
 	CreateVertexBuffer(sizeof(vertices), &s_vertexBuffer, vertices, sizeof(Vertex));
 }
 
-void VDRender::UpdateTestObject(float deltaTime)
+void Render::UpdateTestObject(float deltaTime)
 {
 	static float ATime = 0.0f; // Accumulated time
 	ATime += deltaTime * 1.0f;
@@ -533,7 +571,7 @@ void VDRender::UpdateTestObject(float deltaTime)
 	m_deviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
 }
 
-void VDRender::DrawTestObject()
+void Render::DrawTestObject()
 {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
@@ -546,12 +584,12 @@ void VDRender::DrawTestObject()
 	m_deviceContext->Draw(24, 0);
 }
 
-void VDRender::UpdateRenderMode()
+void Render::UpdateRenderMode()
 {
 	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
 }
 
-VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
+Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
@@ -580,7 +618,7 @@ VDRender::VDRender(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 	s_testCamera.SetScreenSize(static_cast<int>(m_deviceInfo.displayMode.Width), static_cast<int>(m_deviceInfo.displayMode.Height));
 }
 
-VDRender::~VDRender()
+Render::~Render()
 {
 	// Clear device
 	m_SpriteFontMap.clear();
@@ -611,7 +649,7 @@ VDRender::~VDRender()
 	m_inputLayout.Reset();
 }
 
-void VDRender::CreateShapeVertexBuffer()
+void Render::CreateShapeVertexBuffer()
 {
 	if (g_shapeVertexBuffers.find(Shapes::Triangle) == g_shapeVertexBuffers.end())
 	{
@@ -690,7 +728,7 @@ void VDRender::CreateShapeVertexBuffer()
 	}
 }
 
-void VDRender::Resize(UINT width, UINT height)
+void Render::Resize(UINT width, UINT height)
 {
 	if (width == 0 || height == 0) return;
 
@@ -712,7 +750,7 @@ void VDRender::Resize(UINT width, UINT height)
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }
 
-void VDRender::SetViewport(float topLeftX, float topLeftY)
+void Render::SetViewport(float topLeftX, float topLeftY)
 {
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX = -topLeftX;
@@ -724,7 +762,7 @@ void VDRender::SetViewport(float topLeftX, float topLeftY)
 	m_deviceContext->RSSetViewports(1, &viewport);
 }
 
-void VDRender::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)
+void Render::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)
 {
 	wchar_t buffer[256] = {};
 	wcsncpy_s(buffer, text, _TRUNCATE);
@@ -741,11 +779,13 @@ void VDRender::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 
 constexpr XMFLOAT4 CLEAR_COLOR = { 0.5f, 0.5f, 0.5f, 1.0f };
 
-void VDRender::SceneRender()
+void Render::SceneRender()
 {
 	EngineUpdate();
 
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, CLEAR_COLOR, 1.0f, 0);
+
+	DrawObjects();
 
 	DrawTestObject();
 

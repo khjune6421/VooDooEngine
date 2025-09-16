@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Object::Object()
+Object::Object(Shapes shape) : m_shape(shape)
 {
 	g_objects.emplace_back(this);
 }
