@@ -11,10 +11,5 @@ struct PSInput
 
 float4 main(PSInput input) : SV_TARGET
 {
-    input.col.a *= input.sinTime;
-    input.col.r *= input.cosTime;
-    input.col.g *= input.negcosTime;
-    input.col.b *= input.negsinTime;
-    
     return input.col;
 }

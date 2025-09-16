@@ -685,6 +685,21 @@ void Render::CreateShapeVertexBuffer()
 		CreateVertexBuffer(sizeof(squareVertices), &g_shapeVertexBuffers[Shapes::Square].first, squareVertices, sizeof(Vertex));
 		g_shapeVertexBuffers[Shapes::Square].second = 6;
 	}
+	if (g_shapeVertexBuffers.find(Shapes::Plane) == g_shapeVertexBuffers.end())
+	{
+		Vertex planeVertices[] =
+		{
+			{ XMFLOAT3(-1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 0.0f, -1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+
+			{ XMFLOAT3(-1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 0.0f, -1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 0.0f, -1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) }
+		};
+		CreateVertexBuffer(sizeof(planeVertices), &g_shapeVertexBuffers[Shapes::Plane].first, planeVertices, sizeof(Vertex));
+		g_shapeVertexBuffers[Shapes::Plane].second = 6;
+	}
 	if (g_shapeVertexBuffers.find(Shapes::Tetrahedron) == g_shapeVertexBuffers.end())
 	{
 		Vertex tetrahedronVertices[] =

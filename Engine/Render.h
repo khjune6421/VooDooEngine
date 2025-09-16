@@ -33,11 +33,12 @@
 
 enum class Shapes
 {
-	Triangle = 0,
-	Square = 1,
+	Triangle,
+	Square,
+	Plane,
 
-	Tetrahedron = 2,
-	Cube = 3
+	Tetrahedron,
+	Cube
 };
 
 extern std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> g_shapeVertexBuffers;

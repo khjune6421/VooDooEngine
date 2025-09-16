@@ -4,8 +4,12 @@
 
 using namespace std;
 
-TestScene::TestScene(std::string dataFile)
+TestScene::TestScene(string dataFile)
 {
+	unique_ptr<Object> plane = make_unique<Object>(Shapes::Plane);
+	plane->GetTransform().scale = { 10.0f, 1.0f, 10.0f };
+	m_objects.emplace_back(move(plane));
+
 	ObjectPositionParser parser;
 	if (parser.LoadPositions(dataFile))
 	{
@@ -13,8 +17,8 @@ TestScene::TestScene(std::string dataFile)
 		{
 			unique_ptr<Tree> tree = make_unique<Tree>();
 			tree->GetTransform().position = { pos.x, pos.y, pos.z };
-			tree->GetTransform().scale = { 0.1f, 0.1f, 0.1f };
-			m_objects.emplace_back(std::move(tree));
+			tree->GetTransform().scale = { 1.0f, 1.0f, 1.0f };
+			m_objects.emplace_back(move(tree));
 		}
 	}
 	else
