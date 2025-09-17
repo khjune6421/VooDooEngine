@@ -40,25 +40,8 @@ enum class Shapes
 	Tetrahedron,
 	Cube,
 
-	Tree
-};
-
-struct Transform
-{
-	DirectX::SimpleMath::Vector3 position = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f);
-	DirectX::SimpleMath::Vector3 rotation = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f); // in radians
-	DirectX::SimpleMath::Vector3 scale = DirectX::SimpleMath::Vector3(1.0f, 1.0f, 1.0f);
-
-	DirectX::SimpleMath::Matrix GetWorldMatrix() const
-	{
-		DirectX::SimpleMath::Matrix world =
-			DirectX::SimpleMath::Matrix::CreateScale(scale) *
-			DirectX::SimpleMath::Matrix::CreateRotationX(rotation.x) *
-			DirectX::SimpleMath::Matrix::CreateRotationY(rotation.y) *
-			DirectX::SimpleMath::Matrix::CreateRotationZ(rotation.z) *
-			DirectX::SimpleMath::Matrix::CreateTranslation(position);
-		return world;
-	}
+	Tree,
+	WindmillWing
 };
 
 class Object;

@@ -485,7 +485,7 @@ void Render::DrawObjects()
 	static float ATime = 0.0f; // Accumulated time
 	ATime += VDGM::g_deltaTimeF;
 
-	for (const Object* object : g_objects)
+	for (Object* object : g_objects)
 	{
 		if (!object || !object->m_isActive) continue;
 		UINT stride = sizeof(Vertex);
@@ -504,7 +504,7 @@ void Render::DrawObjects()
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		TestConstBuffer constBufferData = {};
-		XMMATRIX worldMatrix = object->m_transform.GetWorldMatrix();
+		XMMATRIX worldMatrix = object->GetWorldMatrix();
 		XMMATRIX viewMatrix = s_testCamera.GetViewMatrix();
 		XMMATRIX projMatrix = s_testCamera.GetProjectionMatrix();
 
@@ -809,6 +809,31 @@ void Render::CreateShapeVertexBuffer()
 
 		CreateVertexBuffer(sizeof(treeVertices), &s_shapeVertexBuffers[Shapes::Tree].first, treeVertices, sizeof(Vertex));
 		s_shapeVertexBuffers[Shapes::Tree].second = 6;
+	}
+
+	if (s_shapeVertexBuffers.find(Shapes::WindmillWing) == s_shapeVertexBuffers.end())
+	{
+		Vertex wingVertices[] =
+		{
+			XMFLOAT3(-1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+			XMFLOAT3(-1.0f, -0.5f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
+			XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
+
+			XMFLOAT3(1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
+			XMFLOAT3(1.0f, -0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+			XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
+
+			XMFLOAT3(-0.5f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
+			XMFLOAT3(0.5f, 1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+			XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
+
+			XMFLOAT3(-0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+			XMFLOAT3(0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
+			XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f)
+		};
+
+		CreateVertexBuffer(sizeof(wingVertices), &s_shapeVertexBuffers[Shapes::WindmillWing].first, wingVertices, sizeof(Vertex));
+		s_shapeVertexBuffers[Shapes::WindmillWing].second = 12;
 	}
 }
 
