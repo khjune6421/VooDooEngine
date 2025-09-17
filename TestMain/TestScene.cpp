@@ -8,13 +8,13 @@ using namespace DirectX;
 TestScene::TestScene(string dataFile)
 {
 	m_player = make_unique<Player>(Shapes::Cube);
-	m_player->SetPosition(XMFLOAT3{ 0.0f, 1.0f, 0.0f });
+	m_player->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 	m_windmill = make_unique<WindMill>(Shapes::Tetrahedron);
-	m_windmill->SetPosition(XMFLOAT3{ 10.0f, 0.0f, 10.0f });
+	m_windmill->SetPosition(XMFLOAT3(10.0f, 0.0f, 10.0f));
 
 	unique_ptr<Object> plane = make_unique<Object>(Shapes::Plane);
-	plane->SetScale({ 50.0f, 1.0f, 50.0f });
+	plane->SetScale(XMFLOAT3(50.0f, 1.0f, 50.0f));
 	m_objects.emplace_back(move(plane));
 
 	ObjectPositionParser parser;
@@ -23,7 +23,7 @@ TestScene::TestScene(string dataFile)
 		for (const auto& pos : parser.GetPositions())
 		{
 			unique_ptr<Object> tree = make_unique<Object>(Shapes::Tree);
-			tree->SetPosition(XMFLOAT3({ pos.x, pos.y, pos.z }));
+			tree->SetPosition(XMFLOAT3(pos.x, pos.y, pos.z));
 			m_objects.emplace_back(move(tree));
 		}
 	}
@@ -38,6 +38,28 @@ void TestScene::Update(float deltaTime)
 	m_player->Update(deltaTime);
 	m_windmill->Update(deltaTime);
 	for (const auto& object : m_objects) object->Update(deltaTime);
+
+	if (GetAsyncKeyState(VK_F5) & 0x0001)
+	{
+		if (m_player->m_windmillWing)
+		{
+			m_windmill->m_windmillWing = move(m_player->m_windmillWing);
+			m_windmill->m_windmillWing->SetParent(m_windmill.get());
+			m_windmill->m_windmillWing->m_rotationAngle = false;
+
+			m_windmill->m_childrens.emplace_back(m_windmill->m_windmillWing.get());
+			m_player->m_childrens.clear();
+		}
+		else if (m_windmill->m_windmillWing)
+		{
+			m_player->m_windmillWing = move(m_windmill->m_windmillWing);
+			m_player->m_windmillWing->SetParent(m_player.get());
+			m_player->m_windmillWing->m_rotationAngle = true;
+
+			m_player->m_childrens.emplace_back(m_player->m_windmillWing.get());
+			m_windmill->m_childrens.clear();
+		}
+	}
 
 	g_camera.LookAt(m_player->GetPosition());
 }

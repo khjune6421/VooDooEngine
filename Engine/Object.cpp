@@ -17,7 +17,9 @@ Object::~Object()
 void Object::SetPosition(const XMFLOAT3& pos)
 {
 	m_position = XMMatrixTranslation(pos.x, pos.y, pos.z);
+
 	m_isDirty = true;
+	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 void Object::MovePosition(const XMFLOAT3& delta)
@@ -27,7 +29,9 @@ void Object::MovePosition(const XMFLOAT3& delta)
 	XMVECTOR newPos = XMVectorAdd(currentPos, deltaVec);
 
 	m_position = XMMatrixTranslationFromVector(newPos);
+
 	m_isDirty = true;
+	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 XMFLOAT3 Object::GetPosition() const
@@ -42,7 +46,9 @@ void Object::SetRotation(const XMFLOAT3& rot)
 	XMMATRIX rotZ = XMMatrixRotationZ(rot.z);
 
 	m_rotation = rotZ * rotY * rotX;
+
 	m_isDirty = true;
+	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 void Object::Rotate(const XMFLOAT3& delta)
@@ -52,7 +58,9 @@ void Object::Rotate(const XMFLOAT3& delta)
 	XMMATRIX deltaZ = XMMatrixRotationZ(delta.z);
 
 	m_rotation = m_rotation * (deltaZ * deltaY * deltaX);
+
 	m_isDirty = true;
+	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 XMFLOAT3 Object::GetRotation() const // in radians // not actually sure how this works
@@ -81,7 +89,9 @@ XMFLOAT3 Object::GetRotation() const // in radians // not actually sure how this
 void Object::SetScale(const XMFLOAT3& scl)
 {
 	m_scale = XMMatrixScaling(scl.x, scl.y, scl.z);
+
 	m_isDirty = true;
+	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 void Object::Scale(const XMFLOAT3& factor)
@@ -94,7 +104,9 @@ void Object::Scale(const XMFLOAT3& factor)
 	currentScale._33 *= factor.z;
 
 	m_scale = XMLoadFloat4x4(&currentScale);
+
 	m_isDirty = true;
+	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 XMFLOAT3 Object::GetScale() const
@@ -110,7 +122,8 @@ XMMATRIX Object::GetWorldMatrix()
 	if (m_isDirty)
 	{
 		m_worldMatrix = m_scale * m_rotation * m_position;
-		if (m_parent) m_worldMatrix = m_worldMatrix * m_parent->GetWorldMatrix();
+		if (m_parent) m_worldMatrix = m_worldMatrix * m_parent->GetWorldMatrix(); // Need to change it to use stack instead of recursion later
+
 		m_isDirty = false;
 	}
 

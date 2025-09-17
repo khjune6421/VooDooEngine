@@ -15,6 +15,9 @@
     <ClCompile Include="WindMill.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="WindMillWing.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">
@@ -32,6 +35,9 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="WindMill.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="WindMillWing.h">
       <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>

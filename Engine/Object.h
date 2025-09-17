@@ -13,19 +13,19 @@ class Object
 	DirectX::XMMATRIX m_scale = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_worldMatrix = DirectX::XMMatrixIdentity();
 
-	bool m_isDirty = true;
-
 	Shapes m_shape = Shapes::Triangle;
 
 protected:
 	bool m_isActive = true;
 
 	Object* m_parent = nullptr;
-	std::vector<std::unique_ptr<Object>> m_childrens;
+	std::vector<Object*> m_childrens;
 
 public:
 	Object(Shapes shape = Shapes::Triangle);
 	virtual ~Object();
+
+	bool m_isDirty = true;
 
 	void SetPosition(const DirectX::XMFLOAT3& pos);
 	void MovePosition(const DirectX::XMFLOAT3& delta);
@@ -41,7 +41,7 @@ public:
 
 	DirectX::XMMATRIX GetWorldMatrix();
 
-	void SetParent(Object* parent) { m_parent = parent; }
+	void SetParent(Object* parent) { m_parent = parent; } // Need to make this autmatic
 
 	virtual void Update(float deltaTime) { (void)deltaTime; } // (void) to avoid unused parameter warning // feels odd but makes sense
 };

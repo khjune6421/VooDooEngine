@@ -1,10 +1,12 @@
 #pragma once
 
-#include "Object.h"
+#include "WindMillWing.h"
 
 class WindMill : public Object
 {
-	std::unique_ptr<Object> m_windmillWing;
+	friend class TestScene;
+
+	std::unique_ptr<WindMillWing> m_windmillWing;
 
 	float m_moveSpeed = 10.0f;
 

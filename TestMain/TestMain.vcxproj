@@ -135,6 +135,7 @@
     <ClCompile Include="TestMain.cpp" />
     <ClCompile Include="TestScene.cpp" />
     <ClCompile Include="WindMill.cpp" />
+    <ClCompile Include="WindMillWing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Assets\ObjectPos\Trees.dat" />
@@ -149,6 +150,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="TestScene.h" />
     <ClInclude Include="WindMill.h" />
+    <ClInclude Include="WindMillWing.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
