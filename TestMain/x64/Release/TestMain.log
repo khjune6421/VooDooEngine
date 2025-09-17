@@ -1,6 +1,1 @@
-﻿  Generating code
-  359 of 2068 functions (17.4%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    151 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe
+﻿  TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe
