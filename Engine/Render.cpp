@@ -12,8 +12,7 @@ using namespace DirectX;
 unordered_map<Shapes, pair<comPtr<ID3D11Buffer>, UINT>> Render::s_shapeVertexBuffers;
 
 // Test object and camera
-comPtr<ID3D11Buffer> Render::s_vertexBuffer = nullptr;
-Camera Render::s_testCamera = Camera();
+Camera g_camera = Camera();
 
 void Render::CreateDeviceSwapChain()
 {
@@ -505,8 +504,8 @@ void Render::DrawObjects()
 
 		TestConstBuffer constBufferData = {};
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
-		XMMATRIX viewMatrix = s_testCamera.GetViewMatrix();
-		XMMATRIX projMatrix = s_testCamera.GetProjectionMatrix();
+		XMMATRIX viewMatrix = g_camera.GetViewMatrix();
+		XMMATRIX projMatrix = g_camera.GetProjectionMatrix();
 
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
 		constBufferData.view = XMMatrixTranspose(viewMatrix);
@@ -523,79 +522,6 @@ void Render::DrawObjects()
 
 		m_deviceContext->Draw(s_shapeVertexBuffers[object->m_shape].second, 0);
 	}
-}
-
-void Render::CreateTestObject()
-{
-	if (s_vertexBuffer) return;
-	Vertex vertices[] =
-	{
-		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-
-		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-
-		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-
-		{ XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-	};
-	CreateVertexBuffer(sizeof(vertices), &s_vertexBuffer, vertices, sizeof(Vertex));
-}
-
-void Render::UpdateTestObject(float deltaTime)
-{
-	static float ATime = 0.0f; // Accumulated time
-	ATime += deltaTime * 1.0f;
-
-	XMMATRIX worldMatrix = XMMatrixRotationY(ATime);
-
-	TestConstBuffer constBufferData = {};
-	XMMATRIX viewMatrix = s_testCamera.GetViewMatrix();
-	XMMATRIX projMatrix = s_testCamera.GetProjectionMatrix();
-
-	constBufferData.world = XMMatrixTranspose(worldMatrix);
-	constBufferData.view = XMMatrixTranspose(viewMatrix);
-	constBufferData.projection = XMMatrixTranspose(projMatrix);
-	constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
-
-	constBufferData.sinTime = sinf(ATime);
-	constBufferData.cosTime = cosf(ATime);
-	constBufferData.negsinTime = -constBufferData.sinTime;
-	constBufferData.negcosTime = -constBufferData.cosTime;
-
-	m_deviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
-}
-
-void Render::DrawTestObject()
-{
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	ID3D11Buffer* vertexBuffer = s_vertexBuffer.Get();
-
-	m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-	m_deviceContext->IASetInputLayout(m_inputLayout.Get());
-	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	m_deviceContext->Draw(24, 0);
 }
 
 void Render::UpdateRenderMode()
@@ -626,10 +552,9 @@ Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 	// Initialize render
 	CreateRasterState();
 	SetInputLayout();
-	CreateTestObject();
 
 	// Initialize camera // this should be moved to somewhere else later
-	s_testCamera.SetScreenSize(static_cast<int>(m_deviceInfo.displayMode.Width), static_cast<int>(m_deviceInfo.displayMode.Height));
+	g_camera.SetScreenSize(static_cast<int>(m_deviceInfo.displayMode.Width), static_cast<int>(m_deviceInfo.displayMode.Height));
 }
 
 Render::~Render()
@@ -895,8 +820,6 @@ void Render::SceneRender()
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, CLEAR_COLOR, 1.0f, 0);
 
 	DrawObjects();
-
-	//DrawTestObject();
 
 #ifdef _DEBUG
 	DisplayDeviceInfo();

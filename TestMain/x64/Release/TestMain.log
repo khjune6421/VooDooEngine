@@ -1,9 +1,10 @@
-﻿  TestMain.cpp
+﻿  Player.cpp
+  TestMain.cpp
   TestScene.cpp
-  Tree.cpp
+  WindMill.cpp
   Generating code
-  55 of 2072 functions ( 2.7%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    18 functions had inline decision re-evaluated but remain unchanged
+  27 of 2085 functions ( 1.3%) were compiled, the rest were copied from previous compilation.
+    5 functions were new in current compilation
+    3 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe

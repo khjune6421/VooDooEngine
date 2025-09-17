@@ -2,5 +2,6 @@
   Object.cpp
   Render.cpp
   Scene.cpp
+  WindowManager.cpp
   Generating Code...
   Engine.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\Engine.lib

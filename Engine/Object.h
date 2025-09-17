@@ -27,18 +27,17 @@ public:
 	Object(Shapes shape = Shapes::Triangle);
 	virtual ~Object();
 
-	// Using simple math for easier vector operations // for now
-	void SetPosition(const DirectX::SimpleMath::Vector3& pos);
-	void MovePosition(const DirectX::SimpleMath::Vector3& delta);
-	DirectX::SimpleMath::Vector3 GetPosition() const;
+	void SetPosition(const DirectX::XMFLOAT3& pos);
+	void MovePosition(const DirectX::XMFLOAT3& delta);
+	DirectX::XMFLOAT3 GetPosition() const;
 
-	void SetRotation(const DirectX::SimpleMath::Vector3& rot); // in radians
-	void Rotate(const DirectX::SimpleMath::Vector3& delta); // in radians
-	DirectX::SimpleMath::Vector3 GetRotation() const; // in radians
+	void SetRotation(const DirectX::XMFLOAT3& rot); // in radians
+	void Rotate(const DirectX::XMFLOAT3& delta); // in radians
+	DirectX::XMFLOAT3 GetRotation() const; // in radians
 
-	void SetScale(const DirectX::SimpleMath::Vector3& scl);
-	void Scale(const DirectX::SimpleMath::Vector3& factor);
-	DirectX::SimpleMath::Vector3 GetScale() const;
+	void SetScale(const DirectX::XMFLOAT3& scl);
+	void Scale(const DirectX::XMFLOAT3& factor);
+	DirectX::XMFLOAT3 GetScale() const;
 
 	DirectX::XMMATRIX GetWorldMatrix();
 

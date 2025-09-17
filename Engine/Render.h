@@ -31,6 +31,8 @@
 // I usually don't use 'using' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
+extern Camera g_camera;
+
 enum class Shapes
 {
 	Triangle,
@@ -142,8 +144,6 @@ class Render
 
 	// Static vertex buffer for rendering objects
 	static std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> s_shapeVertexBuffers;
-	static comPtr<ID3D11Buffer> s_vertexBuffer;
-	static Camera s_testCamera;
 
 	// Functions
 
@@ -177,11 +177,6 @@ class Render
 	float EngineUpdate();
 
 	void DrawObjects();
-
-	// Test Object
-	void CreateTestObject();
-	void UpdateTestObject(float deltaTime);
-	void DrawTestObject();
 
 	void UpdateRenderMode();
 

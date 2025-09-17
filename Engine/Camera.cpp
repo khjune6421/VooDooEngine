@@ -54,6 +54,21 @@ void Camera::SetRotation(const DirectX::XMFLOAT3& rotation)
 	m_viewMatrix = XMMatrixLookAtLH(m_eyePosition, m_focusPosition, m_upDirection);
 }
 
+void Camera::LookAt(const DirectX::XMFLOAT3& target) // Need to properly learn how this works one day // ...one day
+{
+	m_focusPosition = XMVectorSet(target.x, target.y, target.z, 1.0f);
+	XMVECTOR direction = XMVectorSubtract(m_focusPosition, m_eyePosition);
+	direction = XMVector3Normalize(direction);
+
+	m_rotation.x = asinf(-XMVectorGetY(direction)); // pitch
+	m_rotation.y = atan2f(XMVectorGetX(direction), XMVectorGetZ(direction)); // yaw
+	m_rotation.z = 0.0f; // roll
+
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
+	m_upDirection = XMVector3TransformCoord(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotationMatrix);
+	m_viewMatrix = XMMatrixLookAtLH(m_eyePosition, m_focusPosition, m_upDirection);
+}
+
 void Camera::SetScreenSize(int screenWidth, int screenHeight)
 {
 	m_screenWidth = screenWidth;
