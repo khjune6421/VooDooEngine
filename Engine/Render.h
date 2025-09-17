@@ -31,6 +31,8 @@
 // I usually don't use 'using' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
+extern Camera g_camera;
+
 enum class Shapes
 {
 	Triangle,
@@ -40,25 +42,8 @@ enum class Shapes
 	Tetrahedron,
 	Cube,
 
-	Tree
-};
-
-struct Transform
-{
-	DirectX::SimpleMath::Vector3 position = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f);
-	DirectX::SimpleMath::Vector3 rotation = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f); // in radians
-	DirectX::SimpleMath::Vector3 scale = DirectX::SimpleMath::Vector3(1.0f, 1.0f, 1.0f);
-
-	DirectX::SimpleMath::Matrix GetWorldMatrix() const
-	{
-		DirectX::SimpleMath::Matrix world =
-			DirectX::SimpleMath::Matrix::CreateScale(scale) *
-			DirectX::SimpleMath::Matrix::CreateRotationX(rotation.x) *
-			DirectX::SimpleMath::Matrix::CreateRotationY(rotation.y) *
-			DirectX::SimpleMath::Matrix::CreateRotationZ(rotation.z) *
-			DirectX::SimpleMath::Matrix::CreateTranslation(position);
-		return world;
-	}
+	Tree,
+	WindmillWing
 };
 
 class Object;
@@ -159,8 +144,6 @@ class Render
 
 	// Static vertex buffer for rendering objects
 	static std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> s_shapeVertexBuffers;
-	static comPtr<ID3D11Buffer> s_vertexBuffer;
-	static Camera s_testCamera;
 
 	// Functions
 
@@ -194,11 +177,6 @@ class Render
 	float EngineUpdate();
 
 	void DrawObjects();
-
-	// Test Object
-	void CreateTestObject();
-	void UpdateTestObject(float deltaTime);
-	void DrawTestObject();
 
 	void UpdateRenderMode();
 

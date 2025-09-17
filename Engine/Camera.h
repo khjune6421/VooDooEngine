@@ -4,7 +4,7 @@
 
 class Camera
 {
-	DirectX::XMFLOAT3 m_position = { 0.0f, 40.f, -80.0f };
+	DirectX::XMFLOAT3 m_position = { 0.0f, 20.f, -40.0f };
 	DirectX::XMFLOAT3 m_rotation = { 0.0f, 0.0f, 0.0f }; // In radians
 
 	DirectX::XMVECTOR m_eyePosition;
@@ -23,13 +23,15 @@ class Camera
 	DirectX::XMMATRIX m_viewMatrix;
 
 public:
-	Camera(DirectX::XMFLOAT3 position = { 0.0f, 40.f, -80.0f }, DirectX::XMFLOAT3 rotation = { 0.5f, 0.0f, 0.0f }, int screenWidth = 1920, int screenHeight = 1080, float nearPlane = 0.1f, float farPlane = 1000.0f, float fov = DirectX::XM_PIDIV4);
+	Camera(DirectX::XMFLOAT3 position = { 0.0f, 20.f, -40.0f }, DirectX::XMFLOAT3 rotation = { 0.5f, 0.0f, 0.0f }, int screenWidth = 1920, int screenHeight = 1080, float nearPlane = 0.1f, float farPlane = 1000.0f, float fov = DirectX::XM_PIDIV4);
 	~Camera() = default;
 
 	void SetPosition(const DirectX::XMFLOAT3& position);
 	void SetRotation(const DirectX::XMFLOAT3& rotation); // In radians
 	const DirectX::XMFLOAT3& GetPosition() const { return m_position; }
 	const DirectX::XMFLOAT3& GetRotation() const { return m_rotation; } // In radians
+
+	void LookAt(const DirectX::XMFLOAT3& target);
 
 	void SetScreenSize(int screenWidth, int screenHeight);
 	int GetScreenWidth() const { return m_screenWidth; }
