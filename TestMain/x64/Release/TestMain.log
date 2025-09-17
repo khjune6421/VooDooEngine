@@ -1,1 +1,8 @@
-﻿  TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe
+﻿  TestMain.cpp
+  TestScene.cpp
+  Tree.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 2068 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe

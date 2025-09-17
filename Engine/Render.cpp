@@ -449,7 +449,13 @@ void Render::CreateRasterState()
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
 	}
+#ifdef _DEBUG
+	m_deviceContext->RSSetState(g_rasterState[0].Get());
+	m_currentRasterState = RasterState::Wireframe_CullNone;
+#else
 	m_deviceContext->RSSetState(g_rasterState[2].Get());
+	m_currentRasterState = RasterState::Solid_CullNone;
+#endif
 }
 
 void Render::SetInputLayout()

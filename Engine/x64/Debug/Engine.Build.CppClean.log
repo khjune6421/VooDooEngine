@@ -6,14 +6,12 @@ c:\users\user\desktop\voodooengine\engine\x64\debug\render.obj
 c:\users\user\desktop\voodooengine\engine\x64\debug\objectpositionparser.obj
 c:\users\user\desktop\voodooengine\engine\x64\debug\object.obj
 c:\users\user\desktop\voodooengine\engine\x64\debug\gamemanager.obj
+c:\users\user\desktop\voodooengine\engine\x64\debug\camera.obj
 c:\users\user\desktop\voodooengine\x64\debug\allpixelshader.cso
 c:\users\user\desktop\voodooengine\x64\debug\nullpixelshader.cso
 c:\users\user\desktop\voodooengine\x64\debug\pixelshader.cso
 c:\users\user\desktop\voodooengine\x64\debug\vertexshader.cso
 c:\users\user\desktop\voodooengine\x64\debug\engine.lib
-c:\users\user\desktop\voodooengine\engine\x64\debug\camera.obj
-c:\users\user\desktop\voodooengine\engine\x64\debug\vdrender.obj
-c:\users\user\desktop\voodooengine\engine\x64\debug\vdwindowmanager.obj
 c:\users\user\desktop\voodooengine\engine\x64\debug\engine.tlog\cl.command.1.tlog
 c:\users\user\desktop\voodooengine\engine\x64\debug\engine.tlog\cl.items.tlog
 c:\users\user\desktop\voodooengine\engine\x64\debug\engine.tlog\cl.read.1.tlog
