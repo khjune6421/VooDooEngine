@@ -7,7 +7,7 @@ using namespace std;
 TestScene::TestScene(string dataFile)
 {
 	unique_ptr<Object> plane = make_unique<Object>(Shapes::Plane);
-	plane->GetTransform().scale = { 10.0f, 1.0f, 10.0f };
+	plane->GetTransform().scale = { 100.0f, 1.0f, 100.0f };
 	m_objects.emplace_back(move(plane));
 
 	ObjectPositionParser parser;
