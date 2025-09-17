@@ -1,11 +1,5 @@
-﻿  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Debug\AllPixelShader.cso
-  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Debug\NullPixelShader.cso
-  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Debug\PixelShader.cso
-  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Debug\VertexShader.cso
-  Camera.cpp
-  GameManager.cpp
+﻿  GameManager.cpp
   Object.cpp
-  ObjectPositionParser.cpp
   Render.cpp
   Scene.cpp
   WindowManager.cpp

@@ -9,7 +9,7 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
-unordered_map<Shapes, pair<comPtr<ID3D11Buffer>, UINT>> g_shapeVertexBuffers;
+unordered_map<Shapes, pair<comPtr<ID3D11Buffer>, UINT>> Render::s_shapeVertexBuffers;
 
 // Test object and camera
 comPtr<ID3D11Buffer> Render::s_vertexBuffer = nullptr;
@@ -492,7 +492,7 @@ void Render::DrawObjects()
 		UINT offset = 0;
 
 		ID3D11Buffer* vertexBuffer = nullptr;
-		if (g_shapeVertexBuffers.find(object->m_shape) != g_shapeVertexBuffers.end()) vertexBuffer = g_shapeVertexBuffers[object->m_shape].first.Get();
+		if (s_shapeVertexBuffers.find(object->m_shape) != s_shapeVertexBuffers.end()) vertexBuffer = s_shapeVertexBuffers[object->m_shape].first.Get();
 		else
 		{
 			MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK);
@@ -521,7 +521,7 @@ void Render::DrawObjects()
 
 		m_deviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
 
-		m_deviceContext->Draw(g_shapeVertexBuffers[object->m_shape].second, 0);
+		m_deviceContext->Draw(s_shapeVertexBuffers[object->m_shape].second, 0);
 	}
 }
 
@@ -665,7 +665,7 @@ Render::~Render()
 
 void Render::CreateShapeVertexBuffer()
 {
-	if (g_shapeVertexBuffers.find(Shapes::Triangle) == g_shapeVertexBuffers.end())
+	if (s_shapeVertexBuffers.find(Shapes::Triangle) == s_shapeVertexBuffers.end())
 	{
 		Vertex triangleVertices[] =
 		{
@@ -673,10 +673,10 @@ void Render::CreateShapeVertexBuffer()
 			{ XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
 			{ XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) }
 		};
-		CreateVertexBuffer(sizeof(triangleVertices), &g_shapeVertexBuffers[Shapes::Triangle].first, triangleVertices, sizeof(Vertex));
-		g_shapeVertexBuffers[Shapes::Triangle].second = 3;
+		CreateVertexBuffer(sizeof(triangleVertices), &s_shapeVertexBuffers[Shapes::Triangle].first, triangleVertices, sizeof(Vertex));
+		s_shapeVertexBuffers[Shapes::Triangle].second = 3;
 	}
-	if (g_shapeVertexBuffers.find(Shapes::Square) == g_shapeVertexBuffers.end())
+	if (s_shapeVertexBuffers.find(Shapes::Square) == s_shapeVertexBuffers.end())
 	{
 		Vertex squareVertices[] =
 		{
@@ -688,10 +688,10 @@ void Render::CreateShapeVertexBuffer()
 			{ XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
 			{ XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) }
 		};
-		CreateVertexBuffer(sizeof(squareVertices), &g_shapeVertexBuffers[Shapes::Square].first, squareVertices, sizeof(Vertex));
-		g_shapeVertexBuffers[Shapes::Square].second = 6;
+		CreateVertexBuffer(sizeof(squareVertices), &s_shapeVertexBuffers[Shapes::Square].first, squareVertices, sizeof(Vertex));
+		s_shapeVertexBuffers[Shapes::Square].second = 6;
 	}
-	if (g_shapeVertexBuffers.find(Shapes::Plane) == g_shapeVertexBuffers.end())
+	if (s_shapeVertexBuffers.find(Shapes::Plane) == s_shapeVertexBuffers.end())
 	{
 		Vertex planeVertices[] =
 		{
@@ -703,10 +703,10 @@ void Render::CreateShapeVertexBuffer()
 			{ XMFLOAT3(1.0f, 0.0f, -1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
 			{ XMFLOAT3(-1.0f, 0.0f, -1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) }
 		};
-		CreateVertexBuffer(sizeof(planeVertices), &g_shapeVertexBuffers[Shapes::Plane].first, planeVertices, sizeof(Vertex));
-		g_shapeVertexBuffers[Shapes::Plane].second = 6;
+		CreateVertexBuffer(sizeof(planeVertices), &s_shapeVertexBuffers[Shapes::Plane].first, planeVertices, sizeof(Vertex));
+		s_shapeVertexBuffers[Shapes::Plane].second = 6;
 	}
-	if (g_shapeVertexBuffers.find(Shapes::Tetrahedron) == g_shapeVertexBuffers.end())
+	if (s_shapeVertexBuffers.find(Shapes::Tetrahedron) == s_shapeVertexBuffers.end())
 	{
 		Vertex tetrahedronVertices[] =
 		{
@@ -736,10 +736,10 @@ void Render::CreateShapeVertexBuffer()
 			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
 			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) }
 		};
-		CreateVertexBuffer(sizeof(tetrahedronVertices), &g_shapeVertexBuffers[Shapes::Tetrahedron].first, tetrahedronVertices, sizeof(Vertex));
-		g_shapeVertexBuffers[Shapes::Tetrahedron].second = 18;
+		CreateVertexBuffer(sizeof(tetrahedronVertices), &s_shapeVertexBuffers[Shapes::Tetrahedron].first, tetrahedronVertices, sizeof(Vertex));
+		s_shapeVertexBuffers[Shapes::Tetrahedron].second = 18;
 	}
-	if (g_shapeVertexBuffers.find(Shapes::Cube) == g_shapeVertexBuffers.end())
+	if (s_shapeVertexBuffers.find(Shapes::Cube) == s_shapeVertexBuffers.end())
 	{
 		Vertex cubeVertices[] =
 		{
@@ -791,10 +791,10 @@ void Render::CreateShapeVertexBuffer()
 			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
 			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) }
 		};
-		CreateVertexBuffer(sizeof(cubeVertices), &g_shapeVertexBuffers[Shapes::Cube].first, cubeVertices, sizeof(Vertex));
-		g_shapeVertexBuffers[Shapes::Cube].second = 36;
+		CreateVertexBuffer(sizeof(cubeVertices), &s_shapeVertexBuffers[Shapes::Cube].first, cubeVertices, sizeof(Vertex));
+		s_shapeVertexBuffers[Shapes::Cube].second = 36;
 	}
-	if (g_shapeVertexBuffers.find(Shapes::Tree) == g_shapeVertexBuffers.end())
+	if (s_shapeVertexBuffers.find(Shapes::Tree) == s_shapeVertexBuffers.end())
 	{
 		Vertex treeVertices[] =
 		{
@@ -807,8 +807,8 @@ void Render::CreateShapeVertexBuffer()
 			XMFLOAT3(0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f)
 		};
 
-		CreateVertexBuffer(sizeof(treeVertices), &g_shapeVertexBuffers[Shapes::Tree].first, treeVertices, sizeof(Vertex));
-		g_shapeVertexBuffers[Shapes::Tree].second = 6;
+		CreateVertexBuffer(sizeof(treeVertices), &s_shapeVertexBuffers[Shapes::Tree].first, treeVertices, sizeof(Vertex));
+		s_shapeVertexBuffers[Shapes::Tree].second = 6;
 	}
 }
 

@@ -43,8 +43,6 @@ enum class Shapes
 	Tree
 };
 
-extern std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> g_shapeVertexBuffers;
-
 struct Transform
 {
 	DirectX::SimpleMath::Vector3 position = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f);
@@ -160,6 +158,7 @@ class Render
 	comPtr<ID3D11InputLayout> m_inputLayout = nullptr;
 
 	// Static vertex buffer for rendering objects
+	static std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> s_shapeVertexBuffers;
 	static comPtr<ID3D11Buffer> s_vertexBuffer;
 	static Camera s_testCamera;
 
