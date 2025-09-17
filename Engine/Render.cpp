@@ -794,6 +794,22 @@ void Render::CreateShapeVertexBuffer()
 		CreateVertexBuffer(sizeof(cubeVertices), &g_shapeVertexBuffers[Shapes::Cube].first, cubeVertices, sizeof(Vertex));
 		g_shapeVertexBuffers[Shapes::Cube].second = 36;
 	}
+	if (g_shapeVertexBuffers.find(Shapes::Tree) == g_shapeVertexBuffers.end())
+	{
+		Vertex treeVertices[] =
+		{
+			XMFLOAT3(-0.5f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f),
+			XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
+			XMFLOAT3(0.5f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f),
+
+			XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+			XMFLOAT3(-0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
+			XMFLOAT3(0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f)
+		};
+
+		CreateVertexBuffer(sizeof(treeVertices), &g_shapeVertexBuffers[Shapes::Tree].first, treeVertices, sizeof(Vertex));
+		g_shapeVertexBuffers[Shapes::Tree].second = 6;
+	}
 }
 
 void Render::Resize(UINT width, UINT height)

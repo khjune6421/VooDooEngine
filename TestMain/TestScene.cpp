@@ -18,7 +18,7 @@ TestScene::TestScene(string dataFile)
 	{
 		for (const auto& pos : parser.GetPositions())
 		{
-			unique_ptr<Tree> tree = make_unique<Tree>();
+			unique_ptr<Tree> tree = make_unique<Tree>(Shapes::Tree);
 			tree->GetTransform().position = { pos.x, pos.y, pos.z };
 			tree->GetTransform().scale = { 1.0f, 1.0f, 1.0f };
 			m_objects.emplace_back(move(tree));
@@ -32,8 +32,5 @@ TestScene::TestScene(string dataFile)
 
 void TestScene::Update(float deltaTime)
 {
-	//for (const auto & object : m_objects)
-	//{
-	//	object->GetTransform().rotation.y += deltaTime;
-	//}
+	m_player->GetTransform().rotation.y += deltaTime;
 }

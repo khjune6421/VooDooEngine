@@ -1,7 +1,9 @@
-﻿  TestScene.cpp
+﻿  TestMain.cpp
+  TestScene.cpp
+  Tree.cpp
   Generating code
-  4 of 2073 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+  55 of 2072 functions ( 2.7%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    18 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe
