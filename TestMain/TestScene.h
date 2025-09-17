@@ -4,6 +4,8 @@
 
 class TestScene : public Scene
 {
+	std::unique_ptr<Object> m_player;
+
 public:
 	TestScene(std::string dataFile);
 	~TestScene() override = default;

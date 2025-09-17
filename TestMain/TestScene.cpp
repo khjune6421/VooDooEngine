@@ -6,6 +6,9 @@ using namespace std;
 
 TestScene::TestScene(string dataFile)
 {
+	m_player = make_unique<Object>(Shapes::Cube);
+	m_player->GetTransform().position = { 0.0f, 1.0f, 0.0f };
+
 	unique_ptr<Object> plane = make_unique<Object>(Shapes::Plane);
 	plane->GetTransform().scale = { 100.0f, 1.0f, 100.0f };
 	m_objects.emplace_back(move(plane));
