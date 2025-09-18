@@ -3,6 +3,39 @@
 using namespace std;
 using namespace DirectX;
 
+void Object::MakeChildDirty()
+{
+	for (auto& child : m_childrens)
+	{
+		child->m_isDirty = true;
+		child->MakeChildDirty();
+	}
+}
+
+void Object::AddChild(Object* child)
+{
+	if (!child) return;
+
+	if (child->m_parent)
+	{
+		child->m_parent->m_childrens.erase
+		(
+			remove
+			(
+				child->m_parent->m_childrens.begin(),
+				child->m_parent->m_childrens.end(),
+				child
+			),
+			child->m_parent->m_childrens.end()
+		);
+	}
+
+	child->m_parent = this;
+	m_childrens.emplace_back(child);
+
+	MakeChildDirty();
+}
+
 Object::Object(Shapes shape) : m_shape(shape)
 {
 	VDGM::g_objects.emplace_back(this);
@@ -19,7 +52,6 @@ void Object::SetPosition(const XMFLOAT3& pos)
 	m_position = XMMatrixTranslation(pos.x, pos.y, pos.z);
 
 	m_isDirty = true;
-	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 void Object::MovePosition(const XMFLOAT3& delta)
@@ -31,7 +63,6 @@ void Object::MovePosition(const XMFLOAT3& delta)
 	m_position = XMMatrixTranslationFromVector(newPos);
 
 	m_isDirty = true;
-	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 XMFLOAT3 Object::GetPosition() const
@@ -48,7 +79,6 @@ void Object::SetRotation(const XMFLOAT3& rot)
 	m_rotation = rotZ * rotY * rotX;
 
 	m_isDirty = true;
-	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 void Object::Rotate(const XMFLOAT3& delta)
@@ -60,7 +90,6 @@ void Object::Rotate(const XMFLOAT3& delta)
 	m_rotation = m_rotation * (deltaZ * deltaY * deltaX);
 
 	m_isDirty = true;
-	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 XMFLOAT3 Object::GetRotation() const // Not actually sure how this works
@@ -91,7 +120,6 @@ void Object::SetScale(const XMFLOAT3& scl)
 	m_scale = XMMatrixScaling(scl.x, scl.y, scl.z);
 
 	m_isDirty = true;
-	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 void Object::Scale(const XMFLOAT3& factor)
@@ -106,7 +134,6 @@ void Object::Scale(const XMFLOAT3& factor)
 	m_scale = XMLoadFloat4x4(&currentScale);
 
 	m_isDirty = true;
-	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
 XMFLOAT3 Object::GetScale() const
@@ -122,21 +149,16 @@ XMMATRIX Object::GetWorldMatrix()
 	if (m_isDirty)
 	{
 		m_worldMatrix = m_scale * m_rotation * m_position;
-		if (m_parent) m_worldMatrix = m_worldMatrix * m_parent->GetWorldMatrix(); // Need to change it to use stack instead of recursion later
+
+		if (m_parent)
+		{
+			if (m_parent->m_isDirty) m_worldMatrix *= m_parent->GetWorldMatrix();
+			else m_worldMatrix *= m_parent->m_worldMatrix;
+		}
 
 		m_isDirty = false;
+		MakeChildDirty();
 	}
 
 	return m_worldMatrix;
-}
-
-void Object::AddChild(Object* child)
-{
-	if (child)
-	{
-		child->m_parent = this;
-		m_childrens.emplace_back(child);
-
-		child->m_isDirty = true;
-	}
 }

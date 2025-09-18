@@ -6,7 +6,7 @@ class WindMillWing : public Object
 {
 	friend class TestScene;
 
-	std::unique_ptr<Object> m_windmillWing;
+	Object m_windmillWing;
 	bool m_rotationAngle = false;
 
 public:
