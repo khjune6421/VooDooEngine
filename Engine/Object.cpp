@@ -63,7 +63,7 @@ void Object::Rotate(const XMFLOAT3& delta)
 	for (const auto& child : m_childrens) if (child) child->m_isDirty = true;
 }
 
-XMFLOAT3 Object::GetRotation() const // in radians // not actually sure how this works
+XMFLOAT3 Object::GetRotation() const // Not actually sure how this works
 {
 	XMFLOAT4X4 rotMatrix = {};
 	XMStoreFloat4x4(&rotMatrix, m_rotation);
@@ -136,5 +136,7 @@ void Object::AddChild(Object* child)
 	{
 		child->m_parent = this;
 		m_childrens.emplace_back(child);
+
+		child->m_isDirty = true;
 	}
 }

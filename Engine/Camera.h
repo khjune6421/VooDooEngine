@@ -5,7 +5,7 @@
 class Camera
 {
 	DirectX::XMFLOAT3 m_position = { 0.0f, 20.f, -40.0f };
-	DirectX::XMFLOAT3 m_rotation = { 0.0f, 0.0f, 0.0f }; // In radians
+	DirectX::XMFLOAT3 m_rotation = { 0.0f, 0.0f, 0.0f };
 
 	DirectX::XMVECTOR m_eyePosition;
 	DirectX::XMVECTOR m_focusPosition;
@@ -17,7 +17,7 @@ class Camera
 
 	float m_nearPlane;
 	float m_farPlane;
-	float m_fov; // In radians
+	float m_fov;
 
 	DirectX::XMMATRIX m_projectionMatrix;
 	DirectX::XMMATRIX m_viewMatrix;
@@ -27,9 +27,9 @@ public:
 	~Camera() = default;
 
 	void SetPosition(const DirectX::XMFLOAT3& position);
-	void SetRotation(const DirectX::XMFLOAT3& rotation); // In radians
+	void SetRotation(const DirectX::XMFLOAT3& rotation);
 	const DirectX::XMFLOAT3& GetPosition() const { return m_position; }
-	const DirectX::XMFLOAT3& GetRotation() const { return m_rotation; } // In radians
+	const DirectX::XMFLOAT3& GetRotation() const { return m_rotation; }
 
 	void LookAt(const DirectX::XMFLOAT3& target);
 
@@ -42,8 +42,8 @@ public:
 	float GetNearPlane() const { return m_nearPlane; }
 	float GetFarPlane() const { return m_farPlane; }
 
-	void SetFov(float fov); // In radians
-	float GetFov() const { return m_fov; } // In radians
+	void SetFov(float fov);
+	float GetFov() const { return m_fov; }
 
 	float GetAspectRatio() const { return m_aspectRatio; }
 

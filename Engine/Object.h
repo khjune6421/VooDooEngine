@@ -25,15 +25,16 @@ public:
 	Object(Shapes shape = Shapes::Triangle);
 	virtual ~Object();
 
+	// Transformation related variable and functions
 	bool m_isDirty = true;
 
 	void SetPosition(const DirectX::XMFLOAT3& pos);
 	void MovePosition(const DirectX::XMFLOAT3& delta);
 	DirectX::XMFLOAT3 GetPosition() const;
 
-	void SetRotation(const DirectX::XMFLOAT3& rot); // in radians
-	void Rotate(const DirectX::XMFLOAT3& delta); // in radians
-	DirectX::XMFLOAT3 GetRotation() const; // in radians
+	void SetRotation(const DirectX::XMFLOAT3& rot);
+	void Rotate(const DirectX::XMFLOAT3& delta);
+	DirectX::XMFLOAT3 GetRotation() const;
 
 	void SetScale(const DirectX::XMFLOAT3& scl);
 	void Scale(const DirectX::XMFLOAT3& factor);
@@ -41,7 +42,7 @@ public:
 
 	DirectX::XMMATRIX GetWorldMatrix();
 
-	//void SetParent(Object* parent) { m_parent = parent; } // Need to make this automatic
+	// Other basic object functions
 	void AddChild(Object* child);
 
 	virtual void Update(float deltaTime) { (void)deltaTime; } // (void) to avoid unused parameter warning // feels odd but makes sense
