@@ -17,5 +17,8 @@ void Player::Update(float deltaTime)
 	if (GetAsyncKeyState(VK_LEFT) & 0x8000) moveDelta.x -= m_moveSpeed * deltaTime;
 	if (GetAsyncKeyState(VK_RIGHT) & 0x8000) moveDelta.x += m_moveSpeed * deltaTime;
 
+	// Use this later
+	XMVECTOR norm = XMVector3Normalize(XMVectorSet(moveDelta.x, 0.0f, moveDelta.z, 0.0f));
+
 	MovePosition(moveDelta);
 }

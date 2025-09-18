@@ -32,6 +32,7 @@ public:
 	Object(Shapes shape = Shapes::Triangle);
 	virtual ~Object();
 
+	// Maybe change to XMVECTOR later?
 	// Transformation related functions
 	void SetPosition(const DirectX::XMFLOAT3& pos);
 	void MovePosition(const DirectX::XMFLOAT3& delta);
