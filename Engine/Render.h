@@ -47,11 +47,11 @@ enum class Shapes
 };
 
 class Object;
-// This is declared in GameManager.cpp
-extern std::vector<Object*> g_objects;
 
 namespace VDGM
 {
+	extern std::vector<Object*> g_objects;
+
 	extern float g_deltaTimeF;
 	extern double g_deltaTimeD;
 }

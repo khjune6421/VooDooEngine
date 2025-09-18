@@ -5,13 +5,13 @@ using namespace DirectX;
 
 Object::Object(Shapes shape) : m_shape(shape)
 {
-	g_objects.emplace_back(this);
+	VDGM::g_objects.emplace_back(this);
 }
 
 Object::~Object()
 {
-	auto it = find(g_objects.begin(), g_objects.end(), this);
-	if (it != g_objects.end()) g_objects.erase(it);
+	auto it = find(VDGM::g_objects.begin(), VDGM::g_objects.end(), this);
+	if (it != VDGM::g_objects.end()) VDGM::g_objects.erase(it);
 }
 
 void Object::SetPosition(const XMFLOAT3& pos)
