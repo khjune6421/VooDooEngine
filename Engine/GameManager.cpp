@@ -2,27 +2,24 @@
 
 using namespace std;
 
-vector<Object*> g_objects;
-
 namespace VDGM
 {
-	unordered_map<wstring, unique_ptr<Scene>> g_sceneMap;
 	unique_ptr<Scene> g_currentScene = nullptr;
+
+	vector<Object*> g_objects;
 
 	float g_deltaTimeF = 0.0f;
 	double g_deltaTimeD = 0.0;
 
 	void ChangeScene(const std::wstring& sceneName)
 	{
-		if (g_sceneMap.find(sceneName) != g_sceneMap.end())
+		auto it = g_sceneFactory.find(sceneName);
+		if (it != g_sceneFactory.end())
 		{
-			g_currentScene = std::move(g_sceneMap[sceneName]);
-			g_sceneMap.erase(sceneName);
+			g_currentScene.reset();
+			g_currentScene = it->second();
 		}
-		else
-		{
-			MessageBoxW(nullptr, L"Scene not found", L"Error", MB_OK);
-		}
+		else MessageBoxW(nullptr, (L"Scene " + sceneName + L" not found").c_str(), L"Error", MB_OK);
 	}
 
 	void GameLoop()

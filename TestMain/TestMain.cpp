@@ -1,6 +1,13 @@
 #include "GameManager.h"
 #include "TestScene.h"
 
+using namespace std;
+
+unordered_map<wstring, function<unique_ptr<Scene>()>> VDGM::g_sceneFactory =
+{
+	{L"TestScene", []() { return make_unique<TestScene>("../Assets/ObjectPos/Trees.dat"); } },
+};
+
 #ifdef _DEBUG
 int main()
 #else
@@ -25,12 +32,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	VDW::CreateWindowAndRenderer(L"VooDoo Class3", L"VooDoo Engine3", 1280, 720);
 
 	// Create and set the test scene
-	VDGM::g_sceneMap[L"TestScene"] = std::make_unique<TestScene>("../Assets/ObjectPos/Trees.dat");
-	VDGM::ChangeScene(L"TestScene");
+	VDGM::g_currentScene = make_unique<TestScene>("../Assets/ObjectPos/Trees.dat");
 
 	while (VDW::ProcessMessage())
 	{
 		VDGM::GameLoop();
+		if (GetAsyncKeyState(VK_TAB) & 0x0001) VDGM::ChangeScene(L"TestScene");
 	}
 
 	VDW::g_windows.clear();

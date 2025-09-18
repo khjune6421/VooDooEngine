@@ -484,7 +484,7 @@ void Render::DrawObjects()
 	static float ATime = 0.0f; // Accumulated time
 	ATime += VDGM::g_deltaTimeF;
 
-	for (Object* object : g_objects)
+	for (Object* object : VDGM::g_objects)
 	{
 		if (!object || !object->m_isActive) continue;
 		UINT stride = sizeof(Vertex);
