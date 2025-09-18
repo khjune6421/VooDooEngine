@@ -41,7 +41,8 @@ public:
 
 	DirectX::XMMATRIX GetWorldMatrix();
 
-	void SetParent(Object* parent) { m_parent = parent; } // Need to make this autmatic
+	//void SetParent(Object* parent) { m_parent = parent; } // Need to make this automatic
+	void AddChild(Object* child);
 
 	virtual void Update(float deltaTime) { (void)deltaTime; } // (void) to avoid unused parameter warning // feels odd but makes sense
 };

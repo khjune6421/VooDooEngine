@@ -129,3 +129,12 @@ XMMATRIX Object::GetWorldMatrix()
 
 	return m_worldMatrix;
 }
+
+void Object::AddChild(Object* child)
+{
+	if (child)
+	{
+		child->m_parent = this;
+		m_childrens.emplace_back(child);
+	}
+}

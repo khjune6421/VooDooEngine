@@ -6,10 +6,8 @@ using namespace DirectX;
 WindMill::WindMill(Shapes shape) : Object(shape)
 {
 	m_windmillWing = make_unique<WindMillWing>(Shapes::Triangle);
-	m_windmillWing->SetParent(this);
+	AddChild(m_windmillWing.get());
 	m_windmillWing->SetPosition(XMFLOAT3(0.0f, 1.5f, 0.0f));
-
-	m_childrens.emplace_back(m_windmillWing.get());
 }
 
 void WindMill::Update(float deltaTime)

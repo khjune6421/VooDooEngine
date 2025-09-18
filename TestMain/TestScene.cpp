@@ -44,19 +44,17 @@ void TestScene::Update(float deltaTime)
 		if (m_player->m_windmillWing)
 		{
 			m_windmill->m_windmillWing = move(m_player->m_windmillWing);
-			m_windmill->m_windmillWing->SetParent(m_windmill.get());
+			m_windmill->AddChild(m_windmill->m_windmillWing.get());
 			m_windmill->m_windmillWing->m_rotationAngle = false;
 
-			m_windmill->m_childrens.emplace_back(m_windmill->m_windmillWing.get());
 			m_player->m_childrens.clear();
 		}
 		else if (m_windmill->m_windmillWing)
 		{
 			m_player->m_windmillWing = move(m_windmill->m_windmillWing);
-			m_player->m_windmillWing->SetParent(m_player.get());
+			m_player->AddChild(m_player->m_windmillWing.get());
 			m_player->m_windmillWing->m_rotationAngle = true;
 
-			m_player->m_childrens.emplace_back(m_player->m_windmillWing.get());
 			m_windmill->m_childrens.clear();
 		}
 	}

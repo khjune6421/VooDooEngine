@@ -9,9 +9,7 @@ WindMillWing::WindMillWing(Shapes shape) : Object(shape)
 
 	m_windmillWing = make_unique<Object>(Shapes::WindmillWing);
 	m_windmillWing->SetPosition(XMFLOAT3(0.0f, 0.0f, -2.0f));
-	m_windmillWing->SetParent(this);
-
-	m_childrens.emplace_back(m_windmillWing.get());
+	AddChild(m_windmillWing.get());
 }
 
 void WindMillWing::Update(float deltaTime)
