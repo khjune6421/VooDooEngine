@@ -5,7 +5,8 @@ using namespace std;
 
 unordered_map<wstring, function<unique_ptr<Scene>()>> VDGM::g_sceneFactory =
 {
-	{L"TestScene", []() { return make_unique<TestScene>("../Assets/ObjectPos/Trees.dat"); } },
+	{ L"TestScene", []() { return make_unique<TestScene>("../Assets/ObjectPos/Trees.dat"); } },
+	//{ L"TestScene", []() { return make_unique<TestScene>("Trees.dat"); } },
 };
 
 #ifdef _DEBUG
@@ -33,6 +34,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	// Create and set the test scene
 	VDGM::g_currentScene = make_unique<TestScene>("../Assets/ObjectPos/Trees.dat");
+	//VDGM::g_currentScene = make_unique<TestScene>("Trees.dat");
 
 	while (VDW::ProcessMessage())
 	{

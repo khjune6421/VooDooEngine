@@ -231,11 +231,8 @@ void Render::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
 	}
 }
 
-void Render::DisplayDeviceInfo()
+void Render::ShowFPS()
 {
-	constexpr float offset = 20.0f;
-	UINT posIndex = 1;
-
 	static UINT frameCount = 0;
 	static double elapsedTime = 0.0;
 	static double fps = 0.0;
@@ -251,13 +248,16 @@ void Render::DisplayDeviceInfo()
 		elapsedTime = 0.0;
 	}
 
-	// FPS
 	wstring fpsText = L"FPS: " + to_wstring(static_cast<int>(fps));
-	DrawText(fpsText.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-	posIndex++;
+	DrawText(fpsText.c_str(), XMFLOAT2(static_cast<float>(m_deviceInfo.displayMode.Width / 2), 20.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+}
+
+void Render::DisplayDeviceInfo()
+{
+	constexpr float offset = 20.0f;
+	UINT posIndex = 1;
 
 	// System Information
-	posIndex++;
 	DrawText(L"SYSTEM", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	posIndex++;
@@ -820,6 +820,8 @@ void Render::SceneRender()
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, CLEAR_COLOR, 1.0f, 0);
 
 	DrawObjects();
+
+	ShowFPS();
 
 #ifdef _DEBUG
 	DisplayDeviceInfo();

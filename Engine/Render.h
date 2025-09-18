@@ -162,6 +162,7 @@ class Render
 	void CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride);
 	void CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer);
 
+	void ShowFPS();
 	void DisplayDeviceInfo();
 
 	// Shader
