@@ -24,20 +24,8 @@ void WindMill::Update(float deltaTime)
 	if (GetAsyncKeyState('Q') & 0x8000) Rotate(XMFLOAT3(0.0f, -2.0f * deltaTime, 0.0f));
 	if (GetAsyncKeyState('E') & 0x8000) Rotate(XMFLOAT3(0.0f, 2.0f * deltaTime, 0.0f));
 
-	if (GetAsyncKeyState('R') & 0x8000)
-	{
-		if (GetScale().x <= 5.0f)
-		{
-			Scale(XMFLOAT3(1.0f + deltaTime * 2.0f, 1.0f + deltaTime * 2.0f, 1.0f + deltaTime * 2.0f));
-		}
-	}
-	if (GetAsyncKeyState('F') & 0x8000)
-	{
-		if (GetScale().x >= 0.5f)
-		{
-			Scale(XMFLOAT3(1.0f - deltaTime * 2.0f, 1.0f - deltaTime * 2.0f, 1.0f - deltaTime * 2.0f));
-		}
-	}
+	if (GetAsyncKeyState('R') & 0x8000 && GetScale().x <= 5.0f) Scale(XMFLOAT3(1.0f + deltaTime * 2.0f, 1.0f + deltaTime * 2.0f, 1.0f + deltaTime * 2.0f));
+	if (GetAsyncKeyState('F') & 0x8000 && GetScale().x >= 0.5f) Scale(XMFLOAT3(1.0f - deltaTime * 2.0f, 1.0f - deltaTime * 2.0f, 1.0f - deltaTime * 2.0f));
 
 	MovePosition(moveDelta);
 }

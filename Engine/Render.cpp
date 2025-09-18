@@ -448,6 +448,7 @@ void Render::CreateRasterState()
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
 	}
+
 #ifdef _DEBUG
 	m_deviceContext->RSSetState(g_rasterState[0].Get());
 	m_currentRasterState = RasterState::Wireframe_CullNone;
@@ -805,9 +806,15 @@ void Render::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, fl
 
 	if (m_SpriteFontMap.find(fontName) != m_SpriteFontMap.end())
 	{
+		comPtr<ID3D11DepthStencilState> currentDepthState;
+		m_deviceContext->OMGetDepthStencilState(&currentDepthState, nullptr);
+
+		// This fuckes up the depth testing // considering a different way to draw text
 		m_SpriteBatchMap[fontName]->Begin();
 		m_SpriteFontMap[fontName]->DrawString(m_SpriteBatchMap[fontName].get(), buffer, position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
 		m_SpriteBatchMap[fontName]->End();
+
+		m_deviceContext->OMSetDepthStencilState(currentDepthState.Get(), 0);
 	}
 }
 
