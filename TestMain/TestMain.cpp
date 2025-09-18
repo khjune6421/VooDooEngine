@@ -15,7 +15,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	// Create multiple windows with different shaders
 	HWND a = VDW::CreateWindowAndRenderer(L"VooDoo Class1", L"VooDoo Engine1", 640, 480);
-	// This works in a way I don't understand // creates static vertex buffer with one m_device but somewhow usable in other m_device instances
+	// This works in a way I don't understand // creates static vertex buffer with one m_device but somewhow it's usable in other m_device instances
 	VDW::g_windows[a]->CreateShapeVertexBuffer();
 	VDW::g_windows[a]->ChangeShader(1);
 
