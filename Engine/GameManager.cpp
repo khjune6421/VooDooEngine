@@ -11,7 +11,7 @@ namespace VDGM
 	float g_deltaTimeF = 0.0f;
 	double g_deltaTimeD = 0.0;
 
-	void ChangeScene(const std::wstring& sceneName)
+	void ChangeScene(const wstring& sceneName)
 	{
 		auto it = g_sceneFactory.find(sceneName);
 		if (it != g_sceneFactory.end())
