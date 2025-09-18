@@ -1,4 +1,6 @@
-﻿  TestScene.cpp
+﻿  Player.cpp
+  TestMain.cpp
+  TestScene.cpp
   WindMill.cpp
   WindMillWing.cpp
   Generating Code...

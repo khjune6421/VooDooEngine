@@ -3,13 +3,12 @@
 using namespace std;
 using namespace DirectX;
 
-WindMillWing::WindMillWing(Shapes shape) : Object(shape)
+WindMillWing::WindMillWing(Shapes shape) : Object(shape), m_windmillWing(Shapes::WindmillWing)
 {
 	m_isActive = false;
 
-	m_windmillWing = make_unique<Object>(Shapes::WindmillWing);
-	m_windmillWing->SetPosition(XMFLOAT3(0.0f, 0.0f, -2.0f));
-	AddChild(m_windmillWing.get());
+	m_windmillWing.SetPosition(XMFLOAT3(0.0f, 0.0f, -2.0f));
+	AddChild(&m_windmillWing);
 }
 
 void WindMillWing::Update(float deltaTime)
