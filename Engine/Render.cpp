@@ -511,10 +511,10 @@ void Render::DrawObjects()
 		constBufferData.view = XMMatrixTranspose(viewMatrix);
 		constBufferData.projection = XMMatrixTranspose(projMatrix);
 
-		constBufferData.sinTime = sinf(static_cast<float>(ATime));
-		constBufferData.cosTime = cosf(static_cast<float>(ATime));
-		constBufferData.negsinTime = -constBufferData.sinTime;
-		constBufferData.negcosTime = -constBufferData.cosTime;
+		constBufferData.VSFloatA = sinf(static_cast<float>(ATime));
+		constBufferData.VSFloatB = cosf(static_cast<float>(ATime));
+		constBufferData.VSFloatC = -constBufferData.VSFloatA;
+		constBufferData.VSFloatD = -constBufferData.VSFloatB;
 
 		constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
 

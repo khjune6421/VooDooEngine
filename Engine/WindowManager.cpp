@@ -136,7 +136,7 @@ HWND VDW::CreateWindowAndRenderer(std::wstring className, std::wstring windowNam
 	(
 		className.c_str(),
 		windowName.c_str(),
-		WS_POPUP,
+		WS_POPUPWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		width, height,
 		GetDesktopWindow(),

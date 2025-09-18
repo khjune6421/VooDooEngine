@@ -89,10 +89,10 @@ class Render
 		DirectX::XMMATRIX projection; // projection matrix
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
 
-		float sinTime;
-		float cosTime;
-		float negsinTime;
-		float negcosTime;
+		float VSFloatA;
+		float VSFloatB;
+		float VSFloatC;
+		float VSFloatD;
 	};
 
 	// Render

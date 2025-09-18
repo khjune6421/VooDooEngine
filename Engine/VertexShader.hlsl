@@ -5,10 +5,10 @@ cbuffer TestConstBuffer : register(b0)
     matrix projection;
     matrix WVP;
     
-    float sinTime;
-    float cosTime;
-    float negsinTime;
-    float negcosTime;
+    float VSFloatA;
+    float VSFloatB;
+    float VSFloatC;
+    float VSFloatD;
 }
 
 struct VSInput
@@ -22,10 +22,10 @@ struct VSOutput
     float4 pos : SV_POSITION;
     float4 col : COLOR0;
     
-    float sinTime : TEXCOORD0;
-    float cosTime : TEXCOORD1;
-    float negsinTime : TEXCOORD2;
-    float negcosTime : TEXCOORD3;
+    float PSFloatA : TEXCOORD0;
+    float PSFloatB : TEXCOORD1;
+    float PSFloatC : TEXCOORD2;
+    float PSFloatD : TEXCOORD3;
 };
 
 VSOutput main(VSInput input)
@@ -38,10 +38,10 @@ VSOutput main(VSInput input)
     output.pos = input.pos;
     output.col = input.col;
     
-    output.sinTime = sinTime;
-    output.cosTime = cosTime;
-    output.negsinTime = negsinTime;
-    output.negcosTime = negcosTime;
+    output.PSFloatA = VSFloatA;
+    output.PSFloatB = VSFloatB;
+    output.PSFloatC = VSFloatC;
+    output.PSFloatD = VSFloatD;
     
     return output;
 }
