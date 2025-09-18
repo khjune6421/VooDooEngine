@@ -7,6 +7,8 @@ class Object
 	// is this a good idea?
 	friend class Render;
 
+	UINT m_id = 0; // For debug purpose
+
 	Shapes m_shape = Shapes::Triangle;
 
 	// Not sure if these should be private or protected

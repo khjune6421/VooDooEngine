@@ -1,7 +1,13 @@
 #include "Object.h"
 
+#ifdef _DEBUG
+#include <iostream>
+#endif
+
 using namespace std;
 using namespace DirectX;
+
+static UINT s_idCounter = 0;
 
 void Object::MakeChildDirty()
 {
@@ -36,15 +42,23 @@ void Object::AddChild(Object* child)
 	MakeChildDirty();
 }
 
-Object::Object(Shapes shape) : m_shape(shape)
+Object::Object(Shapes shape) : m_shape(shape), m_id(s_idCounter++)
 {
 	VDGM::g_objects.emplace_back(this);
+
+#ifdef _DEBUG
+	cout << "Object created. ID: " << m_id << endl;
+#endif
 }
 
 Object::~Object()
 {
 	auto it = find(VDGM::g_objects.begin(), VDGM::g_objects.end(), this);
 	if (it != VDGM::g_objects.end()) VDGM::g_objects.erase(it);
+
+#ifdef _DEBUG
+	cout << "Object destroyed. ID: " << m_id << endl;
+#endif
 }
 
 void Object::SetPosition(const XMFLOAT3& pos)
