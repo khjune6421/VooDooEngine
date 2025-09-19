@@ -488,8 +488,8 @@ void Render::DrawObjects()
 	for (Object* object : VDGM::g_objects)
 	{
 		if (!object || !object->m_isActive) continue;
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
+		constexpr UINT stride = sizeof(Vertex);
+		constexpr UINT offset = 0;
 
 		ID3D11Buffer* vertexBuffer = nullptr;
 		if (s_shapeVertexBuffers.find(object->m_shape) != s_shapeVertexBuffers.end()) vertexBuffer = s_shapeVertexBuffers[object->m_shape].first.Get();
@@ -503,21 +503,20 @@ void Render::DrawObjects()
 		m_deviceContext->IASetInputLayout(m_inputLayout.Get());
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		TestConstBuffer constBufferData = {};
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
 		XMMATRIX viewMatrix = g_camera.GetViewMatrix();
 		XMMATRIX projMatrix = g_camera.GetProjectionMatrix();
 
+		TestConstBuffer constBufferData = {};
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
 		constBufferData.view = XMMatrixTranspose(viewMatrix);
 		constBufferData.projection = XMMatrixTranspose(projMatrix);
+		constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
 
 		constBufferData.VSFloatA = sinf(static_cast<float>(ATime));
 		constBufferData.VSFloatB = cosf(static_cast<float>(ATime));
 		constBufferData.VSFloatC = -constBufferData.VSFloatA;
 		constBufferData.VSFloatD = -constBufferData.VSFloatB;
-
-		constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
 
 		m_deviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
 

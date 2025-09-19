@@ -61,60 +61,46 @@ Object::~Object()
 #endif
 }
 
-void Object::SetPosition(const XMFLOAT3& pos)
+void Object::SetPosition(const XMVECTOR& pos)
 {
-	m_position = XMMatrixTranslation(pos.x, pos.y, pos.z);
-
+	m_position = XMMatrixTranslationFromVector(pos);
 	m_isDirty = true;
 }
-
-void Object::MovePosition(const XMFLOAT3& delta)
+void Object::MovePosition(const XMVECTOR& delta)
 {
 	XMVECTOR currentPos = XMVectorSet(m_position.r[3].m128_f32[0], m_position.r[3].m128_f32[1], m_position.r[3].m128_f32[2], 1.0f);
-	XMVECTOR deltaVec = XMVectorSet(delta.x, delta.y, delta.z, 0.0f);
-	XMVECTOR newPos = XMVectorAdd(currentPos, deltaVec);
-
+	XMVECTOR newPos = XMVectorAdd(currentPos, delta);
 	m_position = XMMatrixTranslationFromVector(newPos);
-
 	m_isDirty = true;
 }
-
-XMFLOAT3 Object::GetPosition() const
+XMVECTOR Object::GetPosition() const
 {
-	return XMFLOAT3(m_position.r[3].m128_f32[0], m_position.r[3].m128_f32[1], m_position.r[3].m128_f32[2]);
+	return XMVectorSet(m_position.r[3].m128_f32[0], m_position.r[3].m128_f32[1], m_position.r[3].m128_f32[2], 1.0f);
 }
 
-void Object::SetRotation(const XMFLOAT3& rot)
+void Object::SetRotation(const XMVECTOR& rot)
 {
-	XMMATRIX rotX = XMMatrixRotationX(rot.x);
-	XMMATRIX rotY = XMMatrixRotationY(rot.y);
-	XMMATRIX rotZ = XMMatrixRotationZ(rot.z);
-
+	XMMATRIX rotX = XMMatrixRotationX(XMVectorGetX(rot));
+	XMMATRIX rotY = XMMatrixRotationY(XMVectorGetY(rot));
+	XMMATRIX rotZ = XMMatrixRotationZ(XMVectorGetZ(rot));
 	m_rotation = rotZ * rotY * rotX;
-
 	m_isDirty = true;
 }
-
-void Object::Rotate(const XMFLOAT3& delta)
+void Object::Rotate(const XMVECTOR& delta)
 {
-	XMMATRIX deltaX = XMMatrixRotationX(delta.x);
-	XMMATRIX deltaY = XMMatrixRotationY(delta.y);
-	XMMATRIX deltaZ = XMMatrixRotationZ(delta.z);
-
+	XMMATRIX deltaX = XMMatrixRotationX(XMVectorGetX(delta));
+	XMMATRIX deltaY = XMMatrixRotationY(XMVectorGetY(delta));
+	XMMATRIX deltaZ = XMMatrixRotationZ(XMVectorGetZ(delta));
 	m_rotation = m_rotation * (deltaZ * deltaY * deltaX);
-
 	m_isDirty = true;
 }
-
-XMFLOAT3 Object::GetRotation() const // Not actually sure how this works
+XMVECTOR Object::GetRotation() const // Not actually sure how this works
 {
 	XMFLOAT4X4 rotMatrix = {};
 	XMStoreFloat4x4(&rotMatrix, m_rotation);
-
 	XMFLOAT3 euler = {};
 	euler.y = atan2f(rotMatrix._13, rotMatrix._33); // yaw
 	float cosYaw = cosf(euler.y);
-
 	if (fabsf(cosYaw) > 1e-6)
 	{
 		euler.x = asinf(-rotMatrix._23); // pitch
@@ -125,37 +111,33 @@ XMFLOAT3 Object::GetRotation() const // Not actually sure how this works
 		euler.x = asinf(-rotMatrix._23); // pitch
 		euler.z = 0.0f;
 	}
-
-	return euler;
+	return XMVectorSet(euler.x, euler.y, euler.z, 0.0f);
 }
 
-void Object::SetScale(const XMFLOAT3& scl)
+void Object::SetScale(const XMVECTOR& scl)
 {
-	m_scale = XMMatrixScaling(scl.x, scl.y, scl.z);
-
+	XMFLOAT3 scale = {};
+	XMStoreFloat3(&scale, scl);
+	m_scale = XMMatrixScaling(scale.x, scale.y, scale.z);
 	m_isDirty = true;
 }
-
-void Object::Scale(const XMFLOAT3& factor)
+void Object::Scale(const XMVECTOR& factor)
 {
 	XMFLOAT4X4 currentScale = {};
 	XMStoreFloat4x4(&currentScale, m_scale);
-
-	currentScale._11 *= factor.x;
-	currentScale._22 *= factor.y;
-	currentScale._33 *= factor.z;
-
+	XMFLOAT3 scaleFactor = {};
+	XMStoreFloat3(&scaleFactor, factor);
+	currentScale._11 *= scaleFactor.x;
+	currentScale._22 *= scaleFactor.y;
+	currentScale._33 *= scaleFactor.z;
 	m_scale = XMLoadFloat4x4(&currentScale);
-
 	m_isDirty = true;
 }
-
-XMFLOAT3 Object::GetScale() const
+XMVECTOR Object::GetScale() const
 {
 	XMFLOAT4X4 scaleMatrix = {};
 	XMStoreFloat4x4(&scaleMatrix, m_scale);
-
-	return XMFLOAT3(scaleMatrix._11, scaleMatrix._22, scaleMatrix._33);
+	return XMVectorSet(scaleMatrix._11, scaleMatrix._22, scaleMatrix._33, 0.0f);
 }
 
 XMMATRIX Object::GetWorldMatrix()
