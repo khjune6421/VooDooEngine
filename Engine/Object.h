@@ -32,19 +32,17 @@ public:
 	Object(Shapes shape = Shapes::Triangle);
 	virtual ~Object();
 
-	// Maybe change to XMVECTOR later?
-	// Transformation related functions
-	void SetPosition(const DirectX::XMFLOAT3& pos);
-	void MovePosition(const DirectX::XMFLOAT3& delta);
-	DirectX::XMFLOAT3 GetPosition() const;
+	void SetPosition(const DirectX::XMVECTOR& pos);
+	void MovePosition(const DirectX::XMVECTOR& delta);
+	DirectX::XMVECTOR GetPosition() const;
 
-	void SetRotation(const DirectX::XMFLOAT3& rot);
-	void Rotate(const DirectX::XMFLOAT3& delta);
-	DirectX::XMFLOAT3 GetRotation() const;
+	void SetRotation(const DirectX::XMVECTOR& rot);
+	void Rotate(const DirectX::XMVECTOR& delta);
+	DirectX::XMVECTOR GetRotation() const;
 
-	void SetScale(const DirectX::XMFLOAT3& scl);
-	void Scale(const DirectX::XMFLOAT3& factor);
-	DirectX::XMFLOAT3 GetScale() const;
+	void SetScale(const DirectX::XMVECTOR& scl);
+	void Scale(const DirectX::XMVECTOR& factor);
+	DirectX::XMVECTOR GetScale() const;
 
 	DirectX::XMMATRIX GetWorldMatrix();
 

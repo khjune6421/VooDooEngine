@@ -31,7 +31,7 @@ public:
 	const DirectX::XMFLOAT3& GetPosition() const { return m_position; }
 	const DirectX::XMFLOAT3& GetRotation() const { return m_rotation; }
 
-	void LookAt(const DirectX::XMFLOAT3& target);
+	void LookAt(const DirectX::XMVECTOR& target);
 
 	void SetScreenSize(int screenWidth, int screenHeight);
 	int GetScreenWidth() const { return m_screenWidth; }
