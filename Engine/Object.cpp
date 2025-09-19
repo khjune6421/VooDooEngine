@@ -71,6 +71,7 @@ void Object::MovePosition(const XMVECTOR& delta)
 	XMVECTOR currentPos = XMVectorSet(m_position.r[3].m128_f32[0], m_position.r[3].m128_f32[1], m_position.r[3].m128_f32[2], 1.0f);
 	XMVECTOR newPos = XMVectorAdd(currentPos, delta);
 	m_position = XMMatrixTranslationFromVector(newPos);
+
 	m_isDirty = true;
 }
 XMVECTOR Object::GetPosition() const
@@ -84,6 +85,7 @@ void Object::SetRotation(const XMVECTOR& rot)
 	XMMATRIX rotY = XMMatrixRotationY(XMVectorGetY(rot));
 	XMMATRIX rotZ = XMMatrixRotationZ(XMVectorGetZ(rot));
 	m_rotation = rotZ * rotY * rotX;
+
 	m_isDirty = true;
 }
 void Object::Rotate(const XMVECTOR& delta)
@@ -92,6 +94,7 @@ void Object::Rotate(const XMVECTOR& delta)
 	XMMATRIX deltaY = XMMatrixRotationY(XMVectorGetY(delta));
 	XMMATRIX deltaZ = XMMatrixRotationZ(XMVectorGetZ(delta));
 	m_rotation = m_rotation * (deltaZ * deltaY * deltaX);
+
 	m_isDirty = true;
 }
 XMVECTOR Object::GetRotation() const // Not actually sure how this works
@@ -101,6 +104,7 @@ XMVECTOR Object::GetRotation() const // Not actually sure how this works
 	XMFLOAT3 euler = {};
 	euler.y = atan2f(rotMatrix._13, rotMatrix._33); // yaw
 	float cosYaw = cosf(euler.y);
+
 	if (fabsf(cosYaw) > 1e-6)
 	{
 		euler.x = asinf(-rotMatrix._23); // pitch
@@ -111,6 +115,7 @@ XMVECTOR Object::GetRotation() const // Not actually sure how this works
 		euler.x = asinf(-rotMatrix._23); // pitch
 		euler.z = 0.0f;
 	}
+
 	return XMVectorSet(euler.x, euler.y, euler.z, 0.0f);
 }
 
@@ -119,6 +124,7 @@ void Object::SetScale(const XMVECTOR& scl)
 	XMFLOAT3 scale = {};
 	XMStoreFloat3(&scale, scl);
 	m_scale = XMMatrixScaling(scale.x, scale.y, scale.z);
+
 	m_isDirty = true;
 }
 void Object::Scale(const XMVECTOR& factor)
@@ -131,12 +137,14 @@ void Object::Scale(const XMVECTOR& factor)
 	currentScale._22 *= scaleFactor.y;
 	currentScale._33 *= scaleFactor.z;
 	m_scale = XMLoadFloat4x4(&currentScale);
+
 	m_isDirty = true;
 }
 XMVECTOR Object::GetScale() const
 {
 	XMFLOAT4X4 scaleMatrix = {};
 	XMStoreFloat4x4(&scaleMatrix, m_scale);
+
 	return XMVectorSet(scaleMatrix._11, scaleMatrix._22, scaleMatrix._33, 0.0f);
 }
 
