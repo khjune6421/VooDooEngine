@@ -9,6 +9,7 @@ class TestScene : public Scene
 {
 	std::unique_ptr<Player> m_player;
 	std::unique_ptr<WindMill> m_windmill;
+	std::unique_ptr<WindMillWing> m_projectileWing;
 
 public:
 	TestScene(std::string dataFile);

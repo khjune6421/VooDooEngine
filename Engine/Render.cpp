@@ -533,8 +533,8 @@ Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
-	m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
-	m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
+	m_deviceInfo.displayMode.Width = width;
+	m_deviceInfo.displayMode.Height = height;
 
 	CreateDeviceSwapChain();
 	CreateRenderTarget();
