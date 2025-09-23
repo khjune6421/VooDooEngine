@@ -723,8 +723,6 @@ float Render::EngineUpdate()
 	UpdateRenderMode();
 	UpdateShaders();
 
-	//UpdateTestObject(deltaTime);
-
 	return deltaTime;
 }
 
@@ -747,6 +745,9 @@ void Render::DrawObjects()
 			continue;
 		}
 
+		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
+		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
+
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetInputLayout(get<3>(m_vertexShaderMap[object->m_vertexShader]).Get());
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -766,11 +767,12 @@ void Render::DrawObjects()
 		constBufferData.VSFloatC = -constBufferData.VSFloatA;
 		constBufferData.VSFloatD = -constBufferData.VSFloatB;
 
-		//m_deviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
 		m_deviceContext->UpdateSubresource(get<2>(m_vertexShaderMap[object->m_vertexShader]).Get(), 0, nullptr, &constBufferData, 0, 0);
 
 		m_deviceContext->Draw(m_shapeVertexBuffers[object->m_shape].second, 0);
 	}
+
+	UpdateShaders();
 }
 
 void Render::UpdateRenderMode()

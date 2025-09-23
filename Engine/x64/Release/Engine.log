@@ -1,6 +1,2 @@
-﻿  GameManager.cpp
-  Object.cpp
-  Render.cpp
-  Scene.cpp
-  WindowManager.cpp
+﻿  Render.cpp
   Engine.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\Engine.lib
