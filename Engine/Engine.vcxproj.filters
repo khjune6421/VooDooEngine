@@ -66,10 +66,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="AllPixelShader.hlsl">
+    <FxCompile Include="PixelShaderAll.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="NullPixelShader.hlsl">
+    <FxCompile Include="PixelShaderNull.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="PixelShader.hlsl">

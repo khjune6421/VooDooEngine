@@ -3,10 +3,10 @@
   <ProjectOutputs />
   <ContentFiles>
     <ContentFile>
-      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Debug\AllPixelShader.cso</FullPath>
+      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Debug\PixelShaderAll.cso</FullPath>
     </ContentFile>
     <ContentFile>
-      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Debug\NullPixelShader.cso</FullPath>
+      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Debug\PixelShaderNull.cso</FullPath>
     </ContentFile>
     <ContentFile>
       <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Debug\PixelShader.cso</FullPath>

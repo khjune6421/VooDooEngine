@@ -329,8 +329,8 @@ void Render::DisplayDeviceInfo()
 constexpr const wchar_t* DEFAULT_SHADER_PATH = L"../Engine/";
 constexpr const wchar_t* DEFAULT_VS = L"VertexShader";
 constexpr const wchar_t* DEFAULT_PS = L"PixelShader";
-constexpr const wchar_t* NullPS = L"NullPixelShader";
-constexpr const wchar_t* AllPS = L"AllPixelShader";
+constexpr const wchar_t* NullPS = L"PixelShaderNull";
+constexpr const wchar_t* AllPS = L"PixelShaderAll";
 constexpr const char* DEFAULT_ENTRY_POINT = "main";
 constexpr const char* DEFAULT_SHADERMODEL = "5_0";
 
