@@ -4,7 +4,8 @@
   WindMill.cpp
   WindMillWing.cpp
   Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 2225 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  40 of 2735 functions ( 1.5%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    17 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe

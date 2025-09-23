@@ -140,11 +140,8 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
-	// Shader
-	comPtr<ID3D11VertexShader> m_vertexShader = nullptr;
-	comPtr<ID3DBlob> m_VSCode = nullptr;
-	comPtr<ID3D11PixelShader> m_pixelShader = nullptr;
-	comPtr<ID3D11Buffer> m_constantBuffer = nullptr;
+	VertexShaders m_currentVertexShader = VertexShaders::Default;
+	PixelShaders m_currentPixelShader = PixelShaders::Default;
 
 	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout
 	std::unordered_map < VertexShaders, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
@@ -155,10 +152,8 @@ class Render
 	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
-	comPtr<ID3D11InputLayout> m_inputLayout = nullptr;
-
 	// Static vertex buffer for rendering objects
-	static std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> s_shapeVertexBuffers;
+	std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBuffers;
 
 	// Functions
 
@@ -181,7 +176,6 @@ class Render
 	void DisplayDeviceInfo();
 
 	// Shader
-	void CreateShaders();
 	void UpdateShaders();
 
 	void LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel);
@@ -190,13 +184,9 @@ class Render
 	void LoadPrecompiledVertexShader(const wchar_t* file);
 	void LoadPrecompiledPixelShader(const wchar_t* file);
 
-	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode);
-	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader);
-
 	// Render
 	void CreateRasterState();
 
-	void SetInputLayout();
 	void CreateShapeVertexBuffer();
 
 	float EngineUpdate();
@@ -216,7 +206,7 @@ public:
 
 	void SceneRender();
 
-	void ChangeShader(UINT id);
+	void ChangeShader(PixelShaders pixelShader = PixelShaders::Default);
 	void ChangeState();
 };
 

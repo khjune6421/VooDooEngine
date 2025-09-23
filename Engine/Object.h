@@ -20,6 +20,8 @@ class Object
 	UINT m_id = 0; // For debug purpose
 
 	Shapes m_shape = Shapes::Triangle;
+	VertexShaders m_vertexShader = VertexShaders::Default;
+	PixelShaders m_pixelShader = PixelShaders::Default;
 
 	// Not sure if these should be private or protected
 	DirectX::XMMATRIX m_position = DirectX::XMMatrixIdentity();
@@ -52,7 +54,7 @@ protected:
 	UINT m_ignoreScale = IgnoreParentAxis::None;
 
 public:
-	Object(Shapes shape = Shapes::Triangle);
+	Object(Shapes shape = Shapes::Triangle, VertexShaders vertexShader = VertexShaders::Default, PixelShaders pixelShader = PixelShaders::Default);
 	virtual ~Object();
 
 	void SetPosition(const DirectX::XMVECTOR& pos);

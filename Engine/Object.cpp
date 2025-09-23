@@ -42,7 +42,7 @@ void Object::AddChild(Object* child)
 	MakeChildDirty();
 }
 
-Object::Object(Shapes shape) : m_shape(shape), m_id(s_idCounter++)
+Object::Object(Shapes shape, VertexShaders vertexShader, PixelShaders pixelShader) : m_shape(shape), m_vertexShader(vertexShader), m_pixelShader(pixelShader), m_id(s_idCounter++)
 {
 	VDGM::g_objects.emplace_back(this);
 
