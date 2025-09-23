@@ -370,6 +370,141 @@ void Render::UpdateShaders()
 	m_deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
 }
 
+void Render::LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel)
+{
+	filesystem::path path(shaderPath);
+	if (filesystem::exists(path) && filesystem::is_directory(path))
+	{
+		for (const auto& entry : filesystem::recursive_directory_iterator(shaderPath))
+		{
+			if (entry.path().extension() == L".hlsl")
+			{
+				if (entry.path().stem().wstring()[0] == L'V') LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel); // Well this is cursed
+				else LoadPixelShader(entry.path().c_str(), entryPoint, shaderModel);
+			}
+		}
+	}
+	for (const auto& entry : filesystem::directory_iterator())
+	{
+		if (entry.path().extension() == L".cso")
+		{
+			if (entry.path().stem().wstring()[0] == L'V') LoadPrecompiledVertexShader(entry.path().c_str());
+			else LoadPrecompiledPixelShader(entry.path().c_str());
+		}
+	}
+}
+
+void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
+{
+	comPtr<ID3DBlob> VSCode;
+	comPtr<ID3DBlob> errorBlob;
+
+	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
+#ifdef _DEBUG
+	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("vs_" + string(shaderModel)).c_str(), compileFlags, 0, VSCode.GetAddressOf(), errorBlob.GetAddressOf());
+	if (FAILED(hr))
+	{
+		if (errorBlob) MessageBoxA(nullptr, (char*)errorBlob->GetBufferPointer(), "Vertex Shader Compilation Error", MB_OK);
+		else MessageBoxW(nullptr, L"Failed to compile vertex shader", L"Error", MB_OK);
+		return;
+	}
+
+	comPtr<ID3D11VertexShader> vertexShader;
+	hr = m_device->CreateVertexShader(VSCode.Get()->GetBufferPointer(), VSCode.Get()->GetBufferSize(), nullptr, vertexShader.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBoxW(nullptr, L"Failed to create vertex shader", L"Error", MB_OK);
+		return;
+	}
+
+	wstring shaderName = filesystem::path(file).stem().wstring();
+	// Use predefined constant buffer and input layout for now
+	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, m_constantBuffer, m_inputLayout);
+}
+
+void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
+{
+	comPtr<ID3DBlob> PSCode;
+	comPtr<ID3DBlob> errorBlob;
+
+	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
+#ifdef _DEBUG
+	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("ps_" + string(shaderModel)).c_str(), compileFlags, 0, PSCode.GetAddressOf(), errorBlob.GetAddressOf());
+	if (FAILED(hr))
+	{
+		if (errorBlob) MessageBoxA(nullptr, (char*)errorBlob->GetBufferPointer(), "Pixel Shader Compilation Error", MB_OK);
+		else MessageBoxW(nullptr, L"Failed to compile pixel shader", L"Error", MB_OK);
+		return;
+	}
+
+	comPtr<ID3D11PixelShader> pixelShader;
+	hr = m_device->CreatePixelShader(PSCode->GetBufferPointer(), PSCode->GetBufferSize(), nullptr, pixelShader.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBoxW(nullptr, L"Failed to create pixel shader", L"Error", MB_OK);
+		return;
+	}
+
+	wstring shaderName = filesystem::path(file).stem().wstring();
+	if (shaderName == L"PixelShader") m_pixelShaderMap[PixelShaders::Default] = pixelShader;
+	else if (shaderName == L"PixelShaderNull") m_pixelShaderMap[PixelShaders::Greyscale] = pixelShader;
+	else if (shaderName == L"PixelShaderAll") m_pixelShaderMap[PixelShaders::ColorShift] = pixelShader;
+}
+
+void Render::LoadPrecompiledVertexShader(const wchar_t* file)
+{
+	comPtr<ID3DBlob> VSCode;
+
+	HRESULT hr = D3DReadFileToBlob(file, VSCode.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBoxW(nullptr, L"Failed to read precompiled vertex shader", L"Error", MB_OK);
+		return;
+	}
+
+	comPtr<ID3D11VertexShader> vertexShader;
+	hr = m_device->CreateVertexShader(VSCode.Get()->GetBufferPointer(), VSCode.Get()->GetBufferSize(), nullptr, vertexShader.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBoxW(nullptr, L"Failed to create vertex shader", L"Error", MB_OK);
+		return;
+	}
+
+	wstring shaderName = filesystem::path(file).stem().wstring();
+
+	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, m_constantBuffer, m_inputLayout);
+}
+
+void Render::LoadPrecompiledPixelShader(const wchar_t* file)
+{
+	comPtr<ID3DBlob> PSCode;
+	HRESULT hr = D3DReadFileToBlob(file, PSCode.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBoxW(nullptr, L"Failed to read precompiled pixel shader", L"Error", MB_OK);
+		return;
+	}
+
+	comPtr<ID3D11PixelShader> pixelShader;
+	hr = m_device->CreatePixelShader(PSCode.Get()->GetBufferPointer(), PSCode.Get()->GetBufferSize(), nullptr, pixelShader.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBoxW(nullptr, L"Failed to create pixel shader", L"Error", MB_OK);
+		return;
+	}
+
+	wstring shaderName = filesystem::path(file).stem().wstring();
+	if (shaderName == L"PixelShader") m_pixelShaderMap[PixelShaders::Default] = pixelShader;
+	else if (shaderName == L"PixelShaderNull") m_pixelShaderMap[PixelShaders::Greyscale] = pixelShader;
+	else if (shaderName == L"PixelShaderAll") m_pixelShaderMap[PixelShaders::ColorShift] = pixelShader;
+}
+
 void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode)
 {
 	comPtr<ID3DBlob> errorBlob;
@@ -466,126 +601,6 @@ void Render::SetInputLayout()
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	CreateInputLayout(layoutDesc, _countof(layoutDesc), m_VSCode, &m_inputLayout);
-}
-
-float Render::EngineUpdate()
-{
-	float deltaTime = VDGM::g_deltaTimeF;
-
-	UpdateRenderMode();
-	UpdateShaders();
-
-	//UpdateTestObject(deltaTime);
-
-	return deltaTime;
-}
-
-void Render::DrawObjects()
-{
-	static float ATime = 0.0f; // Accumulated time
-	ATime += VDGM::g_deltaTimeF;
-
-	for (Object* object : VDGM::g_objects)
-	{
-		if (!object || !object->m_isActive) continue;
-		constexpr UINT stride = sizeof(Vertex);
-		constexpr UINT offset = 0;
-
-		ID3D11Buffer* vertexBuffer = nullptr;
-		if (s_shapeVertexBuffers.find(object->m_shape) != s_shapeVertexBuffers.end()) vertexBuffer = s_shapeVertexBuffers[object->m_shape].first.Get();
-		else
-		{
-			MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK);
-			continue;
-		}
-
-		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		m_deviceContext->IASetInputLayout(m_inputLayout.Get());
-		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		XMMATRIX worldMatrix = object->GetWorldMatrix();
-		XMMATRIX viewMatrix = g_camera.GetViewMatrix();
-		XMMATRIX projMatrix = g_camera.GetProjectionMatrix();
-
-		TestConstBuffer constBufferData = {};
-		constBufferData.world = XMMatrixTranspose(worldMatrix);
-		constBufferData.view = XMMatrixTranspose(viewMatrix);
-		constBufferData.projection = XMMatrixTranspose(projMatrix);
-		constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
-
-		constBufferData.VSFloatA = sinf(static_cast<float>(ATime));
-		constBufferData.VSFloatB = cosf(static_cast<float>(ATime));
-		constBufferData.VSFloatC = -constBufferData.VSFloatA;
-		constBufferData.VSFloatD = -constBufferData.VSFloatB;
-
-		m_deviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
-
-		m_deviceContext->Draw(s_shapeVertexBuffers[object->m_shape].second, 0);
-	}
-}
-
-void Render::UpdateRenderMode()
-{
-	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
-}
-
-Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
-{
-	// Initialize device
-	GetHardwareInfo();
-	m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
-	m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
-
-	CreateDeviceSwapChain();
-	CreateRenderTarget();
-	CreateDepthStencil();
-	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
-	SetViewport();
-	LoadFonts();
-
-	m_DXVersion = (m_deviceInfo.featureLevels & 0xf000) >> 12;
-	m_DXSubVersion = (m_deviceInfo.featureLevels & 0x0f00) >> 8;
-
-	// Initialize shaders
-	CreateShaders();
-
-	// Initialize render
-	CreateRasterState();
-	SetInputLayout();
-
-	// Initialize camera // this should be moved to somewhere else later
-	g_camera.SetScreenSize(static_cast<int>(m_deviceInfo.displayMode.Width), static_cast<int>(m_deviceInfo.displayMode.Height));
-}
-
-Render::~Render()
-{
-	// Clear device
-	m_SpriteFontMap.clear();
-	m_SpriteBatchMap.clear();
-	m_device.Reset();
-
-	// Not sure if this is necessary // microsoft doesnot recommend it
-	if (m_deviceContext)
-	{
-		m_deviceContext->ClearState();
-		m_deviceContext->Flush();
-	}
-	m_deviceContext.Reset();
-	m_swapChain.Reset();
-	m_renderTargetView.Reset();
-	m_depthStencilBuffer.Reset();
-	m_depthStencilView.Reset();
-	m_deviceInfo.hardwareInfos.clear();
-
-	// Clear shaders
-	m_vertexShader.Reset();
-	m_VSCode.Reset();
-	m_pixelShader.Reset();
-	m_constantBuffer.Reset();
-
-	// Clear render
-	for (auto& state : g_rasterState) state.Reset();
-	m_inputLayout.Reset();
 }
 
 void Render::CreateShapeVertexBuffer()
@@ -760,6 +775,129 @@ void Render::CreateShapeVertexBuffer()
 		CreateVertexBuffer(sizeof(wingVertices), &s_shapeVertexBuffers[Shapes::WindmillWing].first, wingVertices, sizeof(Vertex));
 		s_shapeVertexBuffers[Shapes::WindmillWing].second = 12;
 	}
+}
+
+float Render::EngineUpdate()
+{
+	float deltaTime = VDGM::g_deltaTimeF;
+
+	UpdateRenderMode();
+	UpdateShaders();
+
+	//UpdateTestObject(deltaTime);
+
+	return deltaTime;
+}
+
+void Render::DrawObjects()
+{
+	static float ATime = 0.0f; // Accumulated time
+	ATime += VDGM::g_deltaTimeF;
+
+	for (Object* object : VDGM::g_objects)
+	{
+		if (!object || !object->m_isActive) continue;
+		constexpr UINT stride = sizeof(Vertex);
+		constexpr UINT offset = 0;
+
+		ID3D11Buffer* vertexBuffer = nullptr;
+		if (s_shapeVertexBuffers.find(object->m_shape) != s_shapeVertexBuffers.end()) vertexBuffer = s_shapeVertexBuffers[object->m_shape].first.Get();
+		else
+		{
+			MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK);
+			continue;
+		}
+
+		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetInputLayout(m_inputLayout.Get());
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		XMMATRIX worldMatrix = object->GetWorldMatrix();
+		XMMATRIX viewMatrix = g_camera.GetViewMatrix();
+		XMMATRIX projMatrix = g_camera.GetProjectionMatrix();
+
+		TestConstBuffer constBufferData = {};
+		constBufferData.world = XMMatrixTranspose(worldMatrix);
+		constBufferData.view = XMMatrixTranspose(viewMatrix);
+		constBufferData.projection = XMMatrixTranspose(projMatrix);
+		constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
+
+		constBufferData.VSFloatA = sinf(static_cast<float>(ATime));
+		constBufferData.VSFloatB = cosf(static_cast<float>(ATime));
+		constBufferData.VSFloatC = -constBufferData.VSFloatA;
+		constBufferData.VSFloatD = -constBufferData.VSFloatB;
+
+		m_deviceContext->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
+
+		m_deviceContext->Draw(s_shapeVertexBuffers[object->m_shape].second, 0);
+	}
+}
+
+void Render::UpdateRenderMode()
+{
+	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
+}
+
+Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
+{
+	// Initialize device
+	GetHardwareInfo();
+	m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
+	m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
+
+	CreateDeviceSwapChain();
+	CreateRenderTarget();
+	CreateDepthStencil();
+	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
+	SetViewport();
+	LoadFonts();
+
+	m_DXVersion = (m_deviceInfo.featureLevels & 0xf000) >> 12;
+	m_DXSubVersion = (m_deviceInfo.featureLevels & 0x0f00) >> 8;
+
+	// Initialize shaders
+	CreateShaders();
+
+	// Initialize render
+	CreateRasterState();
+	SetInputLayout();
+	LoadAllShaders(L"../Engine/", "main", "5_0");
+
+	CreateShapeVertexBuffer();
+
+	// Initialize camera // this should be moved to somewhere else later
+	g_camera.SetScreenSize(static_cast<int>(m_deviceInfo.displayMode.Width), static_cast<int>(m_deviceInfo.displayMode.Height));
+}
+
+Render::~Render()
+{
+	// Clear device
+	m_SpriteFontMap.clear();
+	m_SpriteBatchMap.clear();
+	m_device.Reset();
+
+	// Not sure if this is necessary // microsoft doesnot recommend it
+	if (m_deviceContext)
+	{
+		m_deviceContext->ClearState();
+		m_deviceContext->Flush();
+	}
+	m_deviceContext.Reset();
+	m_swapChain.Reset();
+	m_renderTargetView.Reset();
+	m_depthStencilBuffer.Reset();
+	m_depthStencilView.Reset();
+	m_deviceInfo.hardwareInfos.clear();
+
+	// Clear shaders
+	m_vertexShader.Reset();
+	m_VSCode.Reset();
+	m_pixelShader.Reset();
+	m_constantBuffer.Reset();
+
+	// Clear render
+	for (auto& state : g_rasterState) state.Reset();
+	m_inputLayout.Reset();
 }
 
 void Render::Resize(UINT width, UINT height)

@@ -47,11 +47,11 @@ enum class Shapes
 };
 enum class VertexShaders // Should it alos includes corresponding constant buffer and input layout?
 {
-	Basic
+	Default,
 };
 enum class PixelShaders
 {
-	Basic,
+	Default,
 	ColorShift,
 	Greyscale
 };
@@ -184,14 +184,21 @@ class Render
 	void CreateShaders();
 	void UpdateShaders();
 
-	void LoadAllShaders();
+	void LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel);
+	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
+	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
+	void LoadPrecompiledVertexShader(const wchar_t* file);
+	void LoadPrecompiledPixelShader(const wchar_t* file);
 
 	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader);
 
 	// Render
 	void CreateRasterState();
+
 	void SetInputLayout();
+	void CreateShapeVertexBuffer();
+
 	float EngineUpdate();
 
 	void DrawObjects();
@@ -201,8 +208,6 @@ class Render
 public:
 	Render(HWND hWnd, int width, int height);
 	~Render();
-
-	void CreateShapeVertexBuffer();
 
 	void Resize(UINT width, UINT height);
 	void SetViewport(float topLeftX = 0.0f, float topLeftY = 0.0f);
