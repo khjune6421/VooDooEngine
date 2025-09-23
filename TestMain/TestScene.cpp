@@ -28,7 +28,7 @@ TestScene::TestScene(string dataFile)
 			index++;
 			unique_ptr<Object> tree;
 			if (index % 3) tree = make_unique<Object>(Shapes::Tree);
-			else tree = make_unique<Object>(Shapes::Tree, VertexShaders::Default, PixelShaders::ColorShift);
+			else tree = make_unique<Object>(Shapes::Tree, VertexShaders::Default, PixelShaders::Greyscale);
 			tree->SetPosition(XMVECTOR{ pos.x, pos.y, pos.z, 1.0f });
 			m_objects.emplace_back(move(tree));
 		}

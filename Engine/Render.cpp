@@ -716,14 +716,10 @@ void Render::CreateShapeVertexBuffer()
 	}
 }
 
-float Render::EngineUpdate()
+void Render::EngineUpdate()
 {
-	float deltaTime = VDGM::g_deltaTimeF;
-
 	UpdateRenderMode();
 	UpdateShaders();
-
-	return deltaTime;
 }
 
 void Render::DrawObjects()
@@ -745,8 +741,10 @@ void Render::DrawObjects()
 			continue;
 		}
 
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
-		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
+		if (m_currentVertexShader == VertexShaders::Default) m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
+		else m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[m_currentVertexShader]).Get(), nullptr, 0);
+		if (m_currentPixelShader == PixelShaders::Default) m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
+		else m_deviceContext->PSSetShader(m_pixelShaderMap[m_currentPixelShader].Get(), nullptr, 0);
 
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetInputLayout(get<3>(m_vertexShaderMap[object->m_vertexShader]).Get());
@@ -771,8 +769,6 @@ void Render::DrawObjects()
 
 		m_deviceContext->Draw(m_shapeVertexBuffers[object->m_shape].second, 0);
 	}
-
-	UpdateShaders();
 }
 
 void Render::UpdateRenderMode()

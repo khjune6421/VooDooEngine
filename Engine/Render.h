@@ -189,7 +189,7 @@ class Render
 
 	void CreateShapeVertexBuffer();
 
-	float EngineUpdate();
+	void EngineUpdate();
 
 	void DrawObjects();
 

@@ -1,6 +1,7 @@
-﻿  Generating code
-  8 of 2736 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+﻿  TestScene.cpp
+  Generating code
+  1 of 2736 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    10 functions had inline decision re-evaluated but remain unchanged
+    2 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\TestMain.exe
