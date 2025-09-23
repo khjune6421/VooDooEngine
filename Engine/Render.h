@@ -45,6 +45,16 @@ enum class Shapes
 	Tree,
 	WindmillWing
 };
+enum class VertexShaders // Should it alos includes corresponding constant buffer and input layout?
+{
+	Basic
+};
+enum class PixelShaders
+{
+	Basic,
+	ColorShift,
+	Greyscale
+};
 
 class Object;
 
@@ -136,8 +146,13 @@ class Render
 	comPtr<ID3D11PixelShader> m_pixelShader = nullptr;
 	comPtr<ID3D11Buffer> m_constantBuffer = nullptr;
 
+	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout
+	std::unordered_map < VertexShaders, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+	std::unordered_map<PixelShaders, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
+
 	// Render
-	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr }; // 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
+	// 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
+	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
 	comPtr<ID3D11InputLayout> m_inputLayout = nullptr;
@@ -168,6 +183,8 @@ class Render
 	// Shader
 	void CreateShaders();
 	void UpdateShaders();
+
+	void LoadAllShaders();
 
 	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader);
