@@ -6,10 +6,10 @@ c:\users\user\desktop\voodooengine\engine\x64\release\objectpositionparser.obj
 c:\users\user\desktop\voodooengine\engine\x64\release\object.obj
 c:\users\user\desktop\voodooengine\engine\x64\release\gamemanager.obj
 c:\users\user\desktop\voodooengine\engine\x64\release\camera.obj
-c:\users\user\desktop\voodooengine\x64\release\allpixelshader.cso
-c:\users\user\desktop\voodooengine\x64\release\nullpixelshader.cso
 c:\users\user\desktop\voodooengine\x64\release\pixelshader.cso
 c:\users\user\desktop\voodooengine\x64\release\vertexshader.cso
+c:\users\user\desktop\voodooengine\x64\release\allpixelshader.cso
+c:\users\user\desktop\voodooengine\x64\release\nullpixelshader.cso
 c:\users\user\desktop\voodooengine\x64\release\engine.lib
 c:\users\user\desktop\voodooengine\engine\x64\release\engine.tlog\cl.command.1.tlog
 c:\users\user\desktop\voodooengine\engine\x64\release\engine.tlog\cl.items.tlog

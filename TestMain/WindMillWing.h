@@ -6,11 +6,10 @@ class WindMillWing : public Object
 {
 	friend class TestScene;
 
-	Object m_windmillWing;
-	bool m_rotationAngle = false;
+	std::unique_ptr<Object> m_wing[3];
 
 public:
-	WindMillWing(Shapes shape = Shapes::Triangle);
+	WindMillWing();
 	~WindMillWing() override = default;
 
 	void Update(float deltaTime) override;

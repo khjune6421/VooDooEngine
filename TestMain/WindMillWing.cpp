@@ -3,22 +3,26 @@
 using namespace std;
 using namespace DirectX;
 
-WindMillWing::WindMillWing(Shapes shape) : Object(shape), m_windmillWing(Shapes::WindmillWing)
+static UINT s_windmillIndex = 0;
+
+WindMillWing::WindMillWing() : Object()
 {
 	m_isActive = false;
 
-	m_windmillWing.SetPosition(XMVECTOR{ 0.0f, 0.0f, -2.0f, 1.0f });
-	AddChild(&m_windmillWing);
+	for (int i = 0; i < 3; ++i)
+	{
+		m_wing[i] = make_unique<Object>(Shapes::WindmillWing);
+		AddChild(m_wing[i].get());
+
+		m_wing[i]->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.5f * (i + 1), 1.0f});
+		m_wing[i]->SetScale(XMVECTOR{ 2.0f / (i + 2), 2.0f / (i + 2), 2.0f / (i + 2), 0.0f });
+	}
 }
 
 void WindMillWing::Update(float deltaTime)
 {
-	static float ATime = 0.0f; // Accumulated time
-	ATime += deltaTime;
-
-	if (m_rotationAngle) SetRotation(XMVECTOR{ 0.0f, 2.0f * ATime, 0.0f, 0.0f });
-	else SetRotation(XMVECTOR{ 0.0f, 0.0f, 2.0f * ATime, 0.0f });
-
-	if (GetAsyncKeyState(VK_OEM_PERIOD) & 0x8000 && GetScale().m128_f32[0] <= 3.0f) Scale(XMVECTOR{ 1.0f + deltaTime * 2.0f, 1.0f + deltaTime * 2.0f, 1.0f + deltaTime * 2.0f, 0.0f });
-	if (GetAsyncKeyState(VK_OEM_COMMA) & 0x8000 && GetScale().m128_f32[0] >= 0.3f) Scale(XMVECTOR{ 1.0f - deltaTime * 2.0f, 1.0f - deltaTime * 2.0f, 1.0f - deltaTime * 2.0f, 0.0f });
+	//for (auto& wing : m_wing) wing->Rotate(XMVECTOR{ 0.0f, 0.0f, XM_PI * deltaTime, 0.0f });
+	if (m_wing[0]) m_wing[0]->Rotate(XMVECTOR{ 0.0f, 0.0f, XM_PI * deltaTime, 0.0f });
+	if (m_wing[1]) m_wing[1]->Rotate(XMVECTOR{ 0.0f, 0.0f, -XM_PI * deltaTime, 0.0f });
+	if (m_wing[2]) m_wing[2]->Rotate(XMVECTOR{ 0.0f, 0.0f, XM_PI * deltaTime, 0.0f });
 }
