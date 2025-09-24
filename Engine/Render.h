@@ -45,6 +45,16 @@ enum class Shapes
 	Tree,
 	WindmillWing
 };
+enum class VertexShaders // Should it alos includes corresponding constant buffer and input layout?
+{
+	Default,
+};
+enum class PixelShaders
+{
+	Default,
+	ColorShift,
+	Greyscale
+};
 
 class Object;
 
@@ -130,20 +140,20 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
-	// Shader
-	comPtr<ID3D11VertexShader> m_vertexShader = nullptr;
-	comPtr<ID3DBlob> m_VSCode = nullptr;
-	comPtr<ID3D11PixelShader> m_pixelShader = nullptr;
-	comPtr<ID3D11Buffer> m_constantBuffer = nullptr;
+	VertexShaders m_currentVertexShader = VertexShaders::Default;
+	PixelShaders m_currentPixelShader = PixelShaders::Default;
+
+	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout
+	std::unordered_map < VertexShaders, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+	std::unordered_map<PixelShaders, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
 
 	// Render
-	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr }; // 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
+	// 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
+	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
-	comPtr<ID3D11InputLayout> m_inputLayout = nullptr;
-
 	// Static vertex buffer for rendering objects
-	static std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> s_shapeVertexBuffers;
+	std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBuffers;
 
 	// Functions
 
@@ -166,16 +176,20 @@ class Render
 	void DisplayDeviceInfo();
 
 	// Shader
-	void CreateShaders();
 	void UpdateShaders();
 
-	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11VertexShader>* vertexShader, _Out_ comPtr<ID3DBlob>* VSCode);
-	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, _Out_ comPtr<ID3D11PixelShader>* pixelShader);
+	void LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel);
+	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
+	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
+	void LoadPrecompiledVertexShader(const wchar_t* file);
+	void LoadPrecompiledPixelShader(const wchar_t* file);
 
 	// Render
 	void CreateRasterState();
-	void SetInputLayout();
-	float EngineUpdate();
+
+	void CreateShapeVertexBuffer();
+
+	void EngineUpdate();
 
 	void DrawObjects();
 
@@ -185,8 +199,6 @@ public:
 	Render(HWND hWnd, int width, int height);
 	~Render();
 
-	void CreateShapeVertexBuffer();
-
 	void Resize(UINT width, UINT height);
 	void SetViewport(float topLeftX = 0.0f, float topLeftY = 0.0f);
 
@@ -194,7 +206,7 @@ public:
 
 	void SceneRender();
 
-	void ChangeShader(UINT id);
+	void ChangeShader(PixelShaders pixelShader = PixelShaders::Default);
 	void ChangeState();
 };
 
