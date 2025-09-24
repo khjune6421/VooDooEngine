@@ -4,6 +4,9 @@ using namespace DirectX;
 
 Player::Player(Shapes shape) : Object(shape)
 {
+	m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
+	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
+	AddChild(m_camera.get());
 }
 
 void Player::Update(float deltaTime)

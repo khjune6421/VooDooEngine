@@ -7,8 +7,7 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
-// Test object and camera
-Camera g_camera = Camera();
+Camera* g_camera = nullptr;
 
 void Render::CreateDeviceSwapChain()
 {
@@ -722,6 +721,13 @@ void Render::EngineUpdate()
 
 void Render::DrawObjects()
 {
+	if (!g_camera)
+	{
+		DrawText(L"Camera not found!", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+		return;
+	}
+	g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height);
+
 	static float ATime = 0.0f; // Accumulated time
 	ATime += VDGM::g_deltaTimeF;
 
@@ -749,8 +755,8 @@ void Render::DrawObjects()
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
-		XMMATRIX viewMatrix = g_camera.GetViewMatrix();
-		XMMATRIX projMatrix = g_camera.GetProjectionMatrix();
+		XMMATRIX viewMatrix = g_camera->GetViewMatrix();
+		XMMATRIX projMatrix = g_camera->GetProjectionMatrix();
 
 		TestConstBuffer constBufferData = {};
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
@@ -800,9 +806,6 @@ Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 	UpdateShaders();
 
 	CreateShapeVertexBuffer();
-
-	// Initialize camera // this should be moved to somewhere else later
-	g_camera.SetScreenSize(static_cast<int>(m_deviceInfo.displayMode.Width), static_cast<int>(m_deviceInfo.displayMode.Height));
 }
 
 Render::~Render()

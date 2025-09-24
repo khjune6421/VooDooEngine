@@ -13,9 +13,6 @@
 // I usually don't use 'using' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
-extern Camera g_camera;
-//extern Camera* g_ObjectCamera;
-
 class Object;
 
 namespace VDGM

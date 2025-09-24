@@ -7,13 +7,12 @@ vector<Object*> g_objects;
 
 static UINT s_idCounter = 0;
 
-void Object::MakeChildDirty()
+void Object::SetDirty()
 {
-	for (auto& child : m_childrens)
-	{
-		child->m_isDirty = true;
-		child->MakeChildDirty();
-	}
+	if (m_isDirty) return;
+
+	m_isDirty = true;
+	for (auto& child : m_childrens) child->SetDirty();
 }
 
 void Object::AddChild(Object* child)
@@ -37,12 +36,30 @@ void Object::AddChild(Object* child)
 	child->m_parent = this;
 	m_childrens.emplace_back(child);
 
-	MakeChildDirty();
+	SetDirty();
+}
+
+void Object::RemoveChild(Object* child)
+{
+	if (!child) return;
+
+	m_childrens.erase
+	(
+		remove
+		(
+			m_childrens.begin(),
+			m_childrens.end(),
+			child
+		),
+		m_childrens.end()
+	);
+
+	child->m_parent = nullptr;
 }
 
 Object::Object(Shapes shape, VertexShaders vertexShader, PixelShaders pixelShader) : m_shape(shape), m_vertexShader(vertexShader), m_pixelShader(pixelShader), m_id(s_idCounter++)
 {
-	g_objects.emplace_back(this);
+	if (shape != Shapes::None) g_objects.emplace_back(this);
 
 #ifdef _DEBUG
 	cout << "Object created. ID: " << m_id << endl;
@@ -62,21 +79,22 @@ Object::~Object()
 void Object::SetPosition(const XMVECTOR& pos)
 {
 	m_position = pos;
-	m_positionMatRix = XMMatrixTranslationFromVector(m_position);
-	m_isDirty = true;
+	m_positionMatrix = XMMatrixTranslationFromVector(m_position);
+
+	if (!m_isDirty) SetDirty();
 }
 void Object::MovePosition(const XMVECTOR& delta)
 {
 	m_position = XMVectorAdd(m_position, delta);
-	m_positionMatRix = XMMatrixTranslationFromVector(m_position);
+	m_positionMatrix = XMMatrixTranslationFromVector(m_position);
 
-	m_isDirty = true;
+	if (!m_isDirty) SetDirty();
 }
 void Object::MoveDirection(Directions dir, float distance)
 {
-	const XMVECTOR forward = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), m_rotationMatRix));
-	const XMVECTOR right = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), m_rotationMatRix));
-	const XMVECTOR up = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), m_rotationMatRix));
+	const XMVECTOR forward = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), m_rotationMatrix));
+	const XMVECTOR right = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), m_rotationMatrix));
+	const XMVECTOR up = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), m_rotationMatrix));
 
 	XMVECTOR moveDelta = XMVectorZero();
 
@@ -90,57 +108,146 @@ void Object::MoveDirection(Directions dir, float distance)
 
 	case Directions::Up: moveDelta = XMVectorScale(up, distance); break;
 	case Directions::Down: moveDelta = XMVectorScale(up, -distance); break;
+
 	default: break;
 	}
 
 	MovePosition(moveDelta);
+
+	if (!m_isDirty) SetDirty();
+}
+XMVECTOR Object::GetWorldPosition() const
+{
+	if (m_isDirty) GetWorldMatrix();
+
+	return XMVectorSet(m_worldMatrix.r[3].m128_f32[0], m_worldMatrix.r[3].m128_f32[1], m_worldMatrix.r[3].m128_f32[2], 1.0f);
 }
 
 void Object::SetRotation(const XMVECTOR& rot)
 {
 	m_rotation = rot;
+	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
 
-	XMMATRIX rotX = XMMatrixRotationX(XMVectorGetX(m_rotation));
-	XMMATRIX rotY = XMMatrixRotationY(XMVectorGetY(m_rotation));
-	XMMATRIX rotZ = XMMatrixRotationZ(XMVectorGetZ(m_rotation));
-	m_rotationMatRix = rotZ * rotY * rotX;
-
-	m_isDirty = true;
+	if (!m_isDirty) SetDirty();
 }
 void Object::Rotate(const XMVECTOR& delta)
 {
 	m_rotation = XMVectorAdd(m_rotation, delta);
+	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
 
-	XMMATRIX rotX = XMMatrixRotationX(XMVectorGetX(m_rotation));
-	XMMATRIX rotY = XMMatrixRotationY(XMVectorGetY(m_rotation));
-	XMMATRIX rotZ = XMMatrixRotationZ(XMVectorGetZ(m_rotation));
-	m_rotationMatRix = rotZ * rotY * rotX;
+	if (!m_isDirty) SetDirty();
+}
+void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this works
+{
+	XMVECTOR direction = XMVectorSubtract(target, m_position);
+	direction = XMVector3Normalize(direction);
+	float pitch = asinf(-XMVectorGetY(direction));
+	float yaw = atan2f(XMVectorGetX(direction), XMVectorGetZ(direction));
+	float roll = 0.0f;
+	m_rotation = XMVectorSet(pitch, yaw, roll, 0.0f);
+	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
+	if (!m_isDirty) SetDirty();
+}
+XMVECTOR Object::GetWorldRotation() const // This one too
+{
+	if (m_isDirty) GetWorldMatrix();
 
-	m_isDirty = true;
+	XMVECTOR scale, rotationQuat, translation;
+	XMMatrixDecompose(&scale, &rotationQuat, &translation, m_worldMatrix);
+
+	XMFLOAT4 quat = {};
+	XMStoreFloat4(&quat, rotationQuat);
+
+	// This is to prevent gimbal lock
+	const float test = quat.x * quat.y + quat.z * quat.w;
+	if (test > 0.499f)
+	{
+		float yaw = 2.0f * atan2f(quat.x, quat.w);
+		float pitch = XM_PIDIV2;
+		float roll = 0.0f;
+		return XMVectorSet(roll, pitch, yaw, 0.0f);
+	}
+	if (test < -0.499f)
+	{
+		float yaw = -2.0f * atan2f(quat.x, quat.w);
+		float pitch = -XM_PIDIV2;
+		float roll = 0.0f;
+		return XMVectorSet(roll, pitch, yaw, 0.0f);
+	}
+
+	float roll = atan2f
+	(
+		2.0f * (quat.w * quat.x + quat.y * quat.z),
+		1.0f - 2.0f * (quat.x * quat.x + quat.y * quat.y)
+	);
+	float pitch = asinf(2.0f * (quat.w * quat.y - quat.z * quat.x));
+	float yaw = atan2f
+	(
+		2.0f * (quat.w * quat.z + quat.x * quat.y),
+		1.0f - 2.0f * (quat.y * quat.y + quat.z * quat.z)
+	);
+
+	return XMVectorSet(roll, pitch, yaw, 0.0f);
+}
+XMVECTOR Object::GetWorldDirection(Directions dir) const
+{
+	if (m_isDirty) GetWorldMatrix();
+	XMVECTOR direction = XMVectorZero();
+
+	switch (dir)
+	{
+	case Directions::Forward: direction = XMVector3Normalize(XMVectorSet(m_worldMatrix.r[2].m128_f32[0], m_worldMatrix.r[2].m128_f32[1], m_worldMatrix.r[2].m128_f32[2], 0.0f)); break;
+	case Directions::Backward: direction = XMVector3Normalize(XMVectorSet(-m_worldMatrix.r[2].m128_f32[0], -m_worldMatrix.r[2].m128_f32[1], -m_worldMatrix.r[2].m128_f32[2], 0.0f)); break;
+
+	case Directions::Right: direction = XMVector3Normalize(XMVectorSet(m_worldMatrix.r[0].m128_f32[0], m_worldMatrix.r[0].m128_f32[1], m_worldMatrix.r[0].m128_f32[2], 0.0f)); break;
+	case Directions::Left: direction = XMVector3Normalize(XMVectorSet(-m_worldMatrix.r[0].m128_f32[0], -m_worldMatrix.r[0].m128_f32[1], -m_worldMatrix.r[0].m128_f32[2], 0.0f)); break;
+
+	case Directions::Up: direction = XMVector3Normalize(XMVectorSet(m_worldMatrix.r[1].m128_f32[0], m_worldMatrix.r[1].m128_f32[1], m_worldMatrix.r[1].m128_f32[2], 0.0f)); break;
+	case Directions::Down: direction = XMVector3Normalize(XMVectorSet(-m_worldMatrix.r[1].m128_f32[0], -m_worldMatrix.r[1].m128_f32[1], -m_worldMatrix.r[1].m128_f32[2], 0.0f)); break;
+
+	default: break;
+	}
+
+	return direction;
 }
 
 void Object::SetScale(const XMFLOAT3& scl)
 {
 	m_scale = scl;
-	m_scaleMatRix = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
+	m_scaleMatrix = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
 
-	m_isDirty = true;
+	if (!m_isDirty) SetDirty();
 }
 void Object::Scale(const XMFLOAT3& factor)
 {
 	m_scale.x *= factor.x;
 	m_scale.y *= factor.y;
 	m_scale.z *= factor.z;
-	m_scaleMatRix = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
+	m_scaleMatrix = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
 
-	m_isDirty = true;
+	if (!m_isDirty) SetDirty();
 }
 
-XMMATRIX Object::GetWorldMatrix()
+XMFLOAT3 Object::GetWorldScale() const
+{
+	if (m_isDirty) GetWorldMatrix();
+
+	XMVECTOR scale;
+	XMVECTOR rotationQuat;
+	XMVECTOR translation;
+	XMMatrixDecompose(&scale, &rotationQuat, &translation, m_worldMatrix);
+
+	XMFLOAT3 scl = {};
+	XMStoreFloat3(&scl, scale);
+
+	return scl;
+}
+
+XMMATRIX Object::GetWorldMatrix() const
 {
 	if (m_isDirty)
 	{
-		m_worldMatrix = m_scaleMatRix * m_rotationMatRix * m_positionMatRix;
+		m_worldMatrix = m_scaleMatrix * m_rotationMatrix * m_positionMatrix;
 
 		if (m_parent)
 		{
@@ -175,7 +282,6 @@ XMMATRIX Object::GetWorldMatrix()
 		}
 
 		m_isDirty = false;
-		MakeChildDirty();
 	}
 
 	return m_worldMatrix;

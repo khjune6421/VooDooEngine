@@ -7,16 +7,13 @@ TestScene::TestScene(wstring dataFile)
 {
 	m_player = make_unique<Player>(Shapes::Triangle);
 	m_player->SetPosition(XMVECTOR{ 0.0f, 2.0f, 0.0f, 1.0f });
-	//m_player->SetScale(XMVECTOR{ 2.0f, 2.0f, 2.0f, 0.0f });
 	m_player->SetScale(XMFLOAT3{ 2.0f, 2.0f, 2.0f });
 
 	m_windmill = make_unique<WindMill>(Shapes::Tetrahedron);
 	m_windmill->SetPosition(XMVECTOR{ 10.0f, 2.0f, 10.0f, 1.0f });
-	//m_windmill->SetScale(XMVECTOR{ 2.0f, 2.0f, 2.0f, 0.0f });
 	m_windmill->SetScale(XMFLOAT3{ 2.0f, 2.0f, 2.0f });
 
 	unique_ptr<Object> plane = make_unique<Object>(Shapes::Plane);
-	//plane->SetScale(XMVECTOR{ 50.0f, 1.0f, 50.0f, 0.0f });
 	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 
@@ -50,12 +47,11 @@ void TestScene::Update(float deltaTime)
 	{
 		if (m_windmill->m_windmillWing)
 		{
-			m_windmill->m_childrens.clear();
+			m_windmill->RemoveChild(m_windmill->m_windmillWing.get());
 
 			m_player->m_windmillWing = move(m_windmill->m_windmillWing);
 			m_player->AddChild(m_player->m_windmillWing.get());
 			m_player->m_windmillWing->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 0.0f });
-			//m_player->m_windmillWing->SetScale(XMVECTOR{ 1.0f, 1.0f, 1.0f, 0.0f });
 			m_player->m_windmillWing->SetScale(XMFLOAT3{ 1.0f, 1.0f, 1.0f });
 			m_player->m_windmillWing->SetRotation(XMVECTOR{ 0.0f, 0.0f, 0.0f, 0.0f });
 		}
@@ -65,12 +61,11 @@ void TestScene::Update(float deltaTime)
 		if (m_player->m_windmillWing)
 		{
 			m_projectileWing = move(m_player->m_windmillWing);
+			m_player->RemoveChild(m_projectileWing.get());
 
-			m_player->m_childrens.clear();
 			m_projectileWing->SetPosition(m_player->GetPosition());
 			m_projectileWing->SetRotation(m_player->GetRotation());
 			m_projectileWing->SetScale(m_player->GetScale());
-			m_projectileWing->m_parent = nullptr;
 		}
 	}
 	if (m_projectileWing)
@@ -91,6 +86,4 @@ void TestScene::Update(float deltaTime)
 			lifeTime = 1.0f;
 		}
 	}
-
-	g_camera.LookAt(m_player->GetPosition());
 }
