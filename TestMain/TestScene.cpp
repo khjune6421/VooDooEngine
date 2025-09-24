@@ -20,13 +20,9 @@ TestScene::TestScene(wstring dataFile)
 	ObjectPositionParser parser;
 	if (parser.LoadPositions(dataFile))
 	{
-		int index = 0;
 		for (const auto& pos : parser.GetPositions())
 		{
-			index++;
-			unique_ptr<Object> tree;
-			if (index % 3) tree = make_unique<Object>(Shapes::Tree);
-			else tree = make_unique<Object>(Shapes::Tree, VertexShaders::Default, PixelShaders::Greyscale);
+			unique_ptr<Object> tree = make_unique<Tree>();
 			tree->SetPosition(XMVECTOR{ pos.x, pos.y, pos.z, 1.0f });
 			m_objects.emplace_back(move(tree));
 		}
@@ -66,11 +62,13 @@ void TestScene::Update(float deltaTime)
 			m_projectileWing->SetPosition(m_player->GetPosition());
 			m_projectileWing->SetRotation(m_player->GetRotation());
 			m_projectileWing->SetScale(m_player->GetScale());
+
+			g_collidibleObjects.emplace_back(m_projectileWing.get());
 		}
 	}
 	if (m_projectileWing)
 	{
-		static float lifeTime = 1.0f;
+		static float lifeTime = 3.0f;
 		lifeTime -= deltaTime;
 
 		m_projectileWing->MoveDirection(Directions::Forward, 20.0f * deltaTime);
@@ -83,7 +81,18 @@ void TestScene::Update(float deltaTime)
 			m_projectileWing->SetScale(m_windmill->GetScale());
 			m_windmill->m_windmillWing = move(m_projectileWing);
 			m_windmill->AddChild(m_projectileWing.get());
-			lifeTime = 1.0f;
+			lifeTime = 3.0f;
+
+			g_collidibleObjects.erase
+			(
+				remove
+				(
+					g_collidibleObjects.begin(),
+					g_collidibleObjects.end(),
+					m_windmill->m_windmillWing.get()
+				),
+				g_collidibleObjects.end()
+			);
 		}
 	}
 }

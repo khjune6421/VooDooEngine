@@ -4,6 +4,7 @@
 
 #include "Player.h"
 #include "WindMill.h"
+#include "Tree.h"
 
 class TestScene : public Scene
 {
