@@ -42,23 +42,6 @@ void TestScene::Update(float deltaTime)
 	m_windmill->Update(deltaTime);
 	for (const auto& object : m_objects) object->Update(deltaTime);
 
-	if (GetAsyncKeyState('R') & 0x0001)
-	{
-		if (m_cameraOnPlayer)
-		{
-			m_cameraOnPlayer = false;
-			m_player->RemoveChild(m_camera.get());
-			m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
-			m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-		}
-		else
-		{
-			m_cameraOnPlayer = true;
-			m_camera->SetPosition(XMVECTOR{ 0.0f, 5.0f, -10.0f, 1.0f });
-			m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-			m_player->AddChild(m_camera.get());
-		}
-	}
 	if (GetAsyncKeyState('F') & 0x0001) m_cameraMode = static_cast<CameraModes>((m_cameraMode + 1) % 4);
 
 	if (GetAsyncKeyState('C') & 0x0001)
@@ -87,7 +70,6 @@ void TestScene::Update(float deltaTime)
 
 			g_collidibleObjects.emplace_back(m_projectileWing.get());
 
-			if (m_cameraOnPlayer) m_player->RemoveChild(m_camera.get());
 			if (m_cameraMode == CameraModes::FlyBy)
 			{
 				m_camera->SetPosition(m_player->GetPosition());
@@ -108,15 +90,6 @@ void TestScene::Update(float deltaTime)
 				m_camera->SetPosition(XMVECTOR{ 0.75f, -0.5f, -2.5f, 1.0f });
 				m_projectileWing->AddChild(m_camera.get());
 			}
-			else
-			{
-				if (m_cameraOnPlayer) m_projectileWing->AddChild(m_camera.get());
-				else
-				{
-					m_projectileWing->AddChild(m_camera.get());
-					m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-				}
-			}
 		}
 	}
 	if (m_projectileWing)
@@ -128,21 +101,13 @@ void TestScene::Update(float deltaTime)
 		m_projectileWing->Update(deltaTime);
 
 		if (m_cameraMode == CameraModes::FlyBy) m_camera->LookAt(m_projectileWing->GetPosition());
+		if (m_cameraMode == CameraModes::Stationary) m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f } + m_projectileWing->GetPosition());
 
 		if (lifeTime <= 0.0f)
 		{
 			m_projectileWing->RemoveChild(m_camera.get());
-			if (m_cameraOnPlayer)
-			{
-				m_camera->SetPosition(XMVECTOR{ 0.0f, 5.0f, -10.0f, 1.0f });
-				m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-				m_player->AddChild(m_camera.get());
-			}
-			else
-			{
-				m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
-				m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-			}
+			m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
+			m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 
 			m_projectileWing->SetPosition(m_windmill->GetPosition());
 			m_projectileWing->SetRotation(XMVECTOR{ 0.0f, 0.0f, 0.0f, 0.0f });
@@ -156,4 +121,5 @@ void TestScene::Update(float deltaTime)
 			lifeTime = 3.0f;
 		}
 	}
+	else m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f } + m_player->GetPosition());
 }

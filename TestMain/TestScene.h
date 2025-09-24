@@ -22,8 +22,6 @@ class TestScene : public Scene
 	std::unique_ptr<WindMill> m_windmill;
 	std::unique_ptr<WindMillWing> m_projectileWing;
 
-	bool m_cameraOnPlayer = false;
-
 	CameraModes m_cameraMode = CameraModes::FlyBy;
 
 public:
