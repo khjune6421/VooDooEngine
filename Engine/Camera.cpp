@@ -1,11 +1,8 @@
 #include "Camera.h"
 
-// Bit dirty because the perpose of this class is not currently clear
-// It could be used for a stationary camera or a free moving camera inheriting GameObject
-
 using namespace DirectX;
 
-Camera::Camera(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 rotation, int screenWidth, int screenHeight, float nearPlane, float farPlane, float fov)
+Camera::Camera(XMFLOAT3 position, XMFLOAT3 rotation, int screenWidth, int screenHeight, float nearPlane, float farPlane, float fov)
 	: m_position(position), m_rotation(rotation), m_screenWidth(screenWidth), m_screenHeight(screenHeight), m_nearPlane(nearPlane), m_farPlane(farPlane), m_fov(fov)
 {
 	m_aspectRatio = static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
@@ -24,7 +21,7 @@ Camera::Camera(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 rotation, int scree
 	m_viewMatrix = XMMatrixLookAtLH(m_eyePosition, m_focusPosition, m_upDirection);
 }
 
-void Camera::SetPosition(const DirectX::XMFLOAT3& position)
+void Camera::SetPosition(const XMFLOAT3& position)
 {
 	m_position = position;
 
@@ -33,7 +30,7 @@ void Camera::SetPosition(const DirectX::XMFLOAT3& position)
 	m_viewMatrix = XMMatrixLookAtLH(m_eyePosition, m_focusPosition, m_upDirection);
 }
 
-void Camera::SetRotation(const DirectX::XMFLOAT3& rotation)
+void Camera::SetRotation(const XMFLOAT3& rotation)
 {
 	m_rotation = rotation;
 
@@ -54,7 +51,7 @@ void Camera::SetRotation(const DirectX::XMFLOAT3& rotation)
 	m_viewMatrix = XMMatrixLookAtLH(m_eyePosition, m_focusPosition, m_upDirection);
 }
 
-void Camera::LookAt(const DirectX::XMVECTOR& target) // Need to properly learn how this works one day // ...one day
+void Camera::LookAt(const XMVECTOR& target) // Need to properly learn how this works one day // ...one day
 {
 	m_focusPosition = target;
 	XMVECTOR direction = XMVectorSubtract(m_focusPosition, m_eyePosition);
@@ -98,3 +95,14 @@ void Camera::SetFov(float fov)
 
 	m_projectionMatrix = XMMatrixPerspectiveFovLH(m_fov, m_aspectRatio, m_nearPlane, m_farPlane);
 }
+
+//Camera::Camera(UINT screenWidth, UINT screenHeight, float nearPlane, float farPlane, float fov, DirectX::XMVECTOR focusPosition)
+//	: m_screenWidth(screenWidth), m_screenHeight(screenHeight),
+//	m_nearPlane(nearPlane), m_farPlane(farPlane),
+//	m_fov(fov),
+//	m_focusPosition(focusPosition),
+//	m_aspectRatio(static_cast<float>(screenWidth) / static_cast<float>(screenHeight)),
+//	m_projectionMatrix(XMMatrixPerspectiveFovLH(m_fov, m_aspectRatio, m_nearPlane, m_farPlane)),
+//	m_viewMatrix(XMMatrixIdentity())
+//{
+//}

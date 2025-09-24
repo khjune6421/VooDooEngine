@@ -1,11 +1,9 @@
 #include "Object.h"
 
-#ifdef _DEBUG
-#include <iostream>
-#endif
-
 using namespace std;
 using namespace DirectX;
+
+vector<Object*> g_objects;
 
 static UINT s_idCounter = 0;
 
@@ -44,7 +42,7 @@ void Object::AddChild(Object* child)
 
 Object::Object(Shapes shape, VertexShaders vertexShader, PixelShaders pixelShader) : m_shape(shape), m_vertexShader(vertexShader), m_pixelShader(pixelShader), m_id(s_idCounter++)
 {
-	VDGM::g_objects.emplace_back(this);
+	g_objects.emplace_back(this);
 
 #ifdef _DEBUG
 	cout << "Object created. ID: " << m_id << endl;
@@ -53,8 +51,8 @@ Object::Object(Shapes shape, VertexShaders vertexShader, PixelShaders pixelShade
 
 Object::~Object()
 {
-	auto it = find(VDGM::g_objects.begin(), VDGM::g_objects.end(), this);
-	if (it != VDGM::g_objects.end()) VDGM::g_objects.erase(it);
+	auto it = find(g_objects.begin(), g_objects.end(), this);
+	if (it != g_objects.end()) g_objects.erase(it);
 
 #ifdef _DEBUG
 	cout << "Object destroyed. ID: " << m_id << endl;
@@ -63,124 +61,86 @@ Object::~Object()
 
 void Object::SetPosition(const XMVECTOR& pos)
 {
-	m_position = XMMatrixTranslationFromVector(pos);
+	m_position = pos;
+	m_positionMatRix = XMMatrixTranslationFromVector(m_position);
 	m_isDirty = true;
 }
 void Object::MovePosition(const XMVECTOR& delta)
 {
-	XMVECTOR currentPos = XMVectorSet(m_position.r[3].m128_f32[0], m_position.r[3].m128_f32[1], m_position.r[3].m128_f32[2], 1.0f);
-	XMVECTOR newPos = XMVectorAdd(currentPos, delta);
-	m_position = XMMatrixTranslationFromVector(newPos);
+	m_position = XMVectorAdd(m_position, delta);
+	m_positionMatRix = XMMatrixTranslationFromVector(m_position);
 
 	m_isDirty = true;
 }
 void Object::MoveDirection(Directions dir, float distance)
 {
-	XMVECTOR forward = XMVectorSet(m_rotation.r[2].m128_f32[0], m_rotation.r[2].m128_f32[1], m_rotation.r[2].m128_f32[2], 0.0f);
-	XMVECTOR right = XMVectorSet(m_rotation.r[0].m128_f32[0], m_rotation.r[0].m128_f32[1], m_rotation.r[0].m128_f32[2], 0.0f);
-	XMVECTOR up = XMVectorSet(m_rotation.r[1].m128_f32[0], m_rotation.r[1].m128_f32[1], m_rotation.r[1].m128_f32[2], 0.0f);
-	XMVECTOR moveDelta = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	const XMVECTOR forward = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), m_rotationMatRix));
+	const XMVECTOR right = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), m_rotationMatRix));
+	const XMVECTOR up = XMVector3Normalize(XMVector3TransformNormal(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), m_rotationMatRix));
+
+	XMVECTOR moveDelta = XMVectorZero();
 
 	switch (dir)
 	{
-	case Directions::Forward:
-		moveDelta = XMVectorScale(forward, distance);
-		break;
+	case Directions::Forward: moveDelta = XMVectorScale(forward, distance); break;
+	case Directions::Backward: moveDelta = XMVectorScale(forward, -distance); break;
 
-	case Directions::Backward:
-		moveDelta = XMVectorScale(forward, -distance);
-		break;
+	case Directions::Right: moveDelta = XMVectorScale(right, distance); break;
+	case Directions::Left: moveDelta = XMVectorScale(right, -distance); break;
 
-	case Directions::Right:
-		moveDelta = XMVectorScale(right, distance);
-		break;
-
-	case Directions::Left:
-		moveDelta = XMVectorScale(right, -distance);
-		break;
-
-	case Directions::Up:
-		moveDelta = XMVectorScale(up, distance);
-		break;
-
-	case Directions::Down:
-		moveDelta = XMVectorScale(up, -distance);
-		break;
-
-	default:
-		break;
+	case Directions::Up: moveDelta = XMVectorScale(up, distance); break;
+	case Directions::Down: moveDelta = XMVectorScale(up, -distance); break;
+	default: break;
 	}
 
 	MovePosition(moveDelta);
 }
-XMVECTOR Object::GetPosition() const
-{
-	return XMVectorSet(m_position.r[3].m128_f32[0], m_position.r[3].m128_f32[1], m_position.r[3].m128_f32[2], 1.0f);
-}
 
 void Object::SetRotation(const XMVECTOR& rot)
 {
-	m_pitchYawRoll = rot;
+	m_rotation = rot;
 
-	XMMATRIX rotX = XMMatrixRotationX(XMVectorGetX(m_pitchYawRoll));
-	XMMATRIX rotY = XMMatrixRotationY(XMVectorGetY(m_pitchYawRoll));
-	XMMATRIX rotZ = XMMatrixRotationZ(XMVectorGetZ(m_pitchYawRoll));
-	m_rotation = rotZ * rotY * rotX;
+	XMMATRIX rotX = XMMatrixRotationX(XMVectorGetX(m_rotation));
+	XMMATRIX rotY = XMMatrixRotationY(XMVectorGetY(m_rotation));
+	XMMATRIX rotZ = XMMatrixRotationZ(XMVectorGetZ(m_rotation));
+	m_rotationMatRix = rotZ * rotY * rotX;
 
 	m_isDirty = true;
 }
 void Object::Rotate(const XMVECTOR& delta)
 {
-	m_pitchYawRoll = XMVectorAdd(m_pitchYawRoll, delta);
+	m_rotation = XMVectorAdd(m_rotation, delta);
 
-	XMMATRIX rotX = XMMatrixRotationX(XMVectorGetX(m_pitchYawRoll));
-	XMMATRIX rotY = XMMatrixRotationY(XMVectorGetY(m_pitchYawRoll));
-	XMMATRIX rotZ = XMMatrixRotationZ(XMVectorGetZ(m_pitchYawRoll));
-	m_rotation = rotZ * rotY * rotX;
-
-	m_isDirty = true;
-}
-XMVECTOR Object::GetRotation() const
-{
-	return m_pitchYawRoll;
-}
-
-void Object::SetScale(const XMVECTOR& scl)
-{
-	XMFLOAT3 scale = {};
-	XMStoreFloat3(&scale, scl);
-	m_scale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	XMMATRIX rotX = XMMatrixRotationX(XMVectorGetX(m_rotation));
+	XMMATRIX rotY = XMMatrixRotationY(XMVectorGetY(m_rotation));
+	XMMATRIX rotZ = XMMatrixRotationZ(XMVectorGetZ(m_rotation));
+	m_rotationMatRix = rotZ * rotY * rotX;
 
 	m_isDirty = true;
 }
-void Object::Scale(const XMVECTOR& factor)
+
+void Object::SetScale(const XMFLOAT3& scl)
 {
-	XMFLOAT4X4 currentScale = {};
-	XMStoreFloat4x4(&currentScale, m_scale);
-
-	XMFLOAT3 scaleFactor = {};
-	XMStoreFloat3(&scaleFactor, factor);
-	currentScale._11 *= scaleFactor.x;
-	currentScale._22 *= scaleFactor.y;
-	currentScale._33 *= scaleFactor.z;
-
-	m_scale = XMLoadFloat4x4(&currentScale);
+	m_scale = scl;
+	m_scaleMatRix = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
 
 	m_isDirty = true;
 }
-XMVECTOR Object::GetScale() const
+void Object::Scale(const XMFLOAT3& factor)
 {
-	XMFLOAT4X4 scaleMatrix = {};
-	XMStoreFloat4x4(&scaleMatrix, m_scale);
+	m_scale.x *= factor.x;
+	m_scale.y *= factor.y;
+	m_scale.z *= factor.z;
+	m_scaleMatRix = XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
 
-	return XMVectorSet(scaleMatrix._11, scaleMatrix._22, scaleMatrix._33, 0.0f);
+	m_isDirty = true;
 }
 
 XMMATRIX Object::GetWorldMatrix()
 {
 	if (m_isDirty)
 	{
-		m_worldMatrix = m_scale * m_rotation * m_position;
+		m_worldMatrix = m_scaleMatRix * m_rotationMatRix * m_positionMatRix;
 
 		if (m_parent)
 		{
@@ -201,6 +161,7 @@ XMMATRIX Object::GetWorldMatrix()
 				}
 				if (m_ignoreRotation)
 				{
+					// not sure how I should implement this
 				}
 				if (m_ignoreScale)
 				{

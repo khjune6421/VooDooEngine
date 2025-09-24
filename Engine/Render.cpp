@@ -1,8 +1,6 @@
 #include "Render.h"
-#include "Object.h"
 
-#include <d3dcompiler.h>
-#pragma comment(lib, "d3dcompiler.lib")
+#include "Object.h"
 
 using namespace std;
 using namespace DirectX;
@@ -727,7 +725,7 @@ void Render::DrawObjects()
 	static float ATime = 0.0f; // Accumulated time
 	ATime += VDGM::g_deltaTimeF;
 
-	for (Object* object : VDGM::g_objects)
+	for (Object* object : g_objects)
 	{
 		if (!object || !object->m_isActive) continue;
 		constexpr UINT stride = sizeof(Vertex);
@@ -780,8 +778,11 @@ Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
-	m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
-	m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
+	//m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
+	//m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
+
+	m_deviceInfo.displayMode.Width = width;
+	m_deviceInfo.displayMode.Height = height;
 
 	CreateDeviceSwapChain();
 	CreateRenderTarget();

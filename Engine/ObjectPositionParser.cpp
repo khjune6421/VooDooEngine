@@ -1,23 +1,19 @@
 #include "ObjectPositionParser.h"
 
-#include <fstream>
-#include <sstream>
-#include <iostream>
-
 using namespace std;
 
-bool ObjectPositionParser::ParseLine(const string& line, ObjectPosition& position)
+bool ObjectPositionParser::ParseLine(const wstring& line, ObjectPosition& position)
 {
-	stringstream ss(line);
-	string token;
+	wstringstream ss(line);
+	wstring token;
 	int fieldIndex = 0;
 
-	while (getline(ss, token, ','))
+	while (getline(ss, token, L','))
 	{
-		size_t start = token.find_first_not_of(" \t");
-		size_t end = token.find_last_not_of(" \t");
+		size_t start = token.find_first_not_of(L" \t");
+		size_t end = token.find_last_not_of(L" \t");
 
-		if (start == string::npos) continue;
+		if (start == wstring::npos) continue;
 
 		token = token.substr(start, end - start + 1);
 
@@ -55,21 +51,21 @@ bool ObjectPositionParser::ParseLine(const string& line, ObjectPosition& positio
 	return false;
 }
 
-bool ObjectPositionParser::LoadPositions(const string& filename)
+bool ObjectPositionParser::LoadPositions(const wstring& filename)
 {
 	ClearData();
 
-	ifstream file(filename);
+	wifstream file(filename);
 	if (!file.is_open())
 	{
-		cerr << "Error: Could not open file " << filename << endl;
+		wcerr << L"Error: Could not open file " << filename << endl;
 		return false;
 	}
 
-	string line;
+	wstring line;
 	while (getline(file, line))
 	{
-		if (line.empty() || line == "eof") continue;
+		if (line.empty() || line == L"eof") continue;
 
 		ObjectPosition position;
 		if (ParseLine(line, position))
@@ -78,11 +74,11 @@ bool ObjectPositionParser::LoadPositions(const string& filename)
 		}
 		else
 		{
-			cerr << "Warning: Failed to parse line: " << line << endl;
+			wcerr << L"Warning: Failed to parse line: " << line << endl;
 		}
 	}
 
 	file.close();
-	cout << "Loaded " << positions.size() << " tree positions from " << filename << endl;
+	wcout << L"Loaded " << positions.size() << L" tree positions from " << filename << endl;
 	return true;
 }

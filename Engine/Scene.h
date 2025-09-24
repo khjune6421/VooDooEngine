@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "Object.h"
 
 class Scene

@@ -40,5 +40,6 @@
     <ClInclude Include="WindMillWing.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="Engine.h" />
   </ItemGroup>
 </Project>

@@ -1,67 +1,25 @@
 #pragma once
 
-// Base header files
-#include <Windows.h>
-#include <vector>
-#include <wrl/client.h>
-#include <memory>
-#include <unordered_map>
-#include <filesystem>
+// Standard header files
+#include "UtilityHeaders.h"
 
 // DirectX header files
-#include <d3d11.h>
-#include <DirectXMath.h>
-
-// DirectXTK header files
-#include <SimpleMath.h>
-#include <SpriteFont.h>
-#include <DDSTextureLoader.h>
-#include <WICTextureLoader.h>
-
-// DirectX libraries
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "dxgi.lib")
-
-// DirectXTK libraries
-#pragma comment(lib, "DirectXTK.lib")
+#include "DirectXLib.h"
 
 // Other header files
+#include "Object.h"
 #include "Camera.h"
 
 // I usually don't use 'using' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
 extern Camera g_camera;
-
-enum class Shapes
-{
-	Triangle,
-	Square,
-	Plane,
-
-	Tetrahedron,
-	Cube,
-
-	Tree,
-	WindmillWing
-};
-enum class VertexShaders // Should it alos includes corresponding constant buffer and input layout?
-{
-	Default,
-};
-enum class PixelShaders
-{
-	Default,
-	ColorShift,
-	Greyscale
-};
+//extern Camera* g_ObjectCamera;
 
 class Object;
 
 namespace VDGM
 {
-	extern std::vector<Object*> g_objects;
-
 	extern float g_deltaTimeF;
 	extern double g_deltaTimeD;
 }

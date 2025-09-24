@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scene.h"
+#include "Engine.h"
 
 #include "Player.h"
 #include "WindMill.h"
@@ -12,7 +12,7 @@ class TestScene : public Scene
 	std::unique_ptr<WindMillWing> m_projectileWing;
 
 public:
-	TestScene(std::string dataFile);
+	TestScene(std::wstring dataFile);
 	~TestScene() override = default;
 
 	void Update(float deltaTime) override;

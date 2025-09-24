@@ -6,8 +6,6 @@ namespace VDGM
 {
 	unique_ptr<Scene> g_currentScene = nullptr;
 
-	vector<Object*> g_objects;
-
 	float g_deltaTimeF = 0.0f;
 	double g_deltaTimeD = 0.0;
 
