@@ -27,11 +27,11 @@ void Camera::SetScreen(float fov, UINT screenWidth, UINT screenHeight, float nea
 
 XMMATRIX Camera::GetViewMatrix()
 {
-	const XMVECTOR WORLDPOSITION = GetWorldPosition();
-	const XMVECTOR FORWARD = GetWorldDirection(Directions::Forward);
-	static const XMVECTOR UP = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	const XMVECTOR worldPosition = GetWorldPosition();
+	const XMVECTOR forward = GetWorldDirection(Directions::Forward);
+	static const XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	m_viewMatrix = XMMatrixLookAtLH(WORLDPOSITION, XMVectorAdd(WORLDPOSITION, FORWARD), UP);
+	m_viewMatrix = XMMatrixLookAtLH(worldPosition, XMVectorAdd(worldPosition, forward), up);
 
 	return m_viewMatrix;
 }

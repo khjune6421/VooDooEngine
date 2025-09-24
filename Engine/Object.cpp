@@ -19,19 +19,7 @@ void Object::AddChild(Object* child)
 {
 	if (!child) return;
 
-	if (child->m_parent)
-	{
-		child->m_parent->m_childrens.erase
-		(
-			remove
-			(
-				child->m_parent->m_childrens.begin(),
-				child->m_parent->m_childrens.end(),
-				child
-			),
-			child->m_parent->m_childrens.end()
-		);
-	}
+	if (child->m_parent) child->m_parent->RemoveChild(child);
 
 	child->m_parent = this;
 	m_childrens.emplace_back(child);
@@ -43,18 +31,12 @@ void Object::RemoveChild(Object* child)
 {
 	if (!child) return;
 
-	m_childrens.erase
-	(
-		remove
-		(
-			m_childrens.begin(),
-			m_childrens.end(),
-			child
-		),
-		m_childrens.end()
-	);
-
-	child->m_parent = nullptr;
+	auto it = find(m_childrens.begin(), m_childrens.end(), child);
+	if (it != m_childrens.end())
+	{
+		m_childrens.erase(it);
+		child->m_parent = nullptr;
+	}
 }
 
 Object::Object(Shapes shape, VertexShaders vertexShader, PixelShaders pixelShader) : m_shape(shape), m_vertexShader(vertexShader), m_pixelShader(pixelShader), m_id(s_idCounter++)
@@ -139,11 +121,13 @@ void Object::Rotate(const XMVECTOR& delta)
 }
 void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this works
 {
-	XMVECTOR direction = XMVectorSubtract(target, m_position);
+	XMVECTOR direction = XMVectorSubtract(target, GetWorldPosition());
 	direction = XMVector3Normalize(direction);
+
 	float pitch = asinf(-XMVectorGetY(direction));
 	float yaw = atan2f(XMVectorGetX(direction), XMVectorGetZ(direction));
 	float roll = 0.0f;
+
 	m_rotation = XMVectorSet(pitch, yaw, roll, 0.0f);
 	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
 	if (!m_isDirty) SetDirty();
