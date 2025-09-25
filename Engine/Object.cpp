@@ -122,7 +122,7 @@ void Object::Rotate(const XMVECTOR& delta)
 void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this works
 {
 	XMVECTOR toTarget = XMVectorSubtract(target, GetWorldPosition());
-	if (XMVector3LessOrEqual(XMVector3LengthSq(toTarget), XMVectorReplicate(1e-8f))) return; // To avoid NaN errors
+	if (XMVector3LessOrEqual(XMVector3LengthSq(toTarget), XMVectorReplicate(1e-8f))) return; // To avoid NaN errors?
 
 	XMVECTOR direction = XMVector3Normalize(toTarget);
 
@@ -187,14 +187,14 @@ XMVECTOR Object::GetWorldDirection(Directions dir) const
 
 	switch (dir)
 	{
-	case Directions::Forward: direction = XMVector3Normalize(XMVectorSet(m_worldMatrix.r[2].m128_f32[0], m_worldMatrix.r[2].m128_f32[1], m_worldMatrix.r[2].m128_f32[2], 0.0f)); break;
-	case Directions::Backward: direction = XMVector3Normalize(XMVectorSet(-m_worldMatrix.r[2].m128_f32[0], -m_worldMatrix.r[2].m128_f32[1], -m_worldMatrix.r[2].m128_f32[2], 0.0f)); break;
+	case Directions::Forward: direction = XMVector3Normalize(m_worldMatrix.r[2]); break;
+	case Directions::Backward: direction = XMVector3Normalize(-m_worldMatrix.r[2]); break;
 
-	case Directions::Right: direction = XMVector3Normalize(XMVectorSet(m_worldMatrix.r[0].m128_f32[0], m_worldMatrix.r[0].m128_f32[1], m_worldMatrix.r[0].m128_f32[2], 0.0f)); break;
-	case Directions::Left: direction = XMVector3Normalize(XMVectorSet(-m_worldMatrix.r[0].m128_f32[0], -m_worldMatrix.r[0].m128_f32[1], -m_worldMatrix.r[0].m128_f32[2], 0.0f)); break;
+	case Directions::Right: direction = XMVector3Normalize(m_worldMatrix.r[0]); break;
+	case Directions::Left: direction = XMVector3Normalize(-m_worldMatrix.r[0]); break;
 
-	case Directions::Up: direction = XMVector3Normalize(XMVectorSet(m_worldMatrix.r[1].m128_f32[0], m_worldMatrix.r[1].m128_f32[1], m_worldMatrix.r[1].m128_f32[2], 0.0f)); break;
-	case Directions::Down: direction = XMVector3Normalize(XMVectorSet(-m_worldMatrix.r[1].m128_f32[0], -m_worldMatrix.r[1].m128_f32[1], -m_worldMatrix.r[1].m128_f32[2], 0.0f)); break;
+	case Directions::Up: direction = XMVector3Normalize(m_worldMatrix.r[1]); break;
+	case Directions::Down: direction = XMVector3Normalize(-m_worldMatrix.r[1]); break;
 
 	default: break;
 	}

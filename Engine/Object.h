@@ -76,6 +76,7 @@ protected:
 	std::vector<Object*> m_childrens;
 
 	void AddChild(Object* child);
+	// AddChildViaWorldPosition()
 	void RemoveChild(Object* child);
 
 	enum IgnoreParentAxis // Later change to bit field
