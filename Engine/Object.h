@@ -4,20 +4,24 @@
 #include "UtilityHeaders.h"
 
 // Rendering related enums
-enum class Shapes
+enum class Shapes // This also includes number of vertices for each shape and type of primitiveTopology?
 {
+	// Defalt // creating the shape with this shape will not add it to g_objects
 	None,
+
+	// 2D shapes
 	Triangle,
 	Square,
 	Plane,
 
 	Tetrahedron,
 	Cube,
+	Icosphere,
 
 	Tree,
 	WindmillWing
 };
-enum class VertexShaders // Should it alos includes corresponding constant buffer and input layout?
+enum class VertexShaders // Should it also includes corresponding constant buffer and input layout?
 {
 	Default,
 };

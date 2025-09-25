@@ -670,6 +670,50 @@ void Render::CreateShapeVertexBuffer()
 		CreateVertexBuffer(sizeof(cubeVertices), &m_shapeVertexBuffers[Shapes::Cube].first, cubeVertices, sizeof(Vertex));
 		m_shapeVertexBuffers[Shapes::Cube].second = 36;
 	}
+	// Later need to make a way to load from blender for more complex shapes
+	if (m_shapeVertexBuffers.find(Shapes::Icosphere) == m_shapeVertexBuffers.end())
+	{
+		constexpr float PHI = 1.61803398875f;
+
+		XMFLOAT3 base[12] =
+		{
+			{ -1.0f,  PHI,  0.0f }, {  1.0f,  PHI,  0.0f }, { -1.0f, -PHI,  0.0f }, {  1.0f, -PHI,  0.0f },
+			{  0.0f, -1.0f,  PHI }, {  0.0f,  1.0f,  PHI }, {  0.0f, -1.0f, -PHI }, {  0.0f,  1.0f, -PHI },
+			{  PHI,   0.0f, -1.0f }, {  PHI,   0.0f,  1.0f }, { -PHI,  0.0f, -1.0f }, { -PHI,  0.0f,  1.0f }
+		};
+
+		XMFLOAT3 pos[12] = {};
+		for (int i = 0; i < 12; ++i)
+		{
+			XMVECTOR v = XMLoadFloat3(&base[i]);
+			v = XMVector3Normalize(v);
+			XMStoreFloat3(&pos[i], v);
+		}
+
+		const uint16_t faces[20][3] =
+		{
+			{ 0, 11, 5 }, { 0, 5, 1 }, { 0, 1, 7 }, { 0, 7, 10 }, { 0, 10, 11 },
+			{ 1, 5, 9 }, { 5, 11, 4 }, { 11, 10, 2 }, { 10, 7, 6 }, { 7, 1, 8 },
+			{ 3, 9, 4 }, { 3, 4, 2 }, { 3, 2, 6 }, { 3, 6, 8 }, { 3, 8, 9 },
+			{ 4, 9, 5 }, { 2, 4, 11 }, { 6, 2, 10 }, { 8, 6, 7 }, { 9, 8, 1 }
+		};
+		Vertex icosaVertices[60] = {};
+		UINT w = 0;
+
+		for (auto face : faces)
+		{
+			const uint16_t a = face[0];
+			const uint16_t b = face[1];
+			const uint16_t c = face[2];
+
+			icosaVertices[w++] = Vertex{ pos[a], XMFLOAT4((pos[a].x + 1.0f) / 2.0f, (pos[a].y + 1.0f) / 2.0f, (pos[a].z + 1.0f) / 2.0f, 1.0f) };
+			icosaVertices[w++] = Vertex{ pos[b], XMFLOAT4((pos[b].x + 1.0f) / 2.0f, (pos[b].y + 1.0f) / 2.0f, (pos[b].z + 1.0f) / 2.0f, 1.0f) };
+			icosaVertices[w++] = Vertex{ pos[c], XMFLOAT4((pos[c].x + 1.0f) / 2.0f, (pos[c].y + 1.0f) / 2.0f, (pos[c].z + 1.0f) / 2.0f, 1.0f) };
+		}
+
+		CreateVertexBuffer(sizeof(icosaVertices), &m_shapeVertexBuffers[Shapes::Icosphere].first, icosaVertices, sizeof(Vertex));
+		m_shapeVertexBuffers[Shapes::Icosphere].second = 60;
+	}
 	if (m_shapeVertexBuffers.find(Shapes::Tree) == m_shapeVertexBuffers.end())
 	{
 		Vertex treeVertices[] =
