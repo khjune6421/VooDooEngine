@@ -355,7 +355,7 @@ void Render::LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, c
 			}
 		}
 	}
-	for (const auto& entry : filesystem::directory_iterator())
+	for (const auto& entry : filesystem::directory_iterator(L"."))
 	{
 		if (entry.path().extension() == L".cso")
 		{
@@ -828,11 +828,8 @@ Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
-	//m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
-	//m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
-
-	m_deviceInfo.displayMode.Width = width;
-	m_deviceInfo.displayMode.Height = height;
+	m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
+	m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
 
 	CreateDeviceSwapChain();
 	CreateRenderTarget();
