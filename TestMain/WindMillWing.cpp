@@ -5,24 +5,26 @@ using namespace DirectX;
 
 static UINT s_windmillIndex = 0;
 
-WindMillWing::WindMillWing() : Object()
+WindMillWing::WindMillWing(UINT wingAmount)
 {
-	m_isActive = false;
-
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < wingAmount; ++i)
 	{
-		m_wing[i] = make_unique<Object>(Shapes::WindmillWing);
-		AddChild(m_wing[i].get());
-
-		m_wing[i]->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.5f * (i + 1), 1.0f});
-		m_wing[i]->SetScale(XMVECTOR{ 2.0f / (i + 2), 2.0f / (i + 2), 2.0f / (i + 2), 0.0f });
+		unique_ptr<Object> windmill = make_unique<Object>(Shapes::WindmillWing);
+		AddChild(windmill.get());
+		windmill->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.5f * (i + 1), 1.0f });
+		windmill->SetScale(XMFLOAT3{ 2.0f / (i + 2), 2.0f / (i + 2), 2.0f / (i + 2) });
+		m_wing.emplace_back(move(windmill));
 	}
 }
 
 void WindMillWing::Update(float deltaTime)
 {
-	//for (auto& wing : m_wing) wing->Rotate(XMVECTOR{ 0.0f, 0.0f, XM_PI * deltaTime, 0.0f });
-	if (m_wing[0]) m_wing[0]->Rotate(XMVECTOR{ 0.0f, 0.0f, XM_PI * deltaTime, 0.0f });
-	if (m_wing[1]) m_wing[1]->Rotate(XMVECTOR{ 0.0f, 0.0f, -XM_PI * deltaTime, 0.0f });
-	if (m_wing[2]) m_wing[2]->Rotate(XMVECTOR{ 0.0f, 0.0f, XM_PI * deltaTime, 0.0f });
+	for (UINT i = 0; i < m_wing.size(); ++i)
+	{
+		if (m_wing[i])
+		{
+			float direction = (i % 2 == 0) ? 1.0f : -1.0f;
+			m_wing[i]->Rotate(XMVECTOR{ 0.0f, 0.0f, direction * XM_PI * deltaTime, 0.0f });
+		}
+	}
 }

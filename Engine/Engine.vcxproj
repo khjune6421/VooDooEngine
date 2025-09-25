@@ -153,11 +153,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="DirectXLib.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectPositionParser.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="UtilityHeaders.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>

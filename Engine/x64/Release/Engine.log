@@ -1,1 +1,5 @@
-﻿  Engine.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\Engine.lib
+﻿  Camera.cpp
+  GameManager.cpp
+  Object.cpp
+  Scene.cpp
+  Engine.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\Engine.lib

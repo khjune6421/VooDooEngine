@@ -1,7 +1,2 @@
-﻿  Player.cpp
-  TestMain.cpp
-  TestScene.cpp
-  WindMill.cpp
-  WindMillWing.cpp
-  Generating Code...
+﻿  TestScene.cpp
   TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\TestMain.exe

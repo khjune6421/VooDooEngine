@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
-#include <string>
+
+#include "UtilityHeaders.h"
 
 struct ObjectPosition
 {
@@ -13,10 +13,10 @@ struct ObjectPosition
 class ObjectPositionParser
 {
 	std::vector<ObjectPosition> positions;
-	bool ParseLine(const std::string& line, ObjectPosition& position);
+	bool ParseLine(const std::wstring& line, ObjectPosition& position);
 
 public:
-	bool LoadPositions(const std::string& filename);
+	bool LoadPositions(const std::wstring& filename);
 	const std::vector<ObjectPosition>& GetPositions() const { return positions; }
 	void ClearData() { positions.clear(); }
 };
