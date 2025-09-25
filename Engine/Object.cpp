@@ -121,15 +121,22 @@ void Object::Rotate(const XMVECTOR& delta)
 }
 void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this works
 {
-	XMVECTOR direction = XMVectorSubtract(target, GetWorldPosition());
-	direction = XMVector3Normalize(direction);
+	XMVECTOR toTarget = XMVectorSubtract(target, GetWorldPosition());
+	if (XMVector3LessOrEqual(XMVector3LengthSq(toTarget), XMVectorReplicate(1e-8f))) return; // To avoid NaN errors
 
-	float pitch = asinf(-XMVectorGetY(direction));
-	float yaw = atan2f(XMVectorGetX(direction), XMVectorGetZ(direction));
+	XMVECTOR direction = XMVector3Normalize(toTarget);
+
+	const float dirX = XMVectorGetX(direction);
+	const float dirY = XMVectorGetY(direction);
+	const float dirZ = XMVectorGetZ(direction);
+
+	float pitch = asinf(clamp(-dirY, -1.0f, 1.0f));
+	float yaw = atan2f(dirX, dirZ);
 	float roll = 0.0f;
 
 	m_rotation = XMVectorSet(pitch, yaw, roll, 0.0f);
 	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
+
 	if (!m_isDirty) SetDirty();
 }
 XMVECTOR Object::GetWorldRotation() const // This one too
