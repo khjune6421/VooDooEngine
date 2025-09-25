@@ -856,7 +856,7 @@ Render::~Render()
 	m_SpriteBatchMap.clear();
 	m_device.Reset();
 
-	// Not sure if this is necessary // microsoft doesnot recommend it
+	// Not sure if this is necessary // microsoft doesn't recommend it
 	if (m_deviceContext)
 	{
 		m_deviceContext->ClearState();
@@ -868,6 +868,10 @@ Render::~Render()
 	m_depthStencilBuffer.Reset();
 	m_depthStencilView.Reset();
 	m_deviceInfo.hardwareInfos.clear();
+
+	m_shapeVertexBuffers.clear();
+	m_vertexShaderMap.clear();
+	m_pixelShaderMap.clear();
 
 	// Clear render
 	for (auto& state : g_rasterState) state.Reset();
