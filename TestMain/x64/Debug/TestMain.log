@@ -1,2 +1,9 @@
-﻿  TestScene.cpp
+﻿  Player.cpp
+  TestMain.cpp
+  TestScene.cpp
+  Tree.cpp
+  WindMill.cpp
+  WindMillWing.cpp
+C:\Users\User\Desktop\VooDooEngine\TestMain\WindMillWing.cpp(10,20): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
   TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\TestMain.exe
