@@ -7,7 +7,7 @@ static UINT s_windmillIndex = 0;
 
 WindMillWing::WindMillWing(UINT wingAmount)
 {
-	for (int i = 0; i < wingAmount; ++i)
+	for (UINT i = 0; i < wingAmount; ++i)
 	{
 		unique_ptr<Object> windmill = make_unique<Object>(Shapes::WindmillWing);
 		AddChild(windmill.get());
