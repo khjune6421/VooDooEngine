@@ -781,13 +781,13 @@ void Render::DrawObjects()
 		constexpr UINT stride = sizeof(Vertex);
 		constexpr UINT offset = 0;
 
+#ifdef _DEBUG
 		ID3D11Buffer* vertexBuffer = nullptr;
 		if (m_shapeVertexBuffers.find(object->m_shape) != m_shapeVertexBuffers.end()) vertexBuffer = m_shapeVertexBuffers[object->m_shape].first.Get();
-		else
-		{
-			MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK);
-			continue;
-		}
+		else { MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK); continue; }
+#else
+		ID3D11Buffer* vertexBuffer = m_shapeVertexBuffers[object->m_shape].first.Get();
+#endif
 
 		if (m_currentVertexShader == VertexShaders::Default) m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
 		else m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[m_currentVertexShader]).Get(), nullptr, 0);
