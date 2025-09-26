@@ -8,7 +8,7 @@ TestScene::TestScene(wstring dataFile)
 	m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 
-	m_player = make_unique<Player>(Shapes::Cube);
+	m_player = make_unique<Player>(Shapes::Triangle);
 	m_player->SetPosition(XMVECTOR{ 0.0f, 2.0f, 0.0f, 1.0f });
 	m_player->SetScale(XMFLOAT3{ 1.0f, 1.0f, 1.0f });
 
@@ -28,6 +28,7 @@ TestScene::TestScene(wstring dataFile)
 		{
 			unique_ptr<Object> tree = make_unique<Tree>();
 			tree->SetPosition(XMVECTOR{ pos.x, pos.y, pos.z, 1.0f });
+			g_attachableObjects.emplace_back(m_player.get());
 			m_objects.emplace_back(move(tree));
 		}
 	}
@@ -35,6 +36,12 @@ TestScene::TestScene(wstring dataFile)
 	{
 		MessageBoxW(nullptr, L"Failed to load object positions", L"Error", MB_OK);
 	}
+}
+
+TestScene::~TestScene()
+{
+	g_collidibleObjects.clear();
+	g_attachableObjects.clear();
 }
 
 void TestScene::Update(float deltaTime)
@@ -70,45 +77,18 @@ void TestScene::Update(float deltaTime)
 			m_projectileWing->SetScale(m_player->GetScale());
 
 			g_collidibleObjects.emplace_back(m_projectileWing.get());
-
-			if (m_cameraMode == CameraModes::FlyBy)
-			{
-				m_camera->SetPosition(m_player->GetPosition());
-				m_camera->SetRotation(m_player->GetRotation());
-				m_camera->MoveDirection(Directions::Forward, 10.0f);
-				m_camera->MoveDirection(Directions::Left, 10.0f);
-			}
-			else if (m_cameraMode == CameraModes::Behind)
-			{
-				m_camera->SetPosition(XMVECTOR{ 0.0f, 2.5f, -5.0f, 1.0f });
-				m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-				m_projectileWing->AddChild(m_camera.get());
-			}
-			else if (m_cameraMode == CameraModes::Rear)
-			{
-				m_camera->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-				m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 1.0f, 1.0f });
-				m_camera->SetPosition(XMVECTOR{ 0.75f, -0.5f, -2.5f, 1.0f });
-				m_projectileWing->AddChild(m_camera.get());
-			}
 		}
 	}
 	if (m_projectileWing)
 	{
-		static float lifeTime = 3.0f;
-		lifeTime -= deltaTime;
+		projectileLifeTime -= deltaTime;
 
 		m_projectileWing->MoveDirection(Directions::Forward, 20.0f * deltaTime);
 		m_projectileWing->Update(deltaTime);
 
-		if (m_cameraMode == CameraModes::FlyBy) m_camera->LookAt(m_projectileWing->GetPosition());
-		if (m_cameraMode == CameraModes::Stationary) m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f } + m_projectileWing->GetPosition());
-
-		if (lifeTime <= 0.0f)
+		if (projectileLifeTime <= 0.0f)
 		{
 			m_projectileWing->RemoveChild(m_camera.get());
-			m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
-			m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 
 			m_projectileWing->SetPosition(m_windmill->GetPosition());
 			m_projectileWing->SetRotation(XMVECTOR{ 0.0f, 0.0f, 0.0f, 0.0f });
@@ -119,8 +99,8 @@ void TestScene::Update(float deltaTime)
 			auto it = find(g_collidibleObjects.begin(), g_collidibleObjects.end(), m_windmill->m_windmillWing.get());
 			if (it != g_collidibleObjects.end()) g_collidibleObjects.erase(it);
 
-			lifeTime = 3.0f;
+			projectileLifeTime = 3.0f;
 		}
 	}
-	else m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f } + m_player->GetPosition());
+	m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f } + m_player->GetPosition());
 }

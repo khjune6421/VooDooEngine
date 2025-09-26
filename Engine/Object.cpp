@@ -7,6 +7,43 @@ vector<Object*> g_objects;
 
 static UINT s_idCounter = 0;
 
+DirectX::XMVECTOR Object::QuaternionToEuler(const DirectX::XMVECTOR& quat) const // Do I know how this works? No. Does it work? As far as I know, yes but even if it doesnt how would I know?
+{
+	XMFLOAT4 fQuat = {};
+	XMStoreFloat4(&fQuat, quat);
+
+	// This is to prevent gimbal lock
+	const float test = fQuat.x * fQuat.y + fQuat.z * fQuat.w;
+	if (test > 0.499f)
+	{
+		float yaw = 2.0f * atan2f(fQuat.x, fQuat.w);
+		float pitch = XM_PIDIV2;
+		float roll = 0.0f;
+		return XMVectorSet(roll, pitch, yaw, 0.0f);
+	}
+	if (test < -0.499f)
+	{
+		float yaw = -2.0f * atan2f(fQuat.x, fQuat.w);
+		float pitch = -XM_PIDIV2;
+		float roll = 0.0f;
+		return XMVectorSet(roll, pitch, yaw, 0.0f);
+	}
+
+	float roll = atan2f
+	(
+		2.0f * (fQuat.w * fQuat.x + fQuat.y * fQuat.z),
+		1.0f - 2.0f * (fQuat.x * fQuat.x + fQuat.y * fQuat.y)
+	);
+	float pitch = asinf(2.0f * (fQuat.w * fQuat.y - fQuat.z * fQuat.x));
+	float yaw = atan2f
+	(
+		2.0f * (fQuat.w * fQuat.z + fQuat.x * fQuat.y),
+		1.0f - 2.0f * (fQuat.y * fQuat.y + fQuat.z * fQuat.z)
+	);
+
+	return XMVectorSet(roll, pitch, yaw, 0.0f);
+}
+
 void Object::SetDirty()
 {
 	if (m_isDirty) return;
@@ -33,17 +70,14 @@ void Object::AddChildViaWorldPosition(Object* child)
 
 	const XMMATRIX inverseParentWorld = XMMatrixInverse(nullptr, GetWorldMatrix());
 	const XMMATRIX childWorld = child->GetWorldMatrix();
-	const XMMATRIX newLocal = XMMatrixMultiply(childWorld, inverseParentWorld);
+	const XMMATRIX newLocal = childWorld * inverseParentWorld;
 
-	// This is to setting vector value for debug and consistency purpose
 	XMVECTOR scale, rotationQuat, translation;
 	XMMatrixDecompose(&scale, &rotationQuat, &translation, newLocal);
-	child->SetPosition(translation);
-	child->SetRotation(rotationQuat);
-	child->SetScale(scale);
 
-	// This actually sets the local matrix directly
-	child->m_worldMatrix = newLocal;
+	child->SetPosition(translation);
+	child->Rotate(-m_rotation); // To negate parent's rotation
+	child->Scale(XMFLOAT3(1.0f / m_scale.x, 1.0f / m_scale.y, 1.0f / m_scale.z)); // To negate parent's scale
 
 	AddChild(child);
 }
@@ -88,7 +122,7 @@ void Object::SetPosition(const XMVECTOR& pos)
 }
 void Object::MovePosition(const XMVECTOR& delta)
 {
-	m_position = XMVectorAdd(m_position, delta);
+	m_position += delta;
 	m_positionMatrix = XMMatrixTranslationFromVector(m_position);
 
 	if (!m_isDirty) SetDirty();
@@ -135,7 +169,7 @@ void Object::SetRotation(const XMVECTOR& rot)
 }
 void Object::Rotate(const XMVECTOR& delta)
 {
-	m_rotation = XMVectorAdd(m_rotation, delta);
+	m_rotation += delta;
 	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
 
 	if (!m_isDirty) SetDirty();
@@ -160,48 +194,16 @@ void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this 
 
 	if (!m_isDirty) SetDirty();
 }
-XMVECTOR Object::GetWorldRotation() const // This one too
+XMVECTOR Object::GetWorldRotation() const
 {
 	if (m_isDirty) GetWorldMatrix();
 
 	XMVECTOR scale, rotationQuat, translation;
 	XMMatrixDecompose(&scale, &rotationQuat, &translation, m_worldMatrix);
 
-	XMFLOAT4 quat = {};
-	XMStoreFloat4(&quat, rotationQuat);
-
-	// This is to prevent gimbal lock
-	const float test = quat.x * quat.y + quat.z * quat.w;
-	if (test > 0.499f)
-	{
-		float yaw = 2.0f * atan2f(quat.x, quat.w);
-		float pitch = XM_PIDIV2;
-		float roll = 0.0f;
-		return XMVectorSet(roll, pitch, yaw, 0.0f);
-	}
-	if (test < -0.499f)
-	{
-		float yaw = -2.0f * atan2f(quat.x, quat.w);
-		float pitch = -XM_PIDIV2;
-		float roll = 0.0f;
-		return XMVectorSet(roll, pitch, yaw, 0.0f);
-	}
-
-	float roll = atan2f
-	(
-		2.0f * (quat.w * quat.x + quat.y * quat.z),
-		1.0f - 2.0f * (quat.x * quat.x + quat.y * quat.y)
-	);
-	float pitch = asinf(2.0f * (quat.w * quat.y - quat.z * quat.x));
-	float yaw = atan2f
-	(
-		2.0f * (quat.w * quat.z + quat.x * quat.y),
-		1.0f - 2.0f * (quat.y * quat.y + quat.z * quat.z)
-	);
-
-	return XMVectorSet(roll, pitch, yaw, 0.0f);
+	return QuaternionToEuler(rotationQuat);
 }
-XMVECTOR Object::GetWorldDirection(Directions dir) const
+XMVECTOR Object::GetWorldDirection(Directions dir) const // Returns normalized vector
 {
 	if (m_isDirty) GetWorldMatrix();
 	XMVECTOR direction = XMVectorZero();
@@ -274,19 +276,63 @@ XMMATRIX Object::GetWorldMatrix() const
 
 				if (m_ignorePosition)
 				{
-					if (!(m_ignorePosition % IgnoreParentAxis::X)) parentMatrix.r[3].m128_f32[0] = 0.0f;
-					if (!(m_ignorePosition % IgnoreParentAxis::Y)) parentMatrix.r[3].m128_f32[1] = 0.0f;
-					if (!(m_ignorePosition % IgnoreParentAxis::Z)) parentMatrix.r[3].m128_f32[2] = 0.0f;
+					if (!(m_ignorePosition & IgnoreParentAxis::X)) parentMatrix.r[3].m128_f32[0] = 0.0f;
+					if (!(m_ignorePosition & IgnoreParentAxis::Y)) parentMatrix.r[3].m128_f32[1] = 0.0f;
+					if (!(m_ignorePosition & IgnoreParentAxis::Z)) parentMatrix.r[3].m128_f32[2] = 0.0f;
 				}
 				if (m_ignoreRotation)
 				{
-					// not sure how I should implement this
+					XMVECTOR parentScale, parentRotation, parentTranslation;
+					XMMatrixDecompose(&parentScale, &parentRotation, &parentTranslation, parentMatrix);
+
+					XMMATRIX parentScaleMatrix = XMMatrixScalingFromVector(parentScale);
+					XMMATRIX parentTranslationMatrix = XMMatrixTranslationFromVector(parentTranslation);
+
+					if (m_ignoreRotation & IgnoreParentAxis::X)
+					{
+						XMFLOAT4 quatFloat = {};
+						XMStoreFloat4(&quatFloat, parentRotation);
+						XMVECTOR eulerAngles = QuaternionToEuler(parentRotation);
+
+						XMFLOAT3 euler = {};
+						XMStoreFloat3(&euler, eulerAngles);
+
+						euler.x = 0.0f;
+						XMMATRIX partialRotation = XMMatrixRotationRollPitchYaw(euler.x, euler.y, euler.z);
+						parentMatrix = parentScaleMatrix * partialRotation * parentTranslationMatrix;
+					}
+					else if (m_ignoreRotation & IgnoreParentAxis::Y)
+					{
+						XMVECTOR eulerAngles = QuaternionToEuler(parentRotation);
+
+						XMFLOAT3 euler = {};
+						XMStoreFloat3(&euler, eulerAngles);
+
+						euler.y = 0.0f;
+						XMMATRIX partialRotation = XMMatrixRotationRollPitchYaw(euler.x, euler.y, euler.z);
+						parentMatrix = parentScaleMatrix * partialRotation * parentTranslationMatrix;
+					}
+					else if (m_ignoreRotation & IgnoreParentAxis::Z)
+					{
+						XMVECTOR eulerAngles = QuaternionToEuler(parentRotation);
+
+						XMFLOAT3 euler = {};
+						XMStoreFloat3(&euler, eulerAngles);
+
+						euler.z = 0.0f;
+						XMMATRIX partialRotation = XMMatrixRotationRollPitchYaw(euler.x, euler.y, euler.z);
+						parentMatrix = parentScaleMatrix * partialRotation * parentTranslationMatrix;
+					}
+					else
+					{
+						parentMatrix = parentScaleMatrix * parentTranslationMatrix;
+					}
 				}
 				if (m_ignoreScale)
 				{
-					if (!(m_ignoreScale % IgnoreParentAxis::X)) parentMatrix.r[0].m128_f32[0] = 1.0f;
-					if (!(m_ignoreScale % IgnoreParentAxis::Y)) parentMatrix.r[1].m128_f32[1] = 1.0f;
-					if (!(m_ignoreScale % IgnoreParentAxis::Z)) parentMatrix.r[2].m128_f32[2] = 1.0f;
+					if (!(m_ignoreScale & IgnoreParentAxis::X)) parentMatrix.r[0].m128_f32[0] = 1.0f;
+					if (!(m_ignoreScale & IgnoreParentAxis::Y)) parentMatrix.r[1].m128_f32[1] = 1.0f;
+					if (!(m_ignoreScale & IgnoreParentAxis::Z)) parentMatrix.r[2].m128_f32[2] = 1.0f;
 				}
 
 				m_worldMatrix *= parentMatrix;
