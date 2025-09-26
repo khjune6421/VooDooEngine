@@ -7,18 +7,19 @@ vector<Object*> g_objects;
 
 static UINT s_idCounter = 0;
 
-DirectX::XMVECTOR Object::QuaternionToEuler(const DirectX::XMVECTOR& quat) const // Do I know how this works? No. Does it work? As far as I know, yes but even if it doesnt how would I know?
+DirectX::XMVECTOR Object::QuaternionToEuler(const DirectX::XMVECTOR& quat) const // Do I know how this works? No. Does it work? As far as I know, yes but even if it doesn't how would I know?
 {
 	XMFLOAT4 fQuat = {};
 	XMStoreFloat4(&fQuat, quat);
 
-	// This is to prevent gimbal lock
+	// This is to prevent gimbal lock?
 	const float test = fQuat.x * fQuat.y + fQuat.z * fQuat.w;
 	if (test > 0.499f)
 	{
 		float yaw = 2.0f * atan2f(fQuat.x, fQuat.w);
 		float pitch = XM_PIDIV2;
 		float roll = 0.0f;
+
 		return XMVectorSet(roll, pitch, yaw, 0.0f);
 	}
 	if (test < -0.499f)
@@ -26,6 +27,7 @@ DirectX::XMVECTOR Object::QuaternionToEuler(const DirectX::XMVECTOR& quat) const
 		float yaw = -2.0f * atan2f(fQuat.x, fQuat.w);
 		float pitch = -XM_PIDIV2;
 		float roll = 0.0f;
+
 		return XMVectorSet(roll, pitch, yaw, 0.0f);
 	}
 
@@ -276,63 +278,19 @@ XMMATRIX Object::GetWorldMatrix() const
 
 				if (m_ignorePosition)
 				{
-					if (!(m_ignorePosition & IgnoreParentAxis::X)) parentMatrix.r[3].m128_f32[0] = 0.0f;
-					if (!(m_ignorePosition & IgnoreParentAxis::Y)) parentMatrix.r[3].m128_f32[1] = 0.0f;
-					if (!(m_ignorePosition & IgnoreParentAxis::Z)) parentMatrix.r[3].m128_f32[2] = 0.0f;
+					if (!(m_ignorePosition % IgnoreParentAxis::X)) parentMatrix.r[3].m128_f32[0] = 0.0f;
+					if (!(m_ignorePosition % IgnoreParentAxis::Y)) parentMatrix.r[3].m128_f32[1] = 0.0f;
+					if (!(m_ignorePosition % IgnoreParentAxis::Z)) parentMatrix.r[3].m128_f32[2] = 0.0f;
 				}
 				if (m_ignoreRotation)
 				{
-					XMVECTOR parentScale, parentRotation, parentTranslation;
-					XMMatrixDecompose(&parentScale, &parentRotation, &parentTranslation, parentMatrix);
-
-					XMMATRIX parentScaleMatrix = XMMatrixScalingFromVector(parentScale);
-					XMMATRIX parentTranslationMatrix = XMMatrixTranslationFromVector(parentTranslation);
-
-					if (m_ignoreRotation & IgnoreParentAxis::X)
-					{
-						XMFLOAT4 quatFloat = {};
-						XMStoreFloat4(&quatFloat, parentRotation);
-						XMVECTOR eulerAngles = QuaternionToEuler(parentRotation);
-
-						XMFLOAT3 euler = {};
-						XMStoreFloat3(&euler, eulerAngles);
-
-						euler.x = 0.0f;
-						XMMATRIX partialRotation = XMMatrixRotationRollPitchYaw(euler.x, euler.y, euler.z);
-						parentMatrix = parentScaleMatrix * partialRotation * parentTranslationMatrix;
-					}
-					else if (m_ignoreRotation & IgnoreParentAxis::Y)
-					{
-						XMVECTOR eulerAngles = QuaternionToEuler(parentRotation);
-
-						XMFLOAT3 euler = {};
-						XMStoreFloat3(&euler, eulerAngles);
-
-						euler.y = 0.0f;
-						XMMATRIX partialRotation = XMMatrixRotationRollPitchYaw(euler.x, euler.y, euler.z);
-						parentMatrix = parentScaleMatrix * partialRotation * parentTranslationMatrix;
-					}
-					else if (m_ignoreRotation & IgnoreParentAxis::Z)
-					{
-						XMVECTOR eulerAngles = QuaternionToEuler(parentRotation);
-
-						XMFLOAT3 euler = {};
-						XMStoreFloat3(&euler, eulerAngles);
-
-						euler.z = 0.0f;
-						XMMATRIX partialRotation = XMMatrixRotationRollPitchYaw(euler.x, euler.y, euler.z);
-						parentMatrix = parentScaleMatrix * partialRotation * parentTranslationMatrix;
-					}
-					else
-					{
-						parentMatrix = parentScaleMatrix * parentTranslationMatrix;
-					}
+					// not sure how I should implement this
 				}
 				if (m_ignoreScale)
 				{
-					if (!(m_ignoreScale & IgnoreParentAxis::X)) parentMatrix.r[0].m128_f32[0] = 1.0f;
-					if (!(m_ignoreScale & IgnoreParentAxis::Y)) parentMatrix.r[1].m128_f32[1] = 1.0f;
-					if (!(m_ignoreScale & IgnoreParentAxis::Z)) parentMatrix.r[2].m128_f32[2] = 1.0f;
+					if (!(m_ignoreScale % IgnoreParentAxis::X)) parentMatrix.r[0].m128_f32[0] = 1.0f;
+					if (!(m_ignoreScale % IgnoreParentAxis::Y)) parentMatrix.r[1].m128_f32[1] = 1.0f;
+					if (!(m_ignoreScale % IgnoreParentAxis::Z)) parentMatrix.r[2].m128_f32[2] = 1.0f;
 				}
 
 				m_worldMatrix *= parentMatrix;

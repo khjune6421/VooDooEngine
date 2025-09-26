@@ -80,9 +80,9 @@ protected:
 	enum IgnoreParentAxis // Later change to bit field
 	{
 		None = 0,
-		X = 1 << 1, // 2
-		Y = 1 << 2, // 4
-		Z = 1 << 3  // 8
+		X = 2,
+		Y = 3,
+		Z = 5
 	};
 
 	UINT m_ignorePosition = IgnoreParentAxis::None;

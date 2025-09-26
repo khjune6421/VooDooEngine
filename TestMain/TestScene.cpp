@@ -48,6 +48,7 @@ void TestScene::Update(float deltaTime)
 {
 	m_player->Update(deltaTime);
 	m_windmill->Update(deltaTime);
+
 	for (const auto& object : m_objects) object->Update(deltaTime);
 
 	if (GetAsyncKeyState('F') & 0x0001) m_cameraMode = static_cast<CameraModes>((m_cameraMode + 1) % 4);

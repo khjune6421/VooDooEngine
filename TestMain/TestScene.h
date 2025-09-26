@@ -8,10 +8,8 @@
 
 enum CameraModes
 {
-	FlyBy,
-	Behind,
-	Rear,
-	Stationary
+	Default,
+	BirdEye
 };
 
 class TestScene : public Scene
@@ -24,7 +22,7 @@ class TestScene : public Scene
 	std::unique_ptr<WindMill> m_windmill;
 	std::unique_ptr<WindMillWing> m_projectileWing;
 
-	CameraModes m_cameraMode = CameraModes::Stationary;
+	CameraModes m_cameraMode = CameraModes::Default;
 
 public:
 	TestScene(std::wstring dataFile);
