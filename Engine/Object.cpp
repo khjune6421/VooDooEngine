@@ -27,6 +27,27 @@ void Object::AddChild(Object* child)
 	SetDirty();
 }
 
+void Object::AddChildViaWorldPosition(Object* child)
+{
+	if (!child) return;
+
+	const XMMATRIX inverseParentWorld = XMMatrixInverse(nullptr, GetWorldMatrix());
+	const XMMATRIX childWorld = child->GetWorldMatrix();
+	const XMMATRIX newLocal = XMMatrixMultiply(childWorld, inverseParentWorld);
+
+	// This is to setting vector value for debug and consistency purpose
+	XMVECTOR scale, rotationQuat, translation;
+	XMMatrixDecompose(&scale, &rotationQuat, &translation, newLocal);
+	child->SetPosition(translation);
+	child->SetRotation(rotationQuat);
+	child->SetScale(scale);
+
+	// This actually sets the local matrix directly
+	child->m_worldMatrix = newLocal;
+
+	AddChild(child);
+}
+
 void Object::RemoveChild(Object* child)
 {
 	if (!child) return;

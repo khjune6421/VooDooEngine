@@ -9,8 +9,6 @@ void Tree::Update(float deltaTime)
 {
 	for (const auto& obj : g_collidibleObjects)
 	{
-		//if (obj == this) continue;
-
 		const XMVECTOR distance = XMVectorSubtract(GetWorldPosition(), obj->GetWorldPosition());
 		const float distanceLength = XMVectorGetX(XMVector3Length(distance));
 		if (distanceLength < 5.0f)
