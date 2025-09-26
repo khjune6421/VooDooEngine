@@ -75,9 +75,6 @@ protected:
 	Object* m_parent = nullptr;
 	std::vector<Object*> m_childrens;
 
-	void AddChild(Object* child);
-	void RemoveChild(Object* child);
-
 	enum IgnoreParentAxis // Later change to bit field
 	{
 		None = 0,
@@ -94,6 +91,10 @@ public:
 	Object(Shapes shape = Shapes::None, VertexShaders vertexShader = VertexShaders::Default, PixelShaders pixelShader = PixelShaders::Default);
 	virtual ~Object();
 
+	void AddChild(Object* child);
+	void AddChildViaWorldPosition(Object* child);
+	void RemoveChild(Object* child);
+
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);
 	void MoveDirection(Directions dir, float distance);
@@ -108,7 +109,9 @@ public:
 	DirectX::XMVECTOR GetWorldDirection(Directions dir) const;
 
 	void SetScale(const DirectX::XMFLOAT3& scl);
+	void SetScale(const DirectX::XMVECTOR& scl) { DirectX::XMFLOAT3 f3 = {}; DirectX::XMStoreFloat3(&f3, scl); SetScale(f3); }
 	void Scale(const DirectX::XMFLOAT3& factor);
+	void Scale(const DirectX::XMVECTOR& factor) { DirectX::XMFLOAT3 f3 = {}; DirectX::XMStoreFloat3(&f3, factor); Scale(f3); }
 	DirectX::XMFLOAT3 GetScale() const { return m_scale; }
 	DirectX::XMFLOAT3 GetWorldScale() const;
 

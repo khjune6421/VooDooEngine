@@ -33,3 +33,6 @@ public:
 };
 
 extern Camera* g_camera;
+
+// D3DXIntersect
+// D3DXIntersectTri

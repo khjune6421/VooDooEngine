@@ -27,6 +27,27 @@ void Object::AddChild(Object* child)
 	SetDirty();
 }
 
+void Object::AddChildViaWorldPosition(Object* child)
+{
+	if (!child) return;
+
+	const XMMATRIX inverseParentWorld = XMMatrixInverse(nullptr, GetWorldMatrix());
+	const XMMATRIX childWorld = child->GetWorldMatrix();
+	const XMMATRIX newLocal = XMMatrixMultiply(childWorld, inverseParentWorld);
+
+	// This is to setting vector value for debug and consistency purpose
+	XMVECTOR scale, rotationQuat, translation;
+	XMMatrixDecompose(&scale, &rotationQuat, &translation, newLocal);
+	child->SetPosition(translation);
+	child->SetRotation(rotationQuat);
+	child->SetScale(scale);
+
+	// This actually sets the local matrix directly
+	child->m_worldMatrix = newLocal;
+
+	AddChild(child);
+}
+
 void Object::RemoveChild(Object* child)
 {
 	if (!child) return;
@@ -121,15 +142,22 @@ void Object::Rotate(const XMVECTOR& delta)
 }
 void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this works
 {
-	XMVECTOR direction = XMVectorSubtract(target, GetWorldPosition());
-	direction = XMVector3Normalize(direction);
+	XMVECTOR toTarget = XMVectorSubtract(target, GetWorldPosition());
+	if (XMVector3LessOrEqual(XMVector3LengthSq(toTarget), XMVectorReplicate(1e-8f))) return; // To avoid NaN errors?
 
-	float pitch = asinf(-XMVectorGetY(direction));
-	float yaw = atan2f(XMVectorGetX(direction), XMVectorGetZ(direction));
+	XMVECTOR direction = XMVector3Normalize(toTarget);
+
+	const float dirX = XMVectorGetX(direction);
+	const float dirY = XMVectorGetY(direction);
+	const float dirZ = XMVectorGetZ(direction);
+
+	float pitch = asinf(clamp(-dirY, -1.0f, 1.0f));
+	float yaw = atan2f(dirX, dirZ);
 	float roll = 0.0f;
 
 	m_rotation = XMVectorSet(pitch, yaw, roll, 0.0f);
 	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
+
 	if (!m_isDirty) SetDirty();
 }
 XMVECTOR Object::GetWorldRotation() const // This one too
@@ -180,14 +208,14 @@ XMVECTOR Object::GetWorldDirection(Directions dir) const
 
 	switch (dir)
 	{
-	case Directions::Forward: direction = XMVector3Normalize(XMVectorSet(m_worldMatrix.r[2].m128_f32[0], m_worldMatrix.r[2].m128_f32[1], m_worldMatrix.r[2].m128_f32[2], 0.0f)); break;
-	case Directions::Backward: direction = XMVector3Normalize(XMVectorSet(-m_worldMatrix.r[2].m128_f32[0], -m_worldMatrix.r[2].m128_f32[1], -m_worldMatrix.r[2].m128_f32[2], 0.0f)); break;
+	case Directions::Forward: direction = XMVector3Normalize(m_worldMatrix.r[2]); break;
+	case Directions::Backward: direction = XMVector3Normalize(-m_worldMatrix.r[2]); break;
 
-	case Directions::Right: direction = XMVector3Normalize(XMVectorSet(m_worldMatrix.r[0].m128_f32[0], m_worldMatrix.r[0].m128_f32[1], m_worldMatrix.r[0].m128_f32[2], 0.0f)); break;
-	case Directions::Left: direction = XMVector3Normalize(XMVectorSet(-m_worldMatrix.r[0].m128_f32[0], -m_worldMatrix.r[0].m128_f32[1], -m_worldMatrix.r[0].m128_f32[2], 0.0f)); break;
+	case Directions::Right: direction = XMVector3Normalize(m_worldMatrix.r[0]); break;
+	case Directions::Left: direction = XMVector3Normalize(-m_worldMatrix.r[0]); break;
 
-	case Directions::Up: direction = XMVector3Normalize(XMVectorSet(m_worldMatrix.r[1].m128_f32[0], m_worldMatrix.r[1].m128_f32[1], m_worldMatrix.r[1].m128_f32[2], 0.0f)); break;
-	case Directions::Down: direction = XMVector3Normalize(XMVectorSet(-m_worldMatrix.r[1].m128_f32[0], -m_worldMatrix.r[1].m128_f32[1], -m_worldMatrix.r[1].m128_f32[2], 0.0f)); break;
+	case Directions::Up: direction = XMVector3Normalize(m_worldMatrix.r[1]); break;
+	case Directions::Down: direction = XMVector3Normalize(-m_worldMatrix.r[1]); break;
 
 	default: break;
 	}

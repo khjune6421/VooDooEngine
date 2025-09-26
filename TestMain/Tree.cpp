@@ -9,8 +9,6 @@ void Tree::Update(float deltaTime)
 {
 	for (const auto& obj : g_collidibleObjects)
 	{
-		if (obj == this) continue;
-
 		const XMVECTOR distance = XMVectorSubtract(GetWorldPosition(), obj->GetWorldPosition());
 		const float distanceLength = XMVectorGetX(XMVector3Length(distance));
 		if (distanceLength < 5.0f)
@@ -25,3 +23,7 @@ void Tree::Update(float deltaTime)
 		Rotate(XMVECTOR{ 2.0f * deltaTime, 0.0f, 0.0f, 0.0f });
 	}
 }
+
+// XMVector3Cross
+// XMMatrixRotationAxis
+// XMMatrixRotationNormal // this is faster if the axis is normalized value
