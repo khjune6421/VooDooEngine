@@ -8,6 +8,8 @@ using namespace DirectX;
 #define comPtr Microsoft::WRL::ComPtr
 
 Camera* g_camera = nullptr;
+XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
+XMMATRIX Render::s_projectionMatrix = XMMatrixIdentity();
 
 void Render::CreateDeviceSwapChain()
 {
@@ -318,17 +320,6 @@ void Render::DisplayDeviceInfo()
 		}
 		posIndex++;
 	}
-}
-
-void Render::ChangeShader(PixelShaders pixelShader)
-{
-	m_deviceContext->PSSetShader(m_pixelShaderMap[pixelShader].Get(), nullptr, 0);
-	m_currentPixelShader = pixelShader;
-}
-
-void Render::ChangeState()
-{
-	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % 4);
 }
 
 void Render::UpdateShaders()
@@ -804,14 +795,14 @@ void Render::DrawObjects()
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
-		XMMATRIX viewMatrix = g_camera->GetViewMatrix();
-		XMMATRIX projMatrix = g_camera->GetProjectionMatrix();
+		s_viewMatrix = g_camera->GetViewMatrix();
+		s_projectionMatrix = g_camera->GetProjectionMatrix();
 
 		TestConstBuffer constBufferData = {};
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
-		constBufferData.view = XMMatrixTranspose(viewMatrix);
-		constBufferData.projection = XMMatrixTranspose(projMatrix);
-		constBufferData.WVP = XMMatrixTranspose(worldMatrix * viewMatrix * projMatrix);
+		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
+		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
+		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
 
 		constBufferData.VSFloatA = sinf(static_cast<float>(ATime));
 		constBufferData.VSFloatB = cosf(static_cast<float>(ATime));
@@ -829,7 +820,7 @@ void Render::UpdateRenderMode()
 	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
 }
 
-Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
+Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
@@ -907,6 +898,8 @@ void Render::Resize(UINT width, UINT height)
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }
 
+constexpr UINT VEWPORT_NUM = 1;
+
 void Render::SetViewport(float topLeftX, float topLeftY)
 {
 	D3D11_VIEWPORT viewport = {};
@@ -916,7 +909,7 @@ void Render::SetViewport(float topLeftX, float topLeftY)
 	viewport.Height = static_cast<FLOAT>(m_deviceInfo.displayMode.Height);
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
-	m_deviceContext->RSSetViewports(1, &viewport);
+	m_deviceContext->RSSetViewports(VEWPORT_NUM, &viewport);
 }
 
 void Render::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)
@@ -957,6 +950,46 @@ void Render::SceneRender()
 #endif
 
 	Present();
+}
+
+void Render::ChangeShader(PixelShaders pixelShader)
+{
+	m_deviceContext->PSSetShader(m_pixelShaderMap[pixelShader].Get(), nullptr, 0);
+	m_currentPixelShader = pixelShader;
+}
+
+void Render::ChangeState()
+{
+	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % 4);
+}
+
+void Render::ScreenPointToWorld(POINT screenPos) const
+{
+	D3D11_VIEWPORT vp;
+	UINT numViewports = VEWPORT_NUM;
+	m_deviceContext->RSGetViewports(&numViewports, &vp);
+
+	XMVECTOR rayOrigin = XMVectorSet(static_cast<float>(screenPos.x), static_cast<float>(screenPos.y), 0.0f, 1.0f);
+	XMVECTOR rayEnd = XMVectorSet(static_cast<float>(screenPos.x), static_cast<float>(screenPos.y), 1.0f, 1.0f);
+
+	rayOrigin = XMVector3Unproject
+	(
+		rayOrigin,
+		vp.TopLeftX, vp.TopLeftY,
+		vp.Width, vp.Height,
+		vp.MinDepth, vp.MaxDepth,
+		s_projectionMatrix, s_viewMatrix, XMMatrixIdentity()
+	);
+	rayEnd = XMVector3Unproject
+	(
+		rayEnd,
+		vp.TopLeftX, vp.TopLeftY,
+		vp.Width, vp.Height,
+		vp.MinDepth, vp.MaxDepth,
+		s_projectionMatrix, s_viewMatrix, XMMatrixIdentity()
+	);
+
+	if (VDGM::g_currentScene) VDGM::g_currentScene->Raycast(rayOrigin, rayEnd);
 }
 
 #undef comPtr

@@ -77,7 +77,7 @@ protected:
 	Object* m_parent = nullptr;
 	std::vector<Object*> m_childrens;
 
-	enum IgnoreParentAxis // Later change to bit field
+	enum IgnoreParentAxis // TODO: later change this to bit field
 	{
 		None = 0,
 		X = 2,
@@ -100,6 +100,7 @@ public:
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);
 	void MoveDirection(Directions dir, float distance);
+	void LerpPosition(const DirectX::XMVECTOR& start, const DirectX::XMVECTOR& target, float t);
 	DirectX::XMVECTOR GetPosition() const { return m_position; }
 	DirectX::XMVECTOR GetWorldPosition() const;
 
@@ -119,7 +120,6 @@ public:
 
 	DirectX::XMMATRIX GetWorldMatrix() const;
 
-	// Other basic object function
 	virtual void Update(float deltaTime) { (void)deltaTime; } // (void) to avoid unused parameter warning // feels odd but makes sense
 };
 

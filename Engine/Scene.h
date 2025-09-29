@@ -5,12 +5,13 @@
 class Scene
 {
 protected:
-	// To manage objects lifecycle? // this is so fucked up
 	std::vector<std::unique_ptr<Object>> m_objects;
 
-	public:
+public:
 	Scene() = default;
 	virtual ~Scene() = default;
 
 	virtual void Update(float deltaTime) = 0;
+
+	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) = 0;
 };

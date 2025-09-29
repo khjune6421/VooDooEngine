@@ -1,7 +1,6 @@
 #pragma once
 
 #include "WindowManager.h"
-#include "Scene.h"
 
 namespace VDGM
 {
@@ -13,7 +12,7 @@ namespace VDGM
 
 	void ChangeScene(const std::wstring& sceneName);
 
-	void GameLoop();
+	bool GameLoop();
 
 	double GetdeltaTime();
 

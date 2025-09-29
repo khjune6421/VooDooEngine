@@ -155,6 +155,13 @@ void Object::MoveDirection(Directions dir, float distance)
 
 	if (!m_isDirty) SetDirty();
 }
+void Object::LerpPosition(const XMVECTOR& start, const XMVECTOR& end, float t)
+{
+	m_position = XMVectorLerp(start, end, t);
+	m_positionMatrix = XMMatrixTranslationFromVector(m_position);
+
+	if (!m_isDirty) SetDirty();
+}
 XMVECTOR Object::GetWorldPosition() const
 {
 	if (m_isDirty) GetWorldMatrix();

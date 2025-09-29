@@ -48,6 +48,13 @@ namespace VDW
 		//	ReleaseCapture();
 		//	return 0;
 
+		case WM_LBUTTONUP:
+		{
+			POINT mousePos = { LOWORD(lParam), HIWORD(lParam) };
+			g_windows[hWnd]->ScreenPointToWorld(mousePos);
+			return 0;
+		}
+
 		//case WM_MOUSEMOVE:
 		//	if (isDragging)
 		//	{

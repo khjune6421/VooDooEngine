@@ -29,4 +29,6 @@ public:
 	~TestScene() override;
 
 	void Update(float deltaTime) override;
+
+	void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) override;
 };
