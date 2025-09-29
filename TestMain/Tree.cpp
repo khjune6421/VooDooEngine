@@ -3,7 +3,9 @@
 using namespace std;
 using namespace DirectX;
 
+// These should be in some kind of collision manager later // very cursed
 vector<Object*> g_collidibleObjects;
+vector<Object*> g_attachableObjects;
 
 void Tree::Update(float deltaTime)
 {
@@ -11,16 +13,32 @@ void Tree::Update(float deltaTime)
 	{
 		const XMVECTOR distance = XMVectorSubtract(GetWorldPosition(), obj->GetWorldPosition());
 		const float distanceLength = XMVectorGetX(XMVector3Length(distance));
-		if (distanceLength < 5.0f)
+		if (distanceLength < 3.0f)
 		{
 			m_isDead = true;
+			XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+			XMVECTOR objFront = obj->GetWorldDirection(Directions::Forward);
+			m_fallAngle = XMVector3Cross(up, objFront);
 			break;
 		}
 	}
 
-	if (m_isDead && m_rotation.m128_f32[0] < XM_PIDIV2)
+	if (m_isDead && !m_isAttached)
 	{
-		Rotate(XMVECTOR{ 2.0f * deltaTime, 0.0f, 0.0f, 0.0f });
+		XMVECTOR upDir = GetWorldDirection(Directions::Up);
+		if (XMVectorGetY(upDir) > 0.1f) Rotate(XMVectorScale(m_fallAngle, deltaTime));
+
+		for (const auto& obj : g_attachableObjects)
+		{
+			const XMVECTOR distance = XMVectorSubtract(GetWorldPosition(), obj->GetWorldPosition());
+			const float distanceLength = XMVectorGetX(XMVector3Length(distance));
+			if (distanceLength < 3.0f)
+			{
+				m_isAttached = true;
+				obj->AddChildViaWorldPosition(this);
+				break;
+			}
+		}
 	}
 }
 

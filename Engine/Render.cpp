@@ -724,11 +724,19 @@ void Render::CreateShapeVertexBuffer()
 
 			XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
 			XMFLOAT3(-0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
-			XMFLOAT3(0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f)
+			XMFLOAT3(0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
+
+			XMFLOAT3(0.0f, 0.0f, -0.5f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f),
+			XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
+			XMFLOAT3(0.0f, 0.0f, 0.5f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f),
+
+			XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+			XMFLOAT3(0.0f, 0.5f, -0.5f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
+			XMFLOAT3(0.0f, 0.5f, 0.5f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f)
 		};
 
 		CreateVertexBuffer(sizeof(treeVertices), &m_shapeVertexBuffers[Shapes::Tree].first, treeVertices, sizeof(Vertex));
-		m_shapeVertexBuffers[Shapes::Tree].second = 6;
+		m_shapeVertexBuffers[Shapes::Tree].second = 12;
 	}
 
 	if (m_shapeVertexBuffers.find(Shapes::WindmillWing) == m_shapeVertexBuffers.end())
@@ -825,8 +833,11 @@ Render::Render(HWND hWnd, int width, int height) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
-	m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
-	m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
+	//m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
+	//m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
+
+	m_deviceInfo.displayMode.Width = width;
+	m_deviceInfo.displayMode.Height = height;
 
 	CreateDeviceSwapChain();
 	CreateRenderTarget();

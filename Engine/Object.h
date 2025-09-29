@@ -59,6 +59,8 @@ class Object
 	DirectX::XMMATRIX m_rotationMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_scaleMatrix = DirectX::XMMatrixIdentity();
 
+	DirectX::XMVECTOR QuaternionToEuler(const DirectX::XMVECTOR& quat) const;
+
 	// mutable so that it can be modified in const function GetWorldMatrix
 	mutable DirectX::XMMATRIX m_worldMatrix = DirectX::XMMatrixIdentity();
 	mutable bool m_isDirty = true;
