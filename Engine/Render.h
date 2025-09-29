@@ -7,7 +7,7 @@
 #include "DirectXLib.h"
 
 // Other header files
-#include "Object.h"
+#include "Scene.h"
 #include "Camera.h"
 
 // I usually don't use 'using' or #define macro in header files but I'll make this one an exception
@@ -19,6 +19,9 @@ namespace VDGM
 {
 	extern float g_deltaTimeF;
 	extern double g_deltaTimeD;
+
+	// this is so cursed // TODO: not this
+	extern std::unique_ptr<Scene> g_currentScene;
 }
 
 class Render
@@ -110,6 +113,10 @@ class Render
 	// Static vertex buffer for rendering objects
 	std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBuffers;
 
+	// static view and projection matrix for all renders
+	static DirectX::XMMATRIX s_viewMatrix;
+	static DirectX::XMMATRIX s_projectionMatrix;
+
 	// Functions
 
 	// Device
@@ -151,7 +158,7 @@ class Render
 	void UpdateRenderMode();
 
 public:
-	Render(HWND hWnd, int width, int height);
+	Render(HWND hWnd, UINT width, UINT height);
 	~Render();
 
 	void Resize(UINT width, UINT height);
@@ -163,6 +170,8 @@ public:
 
 	void ChangeShader(PixelShaders pixelShader = PixelShaders::Default);
 	void ChangeState();
+
+	void ScreenPointToWorld(POINT screenPos) const;
 };
 
 #undef comPtr

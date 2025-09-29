@@ -20,13 +20,17 @@ namespace VDGM
 		else MessageBoxW(nullptr, (L"Scene " + sceneName + L" not found").c_str(), L"Error", MB_OK);
 	}
 
-	void GameLoop()
+	bool GameLoop()
 	{
+		if (!VDW::ProcessMessage()) return false;
+
 		g_deltaTimeD = GetdeltaTime();
 		g_deltaTimeF = static_cast<float>(g_deltaTimeD);
 
 		Update(g_deltaTimeF);
 		Render();
+
+		return true;
 	}
 
 	double GetdeltaTime()

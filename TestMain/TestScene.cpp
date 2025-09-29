@@ -105,3 +105,27 @@ void TestScene::Update(float deltaTime)
 	}
 	m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f } + m_player->GetPosition());
 }
+
+void TestScene::Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd)
+{
+	XMVECTOR planePoint = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	XMVECTOR planeNormal = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR plane = XMPlaneFromPointNormal(planePoint, planeNormal);
+
+	XMVECTOR rayDirection = XMVector3Normalize(XMVectorSubtract(rayEnd, rayOrigin));
+	float dotProduct = XMVectorGetX(XMVector3Dot(rayDirection, planeNormal));
+
+	if (abs(dotProduct) < 0.0001f) { return; } // Parallel to the plane
+
+	XMVECTOR hit = XMPlaneIntersectLine(plane, rayOrigin, rayEnd);
+
+	if (XMVector3IsInfinite(hit)) { return; } // No intersection
+
+	float hitX = XMVectorGetX(hit);
+	float hitY = XMVectorGetY(hit);
+	float hitZ = XMVectorGetZ(hit);
+
+	if (abs(hitY) < 0.001f) { hitY = 0.0f; }
+
+	m_player->MoveToTarget(XMVectorSet(hitX, 2.0f, hitZ, 1.0f));
+}

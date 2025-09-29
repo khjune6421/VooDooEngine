@@ -40,9 +40,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	VDGM::g_currentScene = make_unique<TestScene>(L"../Assets/ObjectPos/Trees.dat");
 	//VDGM::g_currentScene = make_unique<TestScene>("Trees.dat");
 
-	while (VDW::ProcessMessage())
+	while (VDGM::GameLoop())
 	{
-		VDGM::GameLoop();
 		if (GetAsyncKeyState(VK_TAB) & 0x0001) VDGM::ChangeScene(L"TestScene");
 	}
 
