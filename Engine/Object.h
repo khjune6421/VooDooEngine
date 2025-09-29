@@ -100,7 +100,7 @@ public:
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);
 	void MoveDirection(Directions dir, float distance);
-	void LerpPosition(const DirectX::XMVECTOR& start, const DirectX::XMVECTOR& target, float t);
+	void LerpPosition(const DirectX::XMVECTOR& start, const DirectX::XMVECTOR& target, float t); // t: 0.0f ~ 1.0f
 	DirectX::XMVECTOR GetPosition() const { return m_position; }
 	DirectX::XMVECTOR GetWorldPosition() const;
 
