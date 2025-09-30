@@ -13,7 +13,7 @@ cbuffer TestConstBuffer : register(b0)
 
 struct VSInput
 {
-    float4 pos : POSITION;
+    float4 pos : POSITION0;
     float4 col : COLOR0;
 };
 

@@ -8,7 +8,7 @@ using namespace DirectX;
 #define comPtr Microsoft::WRL::ComPtr
 
 UINT Render::s_nextShapeId = 1;
-unordered_map<wstring, UINT> Render::s_shapeIdMap = {};
+unordered_map<wstring, UINT> g_shapeIdMap;
 
 Camera* g_camera = nullptr;
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
@@ -764,10 +764,10 @@ void Render::LoadDefaultShapes(const wchar_t* objPath)
 	ObjFileParser shapes(objPath);
 	for (const auto& [name, vertices] : shapes.m_shapes)
 	{
-		if (s_shapeIdMap.find(name) == s_shapeIdMap.end()) s_shapeIdMap[name] = s_nextShapeId++;
+		if (g_shapeIdMap.find(name) == g_shapeIdMap.end()) g_shapeIdMap[name] = s_nextShapeId++;
 
-		CreateVertexBuffer(sizeof(Vertex) * vertices.size(), &m_shapeVertexBufferMap[s_shapeIdMap[name]].first, vertices.data(), sizeof(Vertex));
-		m_shapeVertexBufferMap[s_shapeIdMap[name]].second = static_cast<UINT>(vertices.size());
+		CreateVertexBuffer(sizeof(Vertex) * vertices.size(), &m_shapeVertexBufferMap[g_shapeIdMap[name]].first, vertices.data(), sizeof(Vertex));
+		m_shapeVertexBufferMap[g_shapeIdMap[name]].second = static_cast<UINT>(vertices.size());
 	}
 }
 

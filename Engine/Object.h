@@ -3,6 +3,9 @@
 #include "DirectXLib.h"
 #include "UtilityHeaders.h"
 
+// Converts string to uint
+extern std::unordered_map<std::wstring, UINT> g_shapeIdMap;
+
 // Rendering related enums
 enum class Shapes // This also includes number of vertices for each shape and type of primitiveTopology?
 {
