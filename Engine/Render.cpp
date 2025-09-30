@@ -787,10 +787,8 @@ void Render::DrawObjects()
 		constexpr UINT offset = 0;
 
 #ifdef _DEBUG
-		//if (m_shapeVertexBuffers.find(object->m_shape) == m_shapeVertexBuffers.end()) { MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK); continue; }
 		if (m_shapeVertexBufferMap.find(object->m_shapeId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK); continue; }
 #endif
-		//ID3D11Buffer* vertexBuffer = m_shapeVertexBuffers[object->m_shape].first.Get();
 		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeId].first.Get();
 
 		if (m_currentVertexShader == VertexShaders::Default) m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
@@ -819,7 +817,6 @@ void Render::DrawObjects()
 
 		m_deviceContext->UpdateSubresource(get<2>(m_vertexShaderMap[object->m_vertexShader]).Get(), 0, nullptr, &constBufferData, 0, 0);
 
-		//m_deviceContext->Draw(m_shapeVertexBuffers[object->m_shape].second, 0);
 		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeId].second, 0);
 	}
 }
@@ -877,7 +874,6 @@ Render::~Render()
 	m_depthStencilView.Reset();
 	m_deviceInfo.hardwareInfos.clear();
 
-	//m_shapeVertexBuffers.clear();
 	m_shapeVertexBufferMap.clear();
 	m_vertexShaderMap.clear();
 	m_pixelShaderMap.clear();
