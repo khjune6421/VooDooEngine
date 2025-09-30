@@ -139,7 +139,6 @@
     <ClCompile Include="WindMillWing.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Assets\ObjectPos\Trees.dat" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

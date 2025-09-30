@@ -13,13 +13,15 @@ cbuffer TestConstBuffer : register(b0)
 
 struct VSInput
 {
-    float4 pos : POSITION;
+    float4 pos : POSITION0;
     float4 col : COLOR0;
+    float2 uv : TEXCOORD0;
+    float3 norm : NORMAL0;
 };
 
 struct VSOutput
 {
-    float4 pos : SV_POSITION;
+    float4 pos : SV_POSITION0;
     float4 col : COLOR0;
     
     float PSFloatA : TEXCOORD0;

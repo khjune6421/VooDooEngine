@@ -20,6 +20,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="ObjFileParser.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">
@@ -69,6 +72,9 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjFileParser.h">
+      <Filter>Parser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

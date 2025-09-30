@@ -1,7 +1,13 @@
-﻿  Camera.cpp
+﻿  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Release\PixelShaderAll.cso
+  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Release\PixelShaderNull.cso
+  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Release\PixelShader.cso
+  compilation object save succeeded; see C:\Users\User\Desktop\VooDooEngine\x64\Release\VertexShader.cso
+  Camera.cpp
   GameManager.cpp
   Object.cpp
+  ObjFileParser.cpp
   Render.cpp
+C:\Users\User\Desktop\VooDooEngine\Engine\Render.cpp(760,37): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   Scene.cpp
   WindowManager.cpp
   Engine.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Release\Engine.lib

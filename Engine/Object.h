@@ -3,24 +3,10 @@
 #include "DirectXLib.h"
 #include "UtilityHeaders.h"
 
+// Converts string to uint
+extern std::unordered_map<std::wstring, UINT> g_shapeIdMap;
+
 // Rendering related enums
-enum class Shapes // This also includes number of vertices for each shape and type of primitiveTopology?
-{
-	// Defalt // creating the shape with this shape will not add it to g_objects
-	None,
-
-	// 2D shapes
-	Triangle,
-	Square,
-	Plane,
-
-	Tetrahedron,
-	Cube,
-	Icosphere,
-
-	Tree,
-	WindmillWing
-};
 enum class VertexShaders // Should it also includes corresponding constant buffer and input layout?
 {
 	Default,
@@ -50,7 +36,7 @@ class Object
 
 	UINT m_id = 0; // For debug purpose
 
-	Shapes m_shape = Shapes::None;
+	UINT m_shapeId = 0;
 	VertexShaders m_vertexShader = VertexShaders::Default;
 	PixelShaders m_pixelShader = PixelShaders::Default;
 
@@ -90,7 +76,12 @@ protected:
 	UINT m_ignoreScale = IgnoreParentAxis::None;
 
 public:
-	Object(Shapes shape = Shapes::None, VertexShaders vertexShader = VertexShaders::Default, PixelShaders pixelShader = PixelShaders::Default);
+	Object
+	(
+		const std::wstring& shapeName = L"None",
+		VertexShaders vertexShader = VertexShaders::Default,
+		PixelShaders pixelShader = PixelShaders::Default
+	);
 	virtual ~Object();
 
 	void AddChild(Object* child);

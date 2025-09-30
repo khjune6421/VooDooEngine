@@ -68,14 +68,8 @@ bool ObjectPositionParser::LoadPositions(const wstring& filename)
 		if (line.empty() || line == L"eof") continue;
 
 		ObjectPosition position;
-		if (ParseLine(line, position))
-		{
-			positions.push_back(position);
-		}
-		else
-		{
-			wcerr << L"Warning: Failed to parse line: " << line << endl;
-		}
+		if (ParseLine(line, position)) positions.push_back(position);
+		else wcerr << L"Warning: Failed to parse line: " << line << endl;
 	}
 
 	file.close();

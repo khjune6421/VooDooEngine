@@ -11,7 +11,7 @@ class WindMill : public Object
 	float m_moveSpeed = 10.0f;
 
 public:
-	WindMill(Shapes shape = Shapes::Tetrahedron, UINT wingAmount = 3);
+	WindMill(const std::wstring& shape, UINT wingAmount = 3);
 	~WindMill() override = default;
 
 	void Update(float deltaTime) override;

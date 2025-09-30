@@ -72,12 +72,6 @@ class Render
 		Solid_CullBack = 3
 	};
 
-	struct Vertex
-	{
-		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT4 color;
-	};
-
 	// Variables
 	HWND m_hWnd = nullptr;
 
@@ -102,7 +96,7 @@ class Render
 	PixelShaders m_currentPixelShader = PixelShaders::Default;
 
 	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout
-	std::unordered_map < VertexShaders, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+	std::unordered_map <VertexShaders, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 	std::unordered_map<PixelShaders, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
 
 	// Render
@@ -110,8 +104,9 @@ class Render
 	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
-	// Static vertex buffer for rendering objects
-	std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBuffers;
+	static UINT s_nextShapeId;
+	// Maps shape ID to its vertex buffer and vertex count
+	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
 
 	// static view and projection matrix for all renders
 	static DirectX::XMMATRIX s_viewMatrix;
@@ -149,7 +144,7 @@ class Render
 	// Render
 	void CreateRasterState();
 
-	void CreateShapeVertexBuffer();
+	void LoadDefaultShapes(const wchar_t* objPath);
 
 	void EngineUpdate();
 
