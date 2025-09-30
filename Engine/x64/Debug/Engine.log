@@ -1,9 +1,6 @@
-﻿  Camera.cpp
-  GameManager.cpp
-  Object.cpp
+﻿  GameManager.cpp
   Render.cpp
-C:\Users\User\Desktop\VooDooEngine\Engine\Render.cpp(769,37): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  Scene.cpp
+C:\Users\User\Desktop\VooDooEngine\Engine\Render.cpp(760,37): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   WindowManager.cpp
   Generating Code...
   Engine.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\Engine.lib

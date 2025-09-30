@@ -2,10 +2,6 @@
 
 using namespace DirectX;
 
-Player::Player(Shapes shape) : Object(shape)
-{
-}
-
 void Player::Update(float deltaTime)
 {
 	if (m_windmillWing) m_windmillWing->Update(deltaTime);

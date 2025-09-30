@@ -13,7 +13,7 @@ class Tree : public Object
 	DirectX::XMVECTOR m_fallAngle = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
 public:
-	Tree() : Object(Shapes::Tree) {}
+	Tree() : Object(L"Cone") {}
 	~Tree() override = default;
 
 	void Update(float deltaTime) override;

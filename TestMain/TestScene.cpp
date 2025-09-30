@@ -8,16 +8,16 @@ TestScene::TestScene(wstring dataFile)
 	m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 
-	m_player = make_unique<Player>(Shapes::Triangle);
+	m_player = make_unique<Player>(L"Cube");
 	m_player->SetPosition(XMVECTOR{ 0.0f, 2.0f, 0.0f, 1.0f });
 	m_player->SetScale(XMFLOAT3{ 1.0f, 1.0f, 1.0f });
 
-	m_windmill = make_unique<WindMill>(Shapes::Tetrahedron);
+	m_windmill = make_unique<WindMill>(L"Cone");
 	m_windmill->SetPosition(XMVECTOR{ 10.0f, 2.0f, 10.0f, 1.0f });
 	m_windmill->SetRotation(XMVECTOR{ 0.0f, 3.25f, 0.0f, 0.0f });
 	m_windmill->SetScale(XMFLOAT3{ 2.0f, 2.0f, 2.0f });
 
-	unique_ptr<Object> plane = make_unique<Object>(Shapes::Plane);
+	unique_ptr<Object> plane = make_unique<Object>(L"Plane");
 	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 

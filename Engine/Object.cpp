@@ -96,9 +96,21 @@ void Object::RemoveChild(Object* child)
 	}
 }
 
-Object::Object(Shapes shape, VertexShaders vertexShader, PixelShaders pixelShader) : m_shape(shape), m_vertexShader(vertexShader), m_pixelShader(pixelShader), m_id(s_idCounter++)
+Object::Object(const std::wstring& shapeName, VertexShaders vertexShader, PixelShaders pixelShader)
+	:
+	m_vertexShader(vertexShader),
+	m_pixelShader(pixelShader),
+	m_id(s_idCounter++)
 {
-	if (shape != Shapes::None) g_objects.emplace_back(this);
+	if (shapeName != L"None")
+	{
+		if (g_shapeIdMap.find(shapeName) == g_shapeIdMap.end()) MessageBoxW(nullptr, (L"Shape name not found: " + shapeName).c_str(), L"Error", MB_OK);
+		else
+		{
+			m_shapeId = g_shapeIdMap[shapeName];
+			g_objects.emplace_back(this);
+		}
+	}
 
 #ifdef _DEBUG
 	cout << "Object created. ID: " << m_id << endl;

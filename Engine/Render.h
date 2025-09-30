@@ -72,12 +72,6 @@ class Render
 		Solid_CullBack = 3
 	};
 
-	struct TestVertex
-	{
-		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT4 color;
-	};
-
 	// Variables
 	HWND m_hWnd = nullptr;
 
@@ -109,9 +103,6 @@ class Render
 	// 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
 	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
-
-	// Static vertex buffer for rendering objects
-	std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBuffers;
 
 	static UINT s_nextShapeId;
 	// Maps shape ID to its vertex buffer and vertex count
@@ -153,7 +144,6 @@ class Render
 	// Render
 	void CreateRasterState();
 
-	void CreateShapeVertexBuffer();
 	void LoadDefaultShapes(const wchar_t* objPath);
 
 	void EngineUpdate();

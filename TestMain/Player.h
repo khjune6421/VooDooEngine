@@ -6,7 +6,7 @@ class Player : public Object
 {
 	friend class TestScene;
 
-	std::unique_ptr<WindMillWing> m_windmillWing;
+	std::unique_ptr<WindMillWing> m_windmillWing = nullptr;
 
 	float m_moveSpeed = 10.0f;
 
@@ -17,7 +17,7 @@ class Player : public Object
 	float m_moveToTargetElapsed = 0.0f;
 
 public:
-	Player(Shapes shape = Shapes::Cube);
+	Player(const std::wstring& shape) : Object(shape) {}
 	~Player() override = default;
 
 	void Update(float deltaTime) override;
