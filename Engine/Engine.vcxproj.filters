@@ -94,7 +94,4 @@
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Object Include="..\Assets\Shapes\Default.obj" />
-  </ItemGroup>
 </Project>

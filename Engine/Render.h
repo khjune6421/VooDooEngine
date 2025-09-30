@@ -72,7 +72,7 @@ class Render
 		Solid_CullBack = 3
 	};
 
-	struct Vertex
+	struct TestVertex
 	{
 		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT4 color;
@@ -114,6 +114,7 @@ class Render
 	std::unordered_map<Shapes, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBuffers;
 
 	// Converts string to uint
+	static UINT s_nextShapeId;
 	static std::unordered_map<std::wstring, UINT> s_shapeIdMap;
 	// Maps shape ID to its vertex buffer and vertex count
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
