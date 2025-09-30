@@ -20,6 +20,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="ObjFileParser.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">
@@ -70,6 +73,9 @@
     <ClInclude Include="Camera.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="ObjFileParser.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -87,5 +93,8 @@
     <FxCompile Include="VertexShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="..\Assets\Shapes\Default.obj" />
   </ItemGroup>
 </Project>

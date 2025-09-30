@@ -1,11 +1,13 @@
 #include "Render.h"
 
-#include "Object.h"
+#include "ObjFileParser.h"
 
 using namespace std;
 using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
+
+unordered_map<wstring, UINT> Render::s_shapeIdMap = {};
 
 Camera* g_camera = nullptr;
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
@@ -332,7 +334,7 @@ void Render::UpdateShaders()
 	m_deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
 }
 
-void Render::LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel)
+void Render::LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
 {
 	filesystem::path path(shaderPath);
 	if (filesystem::exists(path) && filesystem::is_directory(path))
@@ -756,6 +758,11 @@ void Render::CreateShapeVertexBuffer()
 	}
 }
 
+void Render::LoadDefaultShapes(const wchar_t* objPath)
+{
+
+}
+
 void Render::EngineUpdate()
 {
 	UpdateRenderMode();
@@ -846,6 +853,7 @@ Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
 	UpdateShaders();
 
 	CreateShapeVertexBuffer();
+	LoadDefaultShapes(L"../Assets/Shapes/Default.obj");
 }
 
 Render::~Render()

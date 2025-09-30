@@ -1,9 +1,1 @@
-﻿  Player.cpp
-  TestMain.cpp
-  TestScene.cpp
-  Tree.cpp
-  WindMill.cpp
-  WindMillWing.cpp
-  Generating Code...
-  LINK : C:\Users\User\Desktop\VooDooEngine\x64\Debug\TestMain.exe not found or not built by the last incremental link; performing full link
-  TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\TestMain.exe
+﻿  TestMain.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\TestMain.exe

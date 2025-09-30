@@ -1,8 +1,2 @@
-﻿  Camera.cpp
-  GameManager.cpp
-  Object.cpp
-  Render.cpp
-  Scene.cpp
-  WindowManager.cpp
-  Generating Code...
+﻿ObjFileParser.obj : warning LNK4006: "class std::unordered_map<class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >,unsigned int,struct std::hash<class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > >,struct std::equal_to<class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > >,class std::allocator<struct std::pair<class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > const ,unsigned int> > > m_shapeIdMap" (?m_shapeIdMap@@3V?$unordered_map@V?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@IU?$hash@V?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@@2@U?$equal_to@V?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@@2@V?$allocator@U?$pair@$$CBV?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@I@std@@@2@@std@@A) already defined in Render.obj; second definition ignored
   Engine.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\Engine.lib

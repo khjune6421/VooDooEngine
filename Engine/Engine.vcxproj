@@ -147,6 +147,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjectPositionParser.cpp" />
+    <ClCompile Include="ObjFileParser.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="WindowManager.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectPositionParser.h" />
+    <ClInclude Include="ObjFileParser.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="UtilityHeaders.h" />
@@ -190,6 +192,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="..\Assets\Shapes\Default.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Object>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
