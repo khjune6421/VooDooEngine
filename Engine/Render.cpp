@@ -757,7 +757,7 @@ void Render::LoadDefaultShapes(const wchar_t* objPath)
 	{
 		if (g_shapeIdMap.find(name) == g_shapeIdMap.end()) g_shapeIdMap[name] = s_nextShapeId++;
 
-		CreateVertexBuffer(sizeof(Vertex) * vertices.size(), &m_shapeVertexBufferMap[g_shapeIdMap[name]].first, vertices.data(), sizeof(Vertex));
+		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[name]].first, vertices.data(), sizeof(Vertex));
 		m_shapeVertexBufferMap[g_shapeIdMap[name]].second = static_cast<UINT>(vertices.size());
 	}
 }
