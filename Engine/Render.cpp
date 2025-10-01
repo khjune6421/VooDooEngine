@@ -710,17 +710,23 @@ void Render::DrawObjects()
 		constexpr UINT stride = sizeof(Vertex);
 		constexpr UINT offset = 0;
 
+		for (const auto& shape : object->m_shapeIds)
+		{
 #ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(object->m_shapeId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK); continue; }
+			if (m_shapeVertexBufferMap.find(shape) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shape) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
 #endif
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeId].first.Get();
+			ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shape].first.Get();
+			m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+			m_deviceContext->Draw(m_shapeVertexBufferMap[shape].second, 0);
+		}
+		//ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeId].first.Get();
 
 		if (m_currentVertexShader == VertexShaders::Default) m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
 		else m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[m_currentVertexShader]).Get(), nullptr, 0);
 		if (m_currentPixelShader == PixelShaders::Default) m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
 		else m_deviceContext->PSSetShader(m_pixelShaderMap[m_currentPixelShader].Get(), nullptr, 0);
 
-		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		//m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetInputLayout(get<3>(m_vertexShaderMap[object->m_vertexShader]).Get());
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -741,7 +747,7 @@ void Render::DrawObjects()
 
 		m_deviceContext->UpdateSubresource(get<2>(m_vertexShaderMap[object->m_vertexShader]).Get(), 0, nullptr, &constBufferData, 0, 0);
 
-		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeId].second, 0);
+		//m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeId].second, 0);
 	}
 }
 

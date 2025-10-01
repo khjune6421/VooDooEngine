@@ -35,7 +35,7 @@ class Object
 
 	UINT m_id = 0; // For debug purpose
 
-	UINT m_shapeId = 0;
+	std::vector<UINT> m_shapeIds;
 	VertexShaders m_vertexShader = VertexShaders::Default;
 	PixelShaders m_pixelShader = PixelShaders::Default;
 
@@ -77,7 +77,7 @@ protected:
 public:
 	Object
 	(
-		const std::wstring& shapeName = L"None",
+		const std::vector<std::wstring>& shapeNames = std::vector<std::wstring>{ L"None" },
 		VertexShaders vertexShader = VertexShaders::Default,
 		PixelShaders pixelShader = PixelShaders::Default
 	);
