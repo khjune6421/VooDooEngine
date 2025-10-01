@@ -144,7 +144,8 @@ class Render
 	// Render
 	void CreateRasterState();
 
-	void LoadDefaultShapes(const wchar_t* objPath);
+	void LoadDefaultShapes();
+	void LoadShapeFolder(const wchar_t* folderPath);
 
 	void EngineUpdate();
 
