@@ -695,6 +695,9 @@ void Render::DrawObjects()
 	}
 	g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height);
 
+	s_viewMatrix = g_camera->GetViewMatrix();
+	s_projectionMatrix = g_camera->GetProjectionMatrix();
+
 	static float ATime = 0.0f; // Accumulated time
 	ATime += VDGM::g_deltaTimeF * 5.0f;
 
@@ -720,8 +723,6 @@ void Render::DrawObjects()
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
-		s_viewMatrix = g_camera->GetViewMatrix();
-		s_projectionMatrix = g_camera->GetProjectionMatrix();
 
 		TestConstBuffer constBufferData = {};
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
@@ -729,10 +730,7 @@ void Render::DrawObjects()
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
 		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
 
-		constBufferData.VSFloatA = (sinf(static_cast<float>(ATime)) / 2.0f) + 0.5f;
-		constBufferData.VSFloatB = cosf(static_cast<float>(ATime));
-		constBufferData.VSFloatC = -constBufferData.VSFloatA;
-		constBufferData.VSFloatD = -constBufferData.VSFloatB;
+		object->SetConstBufferVar(&constBufferData.VSFloatA, &constBufferData.VSFloatB, &constBufferData.VSFloatC, &constBufferData.VSFloatD);
 
 		m_deviceContext->UpdateSubresource(get<2>(m_vertexShaderMap[object->m_vertexShader]).Get(), 0, nullptr, &constBufferData, 0, 0);
 

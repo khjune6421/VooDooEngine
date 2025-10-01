@@ -40,6 +40,9 @@ class Object
 	VertexShaders m_vertexShader = VertexShaders::Default;
 	PixelShaders m_pixelShader = PixelShaders::Default;
 
+	// TODO: Remove this later
+	virtual void SetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const; // For setting constant buffer variables
+
 	// Not sure if these should be private or protected
 	DirectX::XMMATRIX m_positionMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_rotationMatrix = DirectX::XMMatrixIdentity();
@@ -104,6 +107,7 @@ public:
 	void SetRotation(const DirectX::XMVECTOR& rot);
 	void Rotate(const DirectX::XMVECTOR& delta);
 	void LookAt(const DirectX::XMVECTOR& target);
+	void LerpRotation(const DirectX::XMVECTOR& start, const DirectX::XMVECTOR& target, float t);
 	DirectX::XMVECTOR GetRotation() const { return m_rotation; }
 	DirectX::XMVECTOR GetWorldRotation() const;
 	DirectX::XMVECTOR GetWorldDirection(Directions dir) const;

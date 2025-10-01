@@ -7,6 +7,14 @@ vector<Object*> g_objects;
 
 static UINT s_idCounter = 0;
 
+void Object::SetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const
+{
+	*var1 = 0.0f;
+	*var2 = 0.0f;
+	*var3 = 0.0f;
+	*var4 = 0.0f;
+}
+
 DirectX::XMVECTOR Object::QuaternionToEuler(const DirectX::XMVECTOR& quat) const // Do I know how this works? No. Does it work? As far as I know, yes but even if it doesn't how would I know?
 {
 	XMFLOAT4 fQuat = {};
@@ -209,6 +217,25 @@ void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this 
 	float roll = 0.0f;
 
 	m_rotation = XMVectorSet(pitch, yaw, roll, 0.0f);
+	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
+
+	if (!m_isDirty) SetDirty();
+}
+void Object::LerpRotation(const XMVECTOR& start, const XMVECTOR& target, float t)
+{
+	//m_rotation = XMVectorLerp(start, target, t);
+	//m_rotation = XMQuaternionSlerp(start, target, t);
+
+	// I dont like this
+	XMVECTOR angleDiff = target - start;
+	if (XMVectorGetX(angleDiff) > XM_PI) angleDiff = XMVectorSetX(angleDiff, XMVectorGetX(angleDiff) - XM_2PI);
+	else if (XMVectorGetX(angleDiff) < -XM_PI) angleDiff = XMVectorSetX(angleDiff, XMVectorGetX(angleDiff) + XM_2PI);
+	if (XMVectorGetY(angleDiff) > XM_PI) angleDiff = XMVectorSetY(angleDiff, XMVectorGetY(angleDiff) - XM_2PI);
+	else if (XMVectorGetY(angleDiff) < -XM_PI) angleDiff = XMVectorSetY(angleDiff, XMVectorGetY(angleDiff) + XM_2PI);
+	if (XMVectorGetZ(angleDiff) > XM_PI) angleDiff = XMVectorSetZ(angleDiff, XMVectorGetZ(angleDiff) - XM_2PI);
+	else if (XMVectorGetZ(angleDiff) < -XM_PI) angleDiff = XMVectorSetZ(angleDiff, XMVectorGetZ(angleDiff) + XM_2PI);
+	m_rotation = start + angleDiff * t;
+
 	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
 
 	if (!m_isDirty) SetDirty();

@@ -9,7 +9,7 @@ TestScene::TestScene(wstring dataFile)
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 
 	m_player = make_unique<Player>(std::vector<std::wstring>{ L"PlayerAnimationIdle", L"PlayerAnimationWalk0", L"PlayerAnimationWalk1" });
-	m_player->SetPosition(XMVECTOR{ 0.0f, 1.0f, 0.0f, 1.0f });
+	m_player->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 	m_player->SetScale(XMFLOAT3{ 1.0f, 1.0f, 1.0f });
 
 	m_windmill = make_unique<WindMill>(L"TriHouse");
@@ -127,6 +127,12 @@ void TestScene::Raycast(XMVECTOR rayOrigin,XMVECTOR rayEnd)
 
 	if (abs(hitY) < 0.001f) { hitY = 0.0f; }
 
-	m_player->MoveToTarget(XMVectorSet(hitX, 1.0f, hitZ, 1.0f));
-	m_player->LookAt(XMVectorSet(hitX, 1.0f, hitZ, 1.0f));
+	XMVECTOR tempRotation0 = m_player->m_rotation;
+
+	m_player->LookAt(XMVectorSet(hitX, 0.0f, hitZ, 1.0f));
+	XMVECTOR tempRotation1 = m_player->m_rotation;
+
+	m_player->m_rotation = tempRotation0;
+
+	m_player->MoveToTarget(XMVectorSet(hitX, 0.0f, hitZ, 1.0f), tempRotation1);
 }
