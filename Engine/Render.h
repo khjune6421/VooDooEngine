@@ -98,9 +98,6 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
-	VertexShaders m_currentVertexShader = VertexShaders::Default;
-	PixelShaders m_currentPixelShader = PixelShaders::Default;
-
 	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout // need to change this to not use struct like vertex buffer map?
 	std::unordered_map <VertexShaders, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 	std::unordered_map<PixelShaders, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
@@ -139,8 +136,6 @@ class Render
 	void DisplayDeviceInfo();
 
 	// Shader
-	void UpdateShaders();
-
 	void LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel);
 	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex = 0);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
@@ -170,7 +165,6 @@ public:
 
 	void SceneRender();
 
-	void ChangeShader(PixelShaders pixelShader = PixelShaders::Default);
 	void ChangeState();
 
 	void ScreenPointToWorld(POINT screenPos) const;

@@ -104,10 +104,11 @@ Object::Object(const vector<wstring>& shapeNames, VertexShaders vertexShader, Pi
 {
 	for (const auto& shapeName : shapeNames)
 	{
-		if (shapeName == L"None") continue;
+		if (shapeName == L"None") return;
 		else if (g_shapeIdMap.find(shapeName) == g_shapeIdMap.end()) MessageBoxW(nullptr, (L"Shape name not found: " + shapeName).c_str(), L"Error", MB_OK);
 		else m_shapeIds.emplace_back(g_shapeIdMap[shapeName]);
 	}
+	g_objects.emplace_back(this);
 
 #ifdef _DEBUG
 	cout << "Object created. ID: " << m_id << endl;

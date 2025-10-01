@@ -1,8 +1,2 @@
-﻿  Camera.cpp
-  GameManager.cpp
-  Object.cpp
-  Render.cpp
-  Scene.cpp
-  WindowManager.cpp
-  Generating Code...
+﻿  Render.cpp
   Engine.vcxproj -> C:\Users\User\Desktop\VooDooEngine\x64\Debug\Engine.lib
