@@ -22,6 +22,7 @@ class Player : public Object
 	float m_val2 = 0.0f;
 	float m_val3 = 0.0f;
 	float m_val4 = 0.0f;
+	float ATime = 0.0f;
 
 	void SetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const override;
 

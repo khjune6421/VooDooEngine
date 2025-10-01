@@ -20,6 +20,10 @@ void Player::Update(float deltaTime)
 
 	if (m_isMovingToTarget)
 	{
+
+		ATime += deltaTime * 5.0f;
+		m_val1 = sin(ATime) / 2.0f + 0.5f;
+
 		m_moveToTargetElapsed += deltaTime;
 		float t = m_moveToTargetElapsed / m_moveToTargetTime;
 
@@ -29,17 +33,13 @@ void Player::Update(float deltaTime)
 			m_isMovingToTarget = false;
 		}
 		LerpPosition(m_startPosition, m_targetPosition, t);
-		LerpRotation(m_startRotation, m_targetRotation, clamp(t * 2.0f, 0.0f, 1.0f));
-		m_val2 = 1.0f;
+		m_val2 = clamp(m_val2 + deltaTime * 5.0f, 0.0f, 1.0f);
+		LerpRotation(m_startRotation, m_targetRotation, m_val2);
 	}
 	else
 	{
 		if (m_val2 > 0.0f) m_val2 -= deltaTime * 5.0f;
 	}
-
-	static float ATime = 0.0f; // Accumulated time
-	ATime += deltaTime * 5.0f;
-	m_val1 = sin(ATime) / 2.0f + 0.5f;
 }
 
 void Player::MoveToTarget(const XMVECTOR& target, const XMVECTOR& targetRotation)
@@ -56,4 +56,8 @@ void Player::MoveToTarget(const XMVECTOR& target, const XMVECTOR& targetRotation
 
 	m_moveToTargetTime = distance / m_moveSpeed;
 	m_moveToTargetElapsed = 0.0f;
+
+	ATime = 0.0f;
+	m_val1 = 0.0f;
+	m_val2 = 0.0f;
 }

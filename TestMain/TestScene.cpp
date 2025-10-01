@@ -15,7 +15,7 @@ TestScene::TestScene(wstring dataFile)
 	m_windmill = make_unique<WindMill>(L"TriHouse");
 	m_windmill->SetPosition(XMVECTOR{ 10.0f, 2.0f, 10.0f, 1.0f });
 	m_windmill->SetRotation(XMVECTOR{ 0.0f, 3.25f, 0.0f, 0.0f });
-	m_windmill->SetScale(XMFLOAT3{ 2.0f, 2.0f, 2.0f });
+	m_windmill->SetScale(XMFLOAT3{ 1.0f, 1.0f, 1.0f });
 
 	unique_ptr<Object> plane = make_unique<Object>(L"GreenPlane");
 	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
@@ -61,7 +61,7 @@ void TestScene::Update(float deltaTime)
 
 			m_player->m_windmillWing = move(m_windmill->m_windmillWing);
 			m_player->AddChild(m_player->m_windmillWing.get());
-			m_player->m_windmillWing->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 0.0f });
+			m_player->m_windmillWing->SetPosition(XMVECTOR{ 0.0f, 2.0f, 0.0f, 0.0f });
 			m_player->m_windmillWing->SetScale(XMFLOAT3{ 1.0f, 1.0f, 1.0f });
 			m_player->m_windmillWing->SetRotation(XMVECTOR{ 0.0f, 0.0f, 0.0f, 0.0f });
 		}
@@ -73,7 +73,7 @@ void TestScene::Update(float deltaTime)
 			m_projectileWing = move(m_player->m_windmillWing);
 			m_player->RemoveChild(m_projectileWing.get());
 
-			m_projectileWing->SetPosition(m_player->GetPosition());
+			m_projectileWing->SetPosition(m_player->GetPosition() + XMVECTOR{ 0.0f, 2.0f, 0.0f, 0.0f });
 			m_projectileWing->SetRotation(m_player->GetRotation());
 			m_projectileWing->SetScale(m_player->GetScale());
 
@@ -127,11 +127,10 @@ void TestScene::Raycast(XMVECTOR rayOrigin,XMVECTOR rayEnd)
 
 	if (abs(hitY) < 0.001f) { hitY = 0.0f; }
 
+	// This is very hard coded
 	XMVECTOR tempRotation0 = m_player->m_rotation;
-
 	m_player->LookAt(XMVectorSet(hitX, 0.0f, hitZ, 1.0f));
 	XMVECTOR tempRotation1 = m_player->m_rotation;
-
 	m_player->m_rotation = tempRotation0;
 
 	m_player->MoveToTarget(XMVectorSet(hitX, 0.0f, hitZ, 1.0f), tempRotation1);
