@@ -10,6 +10,32 @@ using namespace DirectX;
 UINT Render::s_nextShapeId = 1;
 unordered_map<wstring, UINT> g_shapeIdMap;
 
+D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[4] =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+};
+D3D11_INPUT_ELEMENT_DESC Render::s_tripleInputLayoutDesc[12] =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
+	{ "POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
+	{ "POSITION", 2, DXGI_FORMAT_R32G32B32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+};
+pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { {Render::s_defaultInputLayoutDesc, 4}, {Render::s_tripleInputLayoutDesc, 12} };
+
 Camera* g_camera = nullptr;
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
 XMMATRIX Render::s_projectionMatrix = XMMatrixIdentity();
@@ -337,29 +363,40 @@ void Render::UpdateShaders()
 
 void Render::LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
 {
-	filesystem::path path(shaderPath);
-	if (filesystem::exists(path) && filesystem::is_directory(path))
+	filesystem::path shaderDir(shaderPath);
+	filesystem::path vertexShaderPath = shaderDir / L"VertexShader/";
+	filesystem::path pixelShaderPath = shaderDir / L"PixelShader/";
+
+	filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
+	if (filesystem::exists(defaultInputLayoutPath) && filesystem::is_directory(defaultInputLayoutPath))
 	{
-		for (const auto& entry : filesystem::recursive_directory_iterator(shaderPath))
+		for (const auto& entry : filesystem::directory_iterator(defaultInputLayoutPath))
 		{
-			if (entry.path().extension() == L".hlsl")
-			{
-				if (entry.path().stem().wstring()[0] == L'V') LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel); // Well this is cursed
-				else LoadPixelShader(entry.path().c_str(), entryPoint, shaderModel);
-			}
+			//if (entry.path().extension() == L".cso") LoadPrecompiledVertexShader(entry.path().c_str()); loading precompiled shader is disabled for now
+			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
 	}
-	for (const auto& entry : filesystem::directory_iterator(L"."))
+	filesystem::path tripleInputLayoutPath = vertexShaderPath / L"TripleInputLayout/";
+	if (filesystem::exists(tripleInputLayoutPath) && filesystem::is_directory(tripleInputLayoutPath))
 	{
-		if (entry.path().extension() == L".cso")
+		for (const auto& entry : filesystem::directory_iterator(tripleInputLayoutPath))
 		{
-			if (entry.path().stem().wstring()[0] == L'V') LoadPrecompiledVertexShader(entry.path().c_str());
-			else LoadPrecompiledPixelShader(entry.path().c_str());
+			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel, 1);
+		}
+	}
+
+
+	if (filesystem::exists(pixelShaderPath) && filesystem::is_directory(pixelShaderPath))
+	{
+		for (const auto& entry : filesystem::directory_iterator(pixelShaderPath))
+		{
+			//if (entry.path().extension() == L".cso") LoadPrecompiledPixelShader(entry.path().c_str());
+			if (entry.path().extension() == L".hlsl") LoadPixelShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
 	}
 }
 
-void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
+void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex)
 {
 	comPtr<ID3DBlob> VSCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -386,10 +423,10 @@ void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const
 	}
 
 	comPtr<ID3D11InputLayout> inputLayout;
-	CreateInputLayout(g_layoutDesc, _countof(g_layoutDesc), VSCode, &inputLayout);
+	CreateInputLayout(s_layoutDescs[layoutIndex].first, s_layoutDescs[layoutIndex].second, VSCode, &inputLayout);
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
-	// Use predefined constant buffer and input layout for now
+	// Use predefined constant buffer
 	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, nullptr, inputLayout);
 }
 
@@ -445,7 +482,7 @@ void Render::LoadPrecompiledVertexShader(const wchar_t* file)
 	}
 
 	comPtr<ID3D11InputLayout> inputLayout;
-	CreateInputLayout(g_layoutDesc, _countof(g_layoutDesc), VSCode, &inputLayout);
+	CreateInputLayout(s_defaultInputLayoutDesc, _countof(s_defaultInputLayoutDesc), VSCode, &inputLayout);
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
 	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, nullptr, inputLayout);
@@ -735,11 +772,11 @@ Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
 
 	// Initialize render
 	CreateRasterState();
-	LoadAllShaders(L"../Engine/", "main", "5_0");
+	LoadAllShaders(L"../Assets/Shader/", "main", "5_0");
 	UpdateShaders();
 
 	LoadDefaultShapes();
-	LoadShapeFolder(L"../Assets/Shapes/Default.obj");
+	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationIdle.obj");
 }
 
 Render::~Render()

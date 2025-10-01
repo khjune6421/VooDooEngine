@@ -10,7 +10,6 @@ struct Vertex
 	DirectX::XMFLOAT2 uv = { 0.0f, 0.0f };
 	DirectX::XMFLOAT3 normal = { 0.0f, 1.0f, 0.0f };
 };
-extern D3D11_INPUT_ELEMENT_DESC g_layoutDesc[4];
 
 class ObjFileParser
 {

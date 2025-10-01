@@ -32,7 +32,6 @@ class Object
 {
 	// is this a good idea?
 	friend class Render;
-	friend class Camera;
 
 	UINT m_id = 0; // For debug purpose
 
@@ -113,5 +112,3 @@ public:
 
 	virtual void Update(float deltaTime) { (void)deltaTime; } // (void) to avoid unused parameter warning // feels odd but makes sense
 };
-
-extern std::vector<Object*> g_objects;

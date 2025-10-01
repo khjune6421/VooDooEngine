@@ -8,7 +8,7 @@ TestScene::TestScene(wstring dataFile)
 	m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 
-	m_player = make_unique<Player>(L"Default");
+	m_player = make_unique<Player>(L"PlayerAnimationIdle");
 	m_player->SetPosition(XMVECTOR{ 0.0f, 1.0f, 0.0f, 1.0f });
 	m_player->SetScale(XMFLOAT3{ 1.0f, 1.0f, 1.0f });
 
