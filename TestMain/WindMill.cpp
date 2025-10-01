@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DirectX;
 
-WindMill::WindMill(const std::wstring& shape, UINT wingAmount) : Object(shape)
+WindMill::WindMill(const std::wstring& shape, UINT wingAmount) : Object({ shape })
 {
 	m_windmillWing = make_unique<WindMillWing>();
 	AddChild(m_windmillWing.get());

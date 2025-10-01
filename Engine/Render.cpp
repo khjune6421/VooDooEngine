@@ -351,16 +351,6 @@ void Render::DisplayDeviceInfo()
 	}
 }
 
-void Render::UpdateShaders()
-{
-	m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[m_currentVertexShader]).Get(), nullptr, 0);
-	m_deviceContext->PSSetShader(m_pixelShaderMap[m_currentPixelShader].Get(), nullptr, 0);
-
-	if (!get<2>(m_vertexShaderMap[m_currentVertexShader])) CreateConstBuffer(sizeof(TestConstBuffer), &get<2>(m_vertexShaderMap[m_currentVertexShader]));
-	ID3D11Buffer* constantBuffer = get<2>(m_vertexShaderMap[m_currentVertexShader]).Get();
-	m_deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
-}
-
 void Render::LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
 {
 	filesystem::path shaderDir(shaderPath);
@@ -422,12 +412,17 @@ void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const
 		return;
 	}
 
+	comPtr<ID3D11Buffer> constantBuffer;
+	CreateConstBuffer(sizeof(TestConstBuffer), &constantBuffer);
+
 	comPtr<ID3D11InputLayout> inputLayout;
 	CreateInputLayout(s_layoutDescs[layoutIndex].first, s_layoutDescs[layoutIndex].second, VSCode, &inputLayout);
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
-	// Use predefined constant buffer
-	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, nullptr, inputLayout);
+
+	// This is hardcoded for now, will improve later
+	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
+	if (shaderName == L"TripleVertexShader") m_vertexShaderMap[VertexShaders::TripleInput] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
 }
 
 void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
@@ -689,7 +684,6 @@ void Render::LoadShapeFolder(const wchar_t* folderPath)
 void Render::EngineUpdate()
 {
 	UpdateRenderMode();
-	UpdateShaders();
 }
 
 void Render::DrawObjects()
@@ -702,7 +696,7 @@ void Render::DrawObjects()
 	g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height);
 
 	static float ATime = 0.0f; // Accumulated time
-	ATime += VDGM::g_deltaTimeF;
+	ATime += VDGM::g_deltaTimeF * 5.0f;
 
 	for (Object* object : g_objects)
 	{
@@ -710,18 +704,19 @@ void Render::DrawObjects()
 		constexpr UINT stride = sizeof(Vertex);
 		constexpr UINT offset = 0;
 
-#ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(object->m_shapeId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK); continue; }
-#endif
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeId].first.Get();
+		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, get<2>(m_vertexShaderMap[object->m_vertexShader]).GetAddressOf());
+		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
 
-		if (m_currentVertexShader == VertexShaders::Default) m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
-		else m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[m_currentVertexShader]).Get(), nullptr, 0);
-		if (m_currentPixelShader == PixelShaders::Default) m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
-		else m_deviceContext->PSSetShader(m_pixelShaderMap[m_currentPixelShader].Get(), nullptr, 0);
-
-		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetInputLayout(get<3>(m_vertexShaderMap[object->m_vertexShader]).Get());
+		for (size_t i = 0; i < object->m_shapeIds.size(); i++)
+		{
+#ifdef _DEBUG
+			if (m_shapeVertexBufferMap.find(object->m_shapeIds[i]) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(object->m_shapeIds[i]) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
+#endif
+			ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeIds[i]].first.Get();
+			m_deviceContext->IASetVertexBuffers(static_cast<UINT>(i), 1, &vertexBuffer, &stride, &offset);
+		}
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
@@ -734,14 +729,14 @@ void Render::DrawObjects()
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
 		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
 
-		constBufferData.VSFloatA = sinf(static_cast<float>(ATime));
+		constBufferData.VSFloatA = (sinf(static_cast<float>(ATime)) / 2.0f) + 0.5f;
 		constBufferData.VSFloatB = cosf(static_cast<float>(ATime));
 		constBufferData.VSFloatC = -constBufferData.VSFloatA;
 		constBufferData.VSFloatD = -constBufferData.VSFloatB;
 
 		m_deviceContext->UpdateSubresource(get<2>(m_vertexShaderMap[object->m_vertexShader]).Get(), 0, nullptr, &constBufferData, 0, 0);
 
-		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeId].second, 0);
+		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeIds[0]].second, 0);
 	}
 }
 
@@ -773,10 +768,11 @@ Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
 	// Initialize render
 	CreateRasterState();
 	LoadAllShaders(L"../Assets/Shader/", "main", "5_0");
-	UpdateShaders();
 
 	LoadDefaultShapes();
 	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationIdle.obj");
+	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationWalk0.obj");
+	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationWalk1.obj");
 }
 
 Render::~Render()
@@ -881,12 +877,6 @@ void Render::SceneRender()
 #endif
 
 	Present();
-}
-
-void Render::ChangeShader(PixelShaders pixelShader)
-{
-	m_deviceContext->PSSetShader(m_pixelShaderMap[pixelShader].Get(), nullptr, 0);
-	m_currentPixelShader = pixelShader;
 }
 
 void Render::ChangeState()

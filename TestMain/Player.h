@@ -17,7 +17,7 @@ class Player : public Object
 	float m_moveToTargetElapsed = 0.0f;
 
 public:
-	Player(const std::wstring& shape) : Object(shape) {}
+	Player(const std::vector<std::wstring>& shapes) : Object(shapes, VertexShaders::TripleInput) {}
 	~Player() override = default;
 
 	void Update(float deltaTime) override;

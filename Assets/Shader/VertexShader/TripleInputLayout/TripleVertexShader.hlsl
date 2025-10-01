@@ -31,7 +31,7 @@ struct VSInput
 
 struct VSOutput
 {
-    float4 pos : SV_POSITION0;
+    float4 pos : SV_POSITION;
     float4 col : COLOR0;
     
     float PSFloatA : TEXCOORD0;
@@ -44,10 +44,12 @@ VSOutput main(VSInput input)
 {
     VSOutput output = (VSOutput) 0;
     
-    input.pos0.w = 1.0f;
-    input.pos0 = mul(input.pos0, WVP);
+    float4 outPos = lerp(input.pos1, input.pos2, VSFloatA);
     
-    output.pos = input.pos0;
+    outPos.w = 1.0f;
+    outPos = mul(outPos, WVP);
+    
+    output.pos = outPos;
     output.col = input.col0;
     
     output.PSFloatA = VSFloatA;
