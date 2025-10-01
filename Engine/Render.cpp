@@ -10,6 +10,32 @@ using namespace DirectX;
 UINT Render::s_nextShapeId = 1;
 unordered_map<wstring, UINT> g_shapeIdMap;
 
+D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[4] =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+};
+D3D11_INPUT_ELEMENT_DESC Render::s_tripleInputLayoutDesc[12] =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
+	{ "POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
+	{ "POSITION", 2, DXGI_FORMAT_R32G32B32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "COLOR", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+};
+pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { {Render::s_defaultInputLayoutDesc, 4}, {Render::s_tripleInputLayoutDesc, 12} };
+
 Camera* g_camera = nullptr;
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
 XMMATRIX Render::s_projectionMatrix = XMMatrixIdentity();
@@ -325,41 +351,42 @@ void Render::DisplayDeviceInfo()
 	}
 }
 
-void Render::UpdateShaders()
-{
-	m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[m_currentVertexShader]).Get(), nullptr, 0);
-	m_deviceContext->PSSetShader(m_pixelShaderMap[m_currentPixelShader].Get(), nullptr, 0);
-
-	if (!get<2>(m_vertexShaderMap[m_currentVertexShader])) CreateConstBuffer(sizeof(TestConstBuffer), &get<2>(m_vertexShaderMap[m_currentVertexShader]));
-	ID3D11Buffer* constantBuffer = get<2>(m_vertexShaderMap[m_currentVertexShader]).Get();
-	m_deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
-}
-
 void Render::LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
 {
-	filesystem::path path(shaderPath);
-	if (filesystem::exists(path) && filesystem::is_directory(path))
+	filesystem::path shaderDir(shaderPath);
+	filesystem::path vertexShaderPath = shaderDir / L"VertexShader/";
+	filesystem::path pixelShaderPath = shaderDir / L"PixelShader/";
+
+	filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
+	if (filesystem::exists(defaultInputLayoutPath) && filesystem::is_directory(defaultInputLayoutPath))
 	{
-		for (const auto& entry : filesystem::recursive_directory_iterator(shaderPath))
+		for (const auto& entry : filesystem::directory_iterator(defaultInputLayoutPath))
 		{
-			if (entry.path().extension() == L".hlsl")
-			{
-				if (entry.path().stem().wstring()[0] == L'V') LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel); // Well this is cursed
-				else LoadPixelShader(entry.path().c_str(), entryPoint, shaderModel);
-			}
+			//if (entry.path().extension() == L".cso") LoadPrecompiledVertexShader(entry.path().c_str()); loading precompiled shader is disabled for now
+			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
 	}
-	for (const auto& entry : filesystem::directory_iterator(L"."))
+	filesystem::path tripleInputLayoutPath = vertexShaderPath / L"TripleInputLayout/";
+	if (filesystem::exists(tripleInputLayoutPath) && filesystem::is_directory(tripleInputLayoutPath))
 	{
-		if (entry.path().extension() == L".cso")
+		for (const auto& entry : filesystem::directory_iterator(tripleInputLayoutPath))
 		{
-			if (entry.path().stem().wstring()[0] == L'V') LoadPrecompiledVertexShader(entry.path().c_str());
-			else LoadPrecompiledPixelShader(entry.path().c_str());
+			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel, 1);
+		}
+	}
+
+
+	if (filesystem::exists(pixelShaderPath) && filesystem::is_directory(pixelShaderPath))
+	{
+		for (const auto& entry : filesystem::directory_iterator(pixelShaderPath))
+		{
+			//if (entry.path().extension() == L".cso") LoadPrecompiledPixelShader(entry.path().c_str());
+			if (entry.path().extension() == L".hlsl") LoadPixelShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
 	}
 }
 
-void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
+void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex)
 {
 	comPtr<ID3DBlob> VSCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -385,12 +412,17 @@ void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const
 		return;
 	}
 
+	comPtr<ID3D11Buffer> constantBuffer;
+	CreateConstBuffer(sizeof(TestConstBuffer), &constantBuffer);
+
 	comPtr<ID3D11InputLayout> inputLayout;
-	CreateInputLayout(g_layoutDesc, _countof(g_layoutDesc), VSCode, &inputLayout);
+	CreateInputLayout(s_layoutDescs[layoutIndex].first, s_layoutDescs[layoutIndex].second, VSCode, &inputLayout);
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
-	// Use predefined constant buffer and input layout for now
-	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, nullptr, inputLayout);
+
+	// This is hardcoded for now, will improve later
+	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
+	if (shaderName == L"TripleVertexShader") m_vertexShaderMap[VertexShaders::TripleInput] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
 }
 
 void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
@@ -445,7 +477,7 @@ void Render::LoadPrecompiledVertexShader(const wchar_t* file)
 	}
 
 	comPtr<ID3D11InputLayout> inputLayout;
-	CreateInputLayout(g_layoutDesc, _countof(g_layoutDesc), VSCode, &inputLayout);
+	CreateInputLayout(s_defaultInputLayoutDesc, _countof(s_defaultInputLayoutDesc), VSCode, &inputLayout);
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
 	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, nullptr, inputLayout);
@@ -524,235 +556,11 @@ void Render::CreateRasterState()
 #endif
 }
 
-//void Render::CreateShapeVertexBuffer()
-//{
-//	if (m_shapeVertexBuffers.find(Shapes::Triangle) == m_shapeVertexBuffers.end())
-//	{
-//		TestVertex triangleVertices[] =
-//		{
-//			{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) }
-//		};
-//		CreateVertexBuffer(sizeof(triangleVertices), &m_shapeVertexBuffers[Shapes::Triangle].first, triangleVertices, sizeof(TestVertex));
-//		m_shapeVertexBuffers[Shapes::Triangle].second = 3;
-//	}
-//	if (m_shapeVertexBuffers.find(Shapes::Square) == m_shapeVertexBuffers.end())
-//	{
-//		TestVertex squareVertices[] =
-//		{
-//			{ XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) }
-//		};
-//		CreateVertexBuffer(sizeof(squareVertices), &m_shapeVertexBuffers[Shapes::Square].first, squareVertices, sizeof(TestVertex));
-//		m_shapeVertexBuffers[Shapes::Square].second = 6;
-//	}
-//	if (m_shapeVertexBuffers.find(Shapes::Plane) == m_shapeVertexBuffers.end())
-//	{
-//		TestVertex planeVertices[] =
-//		{
-//			{ XMFLOAT3(-1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, 0.0f, -1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-//
-//			{ XMFLOAT3(-1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, 0.0f, -1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, 0.0f, -1.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) }
-//		};
-//		CreateVertexBuffer(sizeof(planeVertices), &m_shapeVertexBuffers[Shapes::Plane].first, planeVertices, sizeof(TestVertex));
-//		m_shapeVertexBuffers[Shapes::Plane].second = 6;
-//	}
-//	if (m_shapeVertexBuffers.find(Shapes::Tetrahedron) == m_shapeVertexBuffers.end())
-//	{
-//		TestVertex tetrahedronVertices[] =
-//		{
-//			// Triangles
-//			{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			// Square
-//			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
-//
-//			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) }
-//		};
-//		CreateVertexBuffer(sizeof(tetrahedronVertices), &m_shapeVertexBuffers[Shapes::Tetrahedron].first, tetrahedronVertices, sizeof(TestVertex));
-//		m_shapeVertexBuffers[Shapes::Tetrahedron].second = 18;
-//	}
-//	if (m_shapeVertexBuffers.find(Shapes::Cube) == m_shapeVertexBuffers.end())
-//	{
-//		TestVertex cubeVertices[] =
-//		{
-//			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-//
-//			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-//			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) }
-//		};
-//		CreateVertexBuffer(sizeof(cubeVertices), &m_shapeVertexBuffers[Shapes::Cube].first, cubeVertices, sizeof(TestVertex));
-//		m_shapeVertexBuffers[Shapes::Cube].second = 36;
-//	}
-//	// Later need to make a way to load from blender for more complex shapes
-//	if (m_shapeVertexBuffers.find(Shapes::Icosphere) == m_shapeVertexBuffers.end())
-//	{
-//		constexpr float PHI = 1.61803398875f;
-//
-//		XMFLOAT3 base[12] =
-//		{
-//			{ -1.0f,  PHI,  0.0f }, {  1.0f,  PHI,  0.0f }, { -1.0f, -PHI,  0.0f }, {  1.0f, -PHI,  0.0f },
-//			{  0.0f, -1.0f,  PHI }, {  0.0f,  1.0f,  PHI }, {  0.0f, -1.0f, -PHI }, {  0.0f,  1.0f, -PHI },
-//			{  PHI,   0.0f, -1.0f }, {  PHI,   0.0f,  1.0f }, { -PHI,  0.0f, -1.0f }, { -PHI,  0.0f,  1.0f }
-//		};
-//
-//		XMFLOAT3 pos[12] = {};
-//		for (int i = 0; i < 12; ++i)
-//		{
-//			XMVECTOR v = XMLoadFloat3(&base[i]);
-//			v = XMVector3Normalize(v);
-//			XMStoreFloat3(&pos[i], v);
-//		}
-//
-//		const uint16_t faces[20][3] =
-//		{
-//			{ 0, 11, 5 }, { 0, 5, 1 }, { 0, 1, 7 }, { 0, 7, 10 }, { 0, 10, 11 },
-//			{ 1, 5, 9 }, { 5, 11, 4 }, { 11, 10, 2 }, { 10, 7, 6 }, { 7, 1, 8 },
-//			{ 3, 9, 4 }, { 3, 4, 2 }, { 3, 2, 6 }, { 3, 6, 8 }, { 3, 8, 9 },
-//			{ 4, 9, 5 }, { 2, 4, 11 }, { 6, 2, 10 }, { 8, 6, 7 }, { 9, 8, 1 }
-//		};
-//		TestVertex icosaVertices[60] = {};
-//		UINT w = 0;
-//
-//		for (auto face : faces)
-//		{
-//			const uint16_t a = face[0];
-//			const uint16_t b = face[1];
-//			const uint16_t c = face[2];
-//
-//			icosaVertices[w++] = TestVertex{ pos[a], XMFLOAT4((pos[a].x + 1.0f) / 2.0f, (pos[a].y + 1.0f) / 2.0f, (pos[a].z + 1.0f) / 2.0f, 1.0f) };
-//			icosaVertices[w++] = TestVertex{ pos[b], XMFLOAT4((pos[b].x + 1.0f) / 2.0f, (pos[b].y + 1.0f) / 2.0f, (pos[b].z + 1.0f) / 2.0f, 1.0f) };
-//			icosaVertices[w++] = TestVertex{ pos[c], XMFLOAT4((pos[c].x + 1.0f) / 2.0f, (pos[c].y + 1.0f) / 2.0f, (pos[c].z + 1.0f) / 2.0f, 1.0f) };
-//		}
-//
-//		CreateVertexBuffer(sizeof(icosaVertices), &m_shapeVertexBuffers[Shapes::Icosphere].first, icosaVertices, sizeof(TestVertex));
-//		m_shapeVertexBuffers[Shapes::Icosphere].second = 60;
-//	}
-//	if (m_shapeVertexBuffers.find(Shapes::Tree) == m_shapeVertexBuffers.end())
-//	{
-//		TestVertex treeVertices[] =
-//		{
-//			XMFLOAT3(-0.5f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f),
-//			XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
-//			XMFLOAT3(0.5f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f),
-//
-//			XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-//			XMFLOAT3(-0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
-//			XMFLOAT3(0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
-//
-//			XMFLOAT3(0.0f, 0.0f, -0.5f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f),
-//			XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
-//			XMFLOAT3(0.0f, 0.0f, 0.5f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f),
-//
-//			XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-//			XMFLOAT3(0.0f, 0.5f, -0.5f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f),
-//			XMFLOAT3(0.0f, 0.5f, 0.5f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f)
-//		};
-//
-//		CreateVertexBuffer(sizeof(treeVertices), &m_shapeVertexBuffers[Shapes::Tree].first, treeVertices, sizeof(TestVertex));
-//		m_shapeVertexBuffers[Shapes::Tree].second = 12;
-//	}
-//
-//	if (m_shapeVertexBuffers.find(Shapes::WindmillWing) == m_shapeVertexBuffers.end())
-//	{
-//		TestVertex wingVertices[] =
-//		{
-//			XMFLOAT3(-1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-//			XMFLOAT3(-1.0f, -0.5f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
-//			XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
-//
-//			XMFLOAT3(1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
-//			XMFLOAT3(1.0f, -0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-//			XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
-//
-//			XMFLOAT3(-0.5f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
-//			XMFLOAT3(0.5f, 1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-//			XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
-//
-//			XMFLOAT3(-0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-//			XMFLOAT3(0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
-//			XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f)
-//		};
-//
-//		CreateVertexBuffer(sizeof(wingVertices), &m_shapeVertexBuffers[Shapes::WindmillWing].first, wingVertices, sizeof(TestVertex));
-//		m_shapeVertexBuffers[Shapes::WindmillWing].second = 12;
-//	}
-//}
-
-void Render::LoadDefaultShapes(const wchar_t* objPath)
+void Render::LoadDefaultShapes()
 {
-	ObjFileParser shapes(objPath);
+	static const wchar_t* defaultObjPath = L"../Assets/Shapes/Default.obj";
+
+	ObjFileParser shapes(defaultObjPath);
 	for (const auto& [name, vertices] : shapes.m_shapes)
 	{
 		if (g_shapeIdMap.find(name) == g_shapeIdMap.end()) g_shapeIdMap[name] = s_nextShapeId++;
@@ -760,12 +568,122 @@ void Render::LoadDefaultShapes(const wchar_t* objPath)
 		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[name]].first, vertices.data(), sizeof(Vertex));
 		m_shapeVertexBufferMap[g_shapeIdMap[name]].second = static_cast<UINT>(vertices.size());
 	}
+	
+	// Other sample shapes
+	if (g_shapeIdMap.find(L"GreenPlane") == g_shapeIdMap.end()) g_shapeIdMap[L"GreenPlane"] = s_nextShapeId++;
+	Vertex plainVertices[] =
+	{
+		{ XMFLOAT3(-50.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(50.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+
+		{ XMFLOAT3(-50.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) }
+	};
+	CreateVertexBuffer(sizeof(plainVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"GreenPlane"]].first, plainVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_shapeIdMap[L"GreenPlane"]].second = 6;
+
+	if (g_shapeIdMap.find(L"TriHouse") == g_shapeIdMap.end()) g_shapeIdMap[L"TriHouse"] = s_nextShapeId++;
+	Vertex triHouseVertices[] =
+	{
+		// Triangles
+		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+
+		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+
+		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+
+		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+
+		// Square
+		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+
+		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) }
+	};
+	CreateVertexBuffer(sizeof(triHouseVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"TriHouse"]].first, triHouseVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_shapeIdMap[L"TriHouse"]].second = 18;
+
+	if (g_shapeIdMap.find(L"Tree") == g_shapeIdMap.end()) g_shapeIdMap[L"Tree"] = s_nextShapeId++;
+	Vertex treeVertices[] =
+	{
+		{ XMFLOAT3(-0.5f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.5f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f) },
+
+		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(-0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+
+		{ XMFLOAT3(0.0f, 0.0f, -0.5f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, 0.5f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f) },
+
+		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.5f, -0.5f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.5f, 0.5f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) }
+	};
+	CreateVertexBuffer(sizeof(treeVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"Tree"]].first, treeVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_shapeIdMap[L"Tree"]].second = 12;
+
+	if (g_shapeIdMap.find(L"WindmillWing") == g_shapeIdMap.end()) g_shapeIdMap[L"WindmillWing"] = s_nextShapeId++;
+	Vertex wingVertices[] =
+	{
+		{ XMFLOAT3(-1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, -0.5f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-0.5f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.5f, 1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
+		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) }
+	};
+	CreateVertexBuffer(sizeof(wingVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"WindmillWing"]].first, wingVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_shapeIdMap[L"WindmillWing"]].second = 12;
+}
+
+void Render::LoadShapeFolder(const wchar_t* folderPath)
+{
+	ObjFileParser shapes(folderPath);
+
+	wstring parentName = filesystem::path(folderPath).stem().wstring();
+	vector<Vertex> combinedVertices;
+
+	for (const auto& [name, vertices] : shapes.m_shapes)
+	{
+		wstring childName = parentName + L"_" + name;
+		if (g_shapeIdMap.find(parentName) == g_shapeIdMap.end()) g_shapeIdMap[parentName] = s_nextShapeId++;
+
+		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
+		m_shapeVertexBufferMap[g_shapeIdMap[parentName]].second = static_cast<UINT>(vertices.size());
+
+		combinedVertices.insert(combinedVertices.end(), vertices.begin(), vertices.end());
+	}
+
+	if (g_shapeIdMap.find(parentName) == g_shapeIdMap.end()) g_shapeIdMap[parentName] = s_nextShapeId++;
+	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
+	m_shapeVertexBufferMap[g_shapeIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
 }
 
 void Render::EngineUpdate()
 {
 	UpdateRenderMode();
-	UpdateShaders();
 }
 
 void Render::DrawObjects()
@@ -777,8 +695,11 @@ void Render::DrawObjects()
 	}
 	g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height);
 
+	s_viewMatrix = g_camera->GetViewMatrix();
+	s_projectionMatrix = g_camera->GetProjectionMatrix();
+
 	static float ATime = 0.0f; // Accumulated time
-	ATime += VDGM::g_deltaTimeF;
+	ATime += VDGM::g_deltaTimeF * 5.0f;
 
 	for (Object* object : g_objects)
 	{
@@ -786,23 +707,22 @@ void Render::DrawObjects()
 		constexpr UINT stride = sizeof(Vertex);
 		constexpr UINT offset = 0;
 
-#ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(object->m_shapeId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, L"Shape not found in vertex buffer map", L"Error", MB_OK); continue; }
-#endif
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeId].first.Get();
+		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, get<2>(m_vertexShaderMap[object->m_vertexShader]).GetAddressOf());
+		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
 
-		if (m_currentVertexShader == VertexShaders::Default) m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
-		else m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[m_currentVertexShader]).Get(), nullptr, 0);
-		if (m_currentPixelShader == PixelShaders::Default) m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
-		else m_deviceContext->PSSetShader(m_pixelShaderMap[m_currentPixelShader].Get(), nullptr, 0);
-
-		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetInputLayout(get<3>(m_vertexShaderMap[object->m_vertexShader]).Get());
+		for (size_t i = 0; i < object->m_shapeIds.size(); i++)
+		{
+#ifdef _DEBUG
+			if (m_shapeVertexBufferMap.find(object->m_shapeIds[i]) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(object->m_shapeIds[i]) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
+#endif
+			ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeIds[i]].first.Get();
+			m_deviceContext->IASetVertexBuffers(static_cast<UINT>(i), 1, &vertexBuffer, &stride, &offset);
+		}
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
-		s_viewMatrix = g_camera->GetViewMatrix();
-		s_projectionMatrix = g_camera->GetProjectionMatrix();
 
 		TestConstBuffer constBufferData = {};
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
@@ -810,14 +730,11 @@ void Render::DrawObjects()
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
 		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
 
-		constBufferData.VSFloatA = sinf(static_cast<float>(ATime));
-		constBufferData.VSFloatB = cosf(static_cast<float>(ATime));
-		constBufferData.VSFloatC = -constBufferData.VSFloatA;
-		constBufferData.VSFloatD = -constBufferData.VSFloatB;
+		object->SetConstBufferVar(&constBufferData.VSFloatA, &constBufferData.VSFloatB, &constBufferData.VSFloatC, &constBufferData.VSFloatD);
 
 		m_deviceContext->UpdateSubresource(get<2>(m_vertexShaderMap[object->m_vertexShader]).Get(), 0, nullptr, &constBufferData, 0, 0);
 
-		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeId].second, 0);
+		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeIds[0]].second, 0);
 	}
 }
 
@@ -848,10 +765,12 @@ Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
 
 	// Initialize render
 	CreateRasterState();
-	LoadAllShaders(L"../Engine/", "main", "5_0");
-	UpdateShaders();
+	LoadAllShaders(L"../Assets/Shader/", "main", "5_0");
 
-	LoadDefaultShapes(L"../Assets/Shapes/Default.obj");
+	LoadDefaultShapes();
+	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationIdle.obj");
+	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationWalk0.obj");
+	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationWalk1.obj");
 }
 
 Render::~Render()
@@ -956,12 +875,6 @@ void Render::SceneRender()
 #endif
 
 	Present();
-}
-
-void Render::ChangeShader(PixelShaders pixelShader)
-{
-	m_deviceContext->PSSetShader(m_pixelShaderMap[pixelShader].Get(), nullptr, 0);
-	m_currentPixelShader = pixelShader;
 }
 
 void Render::ChangeState()

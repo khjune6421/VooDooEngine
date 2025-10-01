@@ -1,20 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <ProjectOutputs />
-  <ContentFiles>
-    <ContentFile>
-      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Debug\PixelShaderAll.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Debug\PixelShaderNull.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Debug\PixelShader.cso</FullPath>
-    </ContentFile>
-    <ContentFile>
-      <FullPath>C:\Users\User\Desktop\VooDooEngine\x64\Debug\VertexShader.cso</FullPath>
-    </ContentFile>
-  </ContentFiles>
+  <ContentFiles />
   <SatelliteDlls />
   <NonRecipeFileRefs />
 </Project>

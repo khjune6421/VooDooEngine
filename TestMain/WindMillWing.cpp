@@ -9,7 +9,7 @@ WindMillWing::WindMillWing(UINT wingAmount)
 {
 	for (UINT i = 0; i < wingAmount; ++i)
 	{
-		unique_ptr<Object> windmill = make_unique<Object>(L"Icosphere");
+		unique_ptr<Object> windmill = make_unique<Object>(L"WindmillWing");
 		AddChild(windmill.get());
 		windmill->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.5f * (i + 1), 1.0f });
 		windmill->SetScale(XMFLOAT3{ 2.0f / (i + 2), 2.0f / (i + 2), 2.0f / (i + 2) });

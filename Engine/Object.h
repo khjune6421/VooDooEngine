@@ -10,6 +10,7 @@ extern std::unordered_map<std::wstring, UINT> g_shapeIdMap;
 enum class VertexShaders // Should it also includes corresponding constant buffer and input layout?
 {
 	Default,
+	TripleInput
 };
 enum class PixelShaders
 {
@@ -32,13 +33,15 @@ class Object
 {
 	// is this a good idea?
 	friend class Render;
-	friend class Camera;
 
 	UINT m_id = 0; // For debug purpose
 
-	UINT m_shapeId = 0;
+	std::vector<UINT> m_shapeIds;
 	VertexShaders m_vertexShader = VertexShaders::Default;
 	PixelShaders m_pixelShader = PixelShaders::Default;
+
+	// TODO: Remove this later
+	virtual void SetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const; // For setting constant buffer variables
 
 	// Not sure if these should be private or protected
 	DirectX::XMMATRIX m_positionMatrix = DirectX::XMMatrixIdentity();
@@ -78,10 +81,16 @@ protected:
 public:
 	Object
 	(
-		const std::wstring& shapeName = L"None",
+		const std::vector<std::wstring>& shapeNames = std::vector<std::wstring>{ L"None" },
 		VertexShaders vertexShader = VertexShaders::Default,
 		PixelShaders pixelShader = PixelShaders::Default
 	);
+	Object
+	(
+		const std::wstring& shapeName,
+		VertexShaders vertexShader = VertexShaders::Default,
+		PixelShaders pixelShader = PixelShaders::Default
+	) : Object(std::vector<std::wstring>{ shapeName }, vertexShader, pixelShader) {}
 	virtual ~Object();
 
 	void AddChild(Object* child);
@@ -98,6 +107,7 @@ public:
 	void SetRotation(const DirectX::XMVECTOR& rot);
 	void Rotate(const DirectX::XMVECTOR& delta);
 	void LookAt(const DirectX::XMVECTOR& target);
+	void LerpRotation(const DirectX::XMVECTOR& start, const DirectX::XMVECTOR& target, float t);
 	DirectX::XMVECTOR GetRotation() const { return m_rotation; }
 	DirectX::XMVECTOR GetWorldRotation() const;
 	DirectX::XMVECTOR GetWorldDirection(Directions dir) const;
@@ -113,5 +123,3 @@ public:
 
 	virtual void Update(float deltaTime) { (void)deltaTime; } // (void) to avoid unused parameter warning // feels odd but makes sense
 };
-
-extern std::vector<Object*> g_objects;
