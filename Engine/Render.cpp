@@ -709,9 +709,13 @@ void Render::DrawObjects()
 	static float ATime = 0.0f; // Accumulated time
 	ATime += VDGM::g_deltaTimeF * 5.0f;
 
+	// Intrusive though: What if I make Object::Render(&Render) and call it here like object->Render(this)?
+	// It would work, but I have a feeling there is a reason why people don't do that
+	// But my rendering logic is quite far from common so maybe?
 	for (Object* object : g_objects)
 	{
 		if (!object || !object->m_isActive) continue;
+
 		constexpr UINT stride = sizeof(Vertex);
 		constexpr UINT offset = 0;
 
