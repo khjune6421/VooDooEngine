@@ -8,11 +8,6 @@ extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_shapeIdMap;
 
 // Rendering related enums
-enum class VertexShaders // Should it also includes corresponding constant buffer and input layout?
-{
-	Default,
-	TripleInput
-};
 enum class PixelShaders
 {
 	Default,
@@ -38,7 +33,8 @@ class Object
 	UINT m_id = 0; // For debug purpose
 
 	std::vector<UINT> m_shapeIds;
-	VertexShaders m_vertexShader = VertexShaders::Default;
+	UINT m_vertexShaderId = 0;
+	//VertexShaders m_vertexShader = VertexShaders::Default;
 	PixelShaders m_pixelShader = PixelShaders::Default;
 
 	// TODO: Remove this later
@@ -83,13 +79,13 @@ public:
 	Object
 	(
 		const std::vector<std::wstring>& shapeNames = std::vector<std::wstring>{ L"None" },
-		VertexShaders vertexShader = VertexShaders::Default,
+		const std::wstring& vertexShader = L"VertexShader",
 		PixelShaders pixelShader = PixelShaders::Default
 	);
 	Object
 	(
 		const std::wstring& shapeName,
-		VertexShaders vertexShader = VertexShaders::Default,
+		const std::wstring& vertexShader = L"VertexShader",
 		PixelShaders pixelShader = PixelShaders::Default
 	) : Object(std::vector<std::wstring>{ shapeName }, vertexShader, pixelShader) {}
 	virtual ~Object();

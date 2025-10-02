@@ -98,20 +98,18 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
-	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout // need to change this to not use struct like vertex buffer map?
-	std::unordered_map <VertexShaders, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 	std::unordered_map<PixelShaders, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
 
 	static UINT s_vertexShaderId;
 	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout
-	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderIdMap;
+	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 
 	// Render
 	// 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
 	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
-	// Maps shape ID to its vertex buffer and vertex count // I might change this to vector later
+	// Maps shape ID to its vertex buffer and vertex count // I might change this to vector later // not sure if it's a good idea to make this unintuitive thing more complicated
 	static UINT s_nextShapeId;
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
 
