@@ -43,7 +43,7 @@ class Object
 	mutable DirectX::XMMATRIX m_worldMatrix = DirectX::XMMatrixIdentity();
 	mutable bool m_isDirty = true;
 
-	void SetDirty();
+	void SetDirty(); // Recursive
 
 protected:
 	DirectX::XMVECTOR m_position = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);

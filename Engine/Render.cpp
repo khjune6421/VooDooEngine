@@ -665,7 +665,7 @@ void Render::LoadShapeFile(const filesystem::path filePath)
 
 	for (const auto& [name, vertices] : shapes.m_shapes)
 	{
-		wstring childName = parentName + L"_" + name;
+		wstring childName = parentName + L"_" + name; // Save child shapes as parentName_childName
 		if (g_shapeIdMap.find(parentName) == g_shapeIdMap.end()) g_shapeIdMap[parentName] = s_nextShapeId++;
 
 		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
@@ -717,7 +717,7 @@ void Render::DrawObjects()
 		constexpr UINT stride = sizeof(Vertex);
 		constexpr UINT offset = 0;
 
-		object->Render(this);
+		object->Render(this); // Where should this be?
 
 		m_deviceContext->VSSetShader(get<VertexShader>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), nullptr, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).GetAddressOf());
