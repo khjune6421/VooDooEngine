@@ -706,10 +706,7 @@ void Render::DrawObjects()
 	s_viewMatrix = g_camera->GetViewMatrix();
 	s_projectionMatrix = g_camera->GetProjectionMatrix();
 
-	static float ATime = 0.0f; // Accumulated time
-	ATime += VDGM::g_deltaTimeF * 5.0f;
-
-	// Intrusive though: What if I make Object::Render(&Render) and call it here like object->Render(this)?
+	// Intrusive though: What if I make Object::Render(Render*) and call it here like object->Render(this)?
 	// It would work, but I have a feeling there is a reason why people don't do that
 	// But my rendering logic is quite far from common so maybe?
 	for (Object* object : g_objects)
@@ -718,6 +715,8 @@ void Render::DrawObjects()
 
 		constexpr UINT stride = sizeof(Vertex);
 		constexpr UINT offset = 0;
+
+		object->Render(this);
 
 		m_deviceContext->VSSetShader(get<VertexShader>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), nullptr, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).GetAddressOf());

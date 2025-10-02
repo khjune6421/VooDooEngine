@@ -111,4 +111,5 @@ public:
 	DirectX::XMMATRIX GetWorldMatrix() const;
 
 	virtual void Update(float deltaTime) { (void)deltaTime; } // (void) to avoid unused parameter warning // feels odd but makes sense
+	virtual void Render(class Render* renderer) const {} // THE CARDINAL SIN // perhaps this is what VooDoo is all about
 };
