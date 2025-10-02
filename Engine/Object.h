@@ -3,7 +3,8 @@
 #include "DirectXLib.h"
 #include "UtilityHeaders.h"
 
-// Converts string to uint
+// Converts string to uint for mapped shader, shape, etc
+extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_shapeIdMap;
 
 // Rendering related enums

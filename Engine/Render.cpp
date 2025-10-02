@@ -7,7 +7,9 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
-UINT Render::s_nextShapeId = 1;
+UINT Render::s_vertexShaderId = 1;
+
+UINT Render::s_nextShapeId = 0;
 unordered_map<wstring, UINT> g_shapeIdMap;
 
 D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[4] =
@@ -658,7 +660,7 @@ void Render::LoadDefaultShapes()
 	m_shapeVertexBufferMap[g_shapeIdMap[L"WindmillWing"]].second = 12;
 }
 
-void Render::LoadShapeFolder(const wchar_t* folderPath)
+void Render::LoadShapeFile(const wchar_t* folderPath)
 {
 	ObjFileParser shapes(folderPath);
 
@@ -768,9 +770,9 @@ Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
 	LoadAllShaders(L"../Assets/Shader/", "main", "5_0");
 
 	LoadDefaultShapes();
-	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationIdle.obj");
-	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationWalk0.obj");
-	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationWalk1.obj");
+	LoadShapeFile(L"../Assets/Shapes/PlayerAnimationIdle.obj");
+	LoadShapeFile(L"../Assets/Shapes/PlayerAnimationWalk0.obj");
+	LoadShapeFile(L"../Assets/Shapes/PlayerAnimationWalk1.obj");
 }
 
 Render::~Render()

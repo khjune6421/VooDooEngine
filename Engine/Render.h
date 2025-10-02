@@ -64,7 +64,7 @@ class Render
 		float VSFloatD;
 	};
 
-	// Input layouts // this is cursed
+	// Input layouts // well this is cursed
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[4];
 	static D3D11_INPUT_ELEMENT_DESC s_tripleInputLayoutDesc[12];
 	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[2];
@@ -102,13 +102,17 @@ class Render
 	std::unordered_map <VertexShaders, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 	std::unordered_map<PixelShaders, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
 
+	static UINT s_vertexShaderId;
+	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout
+	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderIdMap;
+
 	// Render
 	// 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
 	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
-	static UINT s_nextShapeId;
 	// Maps shape ID to its vertex buffer and vertex count // I might change this to vector later
+	static UINT s_nextShapeId;
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
 
 	// static view and projection matrix for all renders
@@ -146,7 +150,7 @@ class Render
 	void CreateRasterState();
 
 	void LoadDefaultShapes();
-	void LoadShapeFolder(const wchar_t* folderPath);
+	void LoadShapeFile(const wchar_t* folderPath);
 
 	void EngineUpdate();
 
