@@ -121,7 +121,7 @@ Object::Object(const vector<wstring>& shapeNames, const wstring& vertexShader, c
 	m_vertexShaderId = g_vertexShaderIdMap[vertexShader];
 
 #ifdef _DEBUG
-	if (g_pixelShaderIdMap.find(pixelShaderName) == g_pixelShaderIdMap.end()) MessageBoxW(nullptr, (L"Pixel shader not found: " + pixelShader).c_str(), L"Error", MB_OK);
+	if (g_pixelShaderIdMap.find(pixelShader) == g_pixelShaderIdMap.end()) MessageBoxW(nullptr, (L"Pixel shader not found: " + pixelShader).c_str(), L"Error", MB_OK);
 #endif
 	m_pixelShader = g_pixelShaderIdMap[pixelShader];
 

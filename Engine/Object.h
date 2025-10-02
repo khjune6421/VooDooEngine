@@ -74,12 +74,7 @@ public:
 		const std::wstring& vertexShader = L"VertexShader",
 		const std::wstring& pixelShader = L"PixelShader"
 	);
-	Object
-	(
-		const std::wstring& shapeName = L"None",
-		const std::wstring& vertexShader = L"VertexShader",
-		const std::wstring& pixelShader = L"PixelShader"
-	) : Object(std::vector<std::wstring>{ shapeName }, vertexShader, pixelShader) {}
+	Object(const std::wstring& shapeName) : Object(std::vector<std::wstring>{ shapeName }) {}
 	virtual ~Object();
 
 	void AddChild(Object* child);
