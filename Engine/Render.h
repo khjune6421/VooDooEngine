@@ -98,11 +98,12 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
-	std::unordered_map<PixelShaders, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
-
 	static UINT s_vertexShaderId;
 	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout
 	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+
+	static UINT s_pixelShaderId;
+	std::unordered_map<UINT, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
 
 	// Render
 	// 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack

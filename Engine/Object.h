@@ -5,15 +5,8 @@
 
 // Converts string to uint for mapped shader, shape, etc
 extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
+extern std::unordered_map<std::wstring, UINT> g_pixelShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_shapeIdMap;
-
-// Rendering related enums
-enum class PixelShaders
-{
-	Default,
-	ColorShift,
-	Greyscale
-};
 
 enum class Directions
 {
@@ -34,8 +27,7 @@ class Object
 
 	std::vector<UINT> m_shapeIds;
 	UINT m_vertexShaderId = 0;
-	//VertexShaders m_vertexShader = VertexShaders::Default;
-	PixelShaders m_pixelShader = PixelShaders::Default;
+	UINT m_pixelShader = 0;
 
 	// TODO: Remove this later
 	virtual void SetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const; // For setting constant buffer variables
@@ -80,13 +72,13 @@ public:
 	(
 		const std::vector<std::wstring>& shapeNames = std::vector<std::wstring>{ L"None" },
 		const std::wstring& vertexShader = L"VertexShader",
-		PixelShaders pixelShader = PixelShaders::Default
+		const std::wstring& pixelShader = L"PixelShader"
 	);
 	Object
 	(
 		const std::wstring& shapeName,
 		const std::wstring& vertexShader = L"VertexShader",
-		PixelShaders pixelShader = PixelShaders::Default
+		const std::wstring& pixelShader = L"PixelShader"
 	) : Object(std::vector<std::wstring>{ shapeName }, vertexShader, pixelShader) {}
 	virtual ~Object();
 

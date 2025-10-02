@@ -10,6 +10,9 @@ using namespace DirectX;
 UINT Render::s_vertexShaderId = 0;
 unordered_map<wstring, UINT> g_vertexShaderIdMap;
 
+UINT Render::s_pixelShaderId = 0;
+unordered_map<wstring, UINT> g_pixelShaderIdMap;
+
 UINT Render::s_nextShapeId = 0;
 unordered_map<wstring, UINT> g_shapeIdMap;
 
@@ -454,9 +457,9 @@ void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const 
 	}
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
-	if (shaderName == L"PixelShader") m_pixelShaderMap[PixelShaders::Default] = pixelShader;
-	else if (shaderName == L"PixelShaderNull") m_pixelShaderMap[PixelShaders::Greyscale] = pixelShader;
-	else if (shaderName == L"PixelShaderAll") m_pixelShaderMap[PixelShaders::ColorShift] = pixelShader;
+
+	if (g_pixelShaderIdMap.find(shaderName) == g_pixelShaderIdMap.end()) g_pixelShaderIdMap[shaderName] = s_pixelShaderId++;
+	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
 }
 
 void Render::LoadPrecompiledVertexShader(const wchar_t* file)
@@ -509,9 +512,9 @@ void Render::LoadPrecompiledPixelShader(const wchar_t* file)
 	}
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
-	if (shaderName == L"PixelShader") m_pixelShaderMap[PixelShaders::Default] = pixelShader;
-	else if (shaderName == L"PixelShaderNull") m_pixelShaderMap[PixelShaders::Greyscale] = pixelShader;
-	else if (shaderName == L"PixelShaderAll") m_pixelShaderMap[PixelShaders::ColorShift] = pixelShader;
+
+	if (g_pixelShaderIdMap.find(shaderName) == g_pixelShaderIdMap.end()) g_pixelShaderIdMap[shaderName] = s_pixelShaderId++;
+	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
 }
 
 void Render::CreateRasterState()
