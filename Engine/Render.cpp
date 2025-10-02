@@ -715,11 +715,11 @@ void Render::DrawObjects()
 		constexpr UINT stride = sizeof(Vertex);
 		constexpr UINT offset = 0;
 
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), nullptr, 0);
-		m_deviceContext->VSSetConstantBuffers(0, 1, get<2>(m_vertexShaderMap[object->m_vertexShaderId]).GetAddressOf());
+		m_deviceContext->VSSetShader(get<VertexShader>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), nullptr, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).GetAddressOf());
 		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
 
-		m_deviceContext->IASetInputLayout(get<3>(m_vertexShaderMap[object->m_vertexShaderId]).Get());
+		m_deviceContext->IASetInputLayout(get<InputLayout>(m_vertexShaderMap[object->m_vertexShaderId]).Get());
 		for (size_t i = 0; i < object->m_shapeIds.size(); i++)
 		{
 #ifdef _DEBUG
@@ -740,7 +740,7 @@ void Render::DrawObjects()
 
 		object->SetConstBufferVar(&constBufferData.VSFloatA, &constBufferData.VSFloatB, &constBufferData.VSFloatC, &constBufferData.VSFloatD);
 
-		m_deviceContext->UpdateSubresource(get<2>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), 0, nullptr, &constBufferData, 0, 0);
+		m_deviceContext->UpdateSubresource(get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), 0, nullptr, &constBufferData, 0, 0);
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeIds[0]].second, 0);
 	}
@@ -774,12 +774,18 @@ Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) 
 
 	// Initialize render
 	CreateRasterState();
+	CreateSampleShapes();
 
 	static const filesystem::path defaultPath(L"../Assets/Default/");
 	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");
 	LoadDefaultShapes(defaultPath / L"Shapes/");
 
-	CreateSampleShapes();
+	if (resourcePath) // This will override the default assets if corrisponding files are found
+	{
+		filesystem::path resPath(resourcePath);
+		LoadAllShaders(resPath / L"Shader/", "main", "5_0");
+		LoadDefaultShapes(resPath / L"Shapes/");
+	}
 }
 
 Render::~Render()
