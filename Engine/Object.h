@@ -76,7 +76,7 @@ public:
 	);
 	Object
 	(
-		const std::wstring& shapeName,
+		const std::wstring& shapeName = L"None",
 		const std::wstring& vertexShader = L"VertexShader",
 		const std::wstring& pixelShader = L"PixelShader"
 	) : Object(std::vector<std::wstring>{ shapeName }, vertexShader, pixelShader) {}
@@ -111,5 +111,5 @@ public:
 	DirectX::XMMATRIX GetWorldMatrix() const;
 
 	virtual void Update(float deltaTime) { (void)deltaTime; } // (void) to avoid unused parameter warning // feels odd but makes sense
-	virtual void Render(class Render* renderer) const {} // THE CARDINAL SIN // perhaps this is what VooDoo is all about
+	virtual void Render(class Render* renderer) const {} // The cardinal sin // perhaps this is what VooDoo is all about
 };

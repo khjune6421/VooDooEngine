@@ -40,7 +40,7 @@ D3D11_INPUT_ELEMENT_DESC Render::s_tripleInputLayoutDesc[12] =
 	{ "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
-pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { {Render::s_defaultInputLayoutDesc, 4}, {Render::s_tripleInputLayoutDesc, 12} };
+pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { { Render::s_defaultInputLayoutDesc, 4 }, { Render::s_tripleInputLayoutDesc, 12 } };
 
 Camera* g_camera = nullptr;
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
@@ -60,7 +60,8 @@ void Render::CreateDeviceSwapChain()
 	swapChainDesc.SampleDesc.Count = m_deviceInfo.antiAliasingLevel;
 	swapChainDesc.SampleDesc.Quality = 0;
 
-	if (
+	if
+		(
 		FAILED
 		(
 			D3D11CreateDeviceAndSwapChain
@@ -812,6 +813,7 @@ Render::~Render()
 	m_deviceInfo.hardwareInfos.clear();
 
 	m_vertexShaderMap.clear();
+	m_pixelShaderMap.clear();
 	m_shapeVertexBufferMap.clear();
 	m_pixelShaderMap.clear();
 
