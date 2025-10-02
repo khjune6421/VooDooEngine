@@ -18,8 +18,7 @@ extern std::vector<Object*> g_objects;
 
 namespace VDGM
 {
-	extern float g_deltaTimeF;
-	extern double g_deltaTimeD;
+	extern float g_deltaTime;
 
 	// this is so cursed // TODO: not this
 	extern std::unique_ptr<Scene> g_currentScene;

@@ -81,19 +81,19 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Assets\Shader\PixelShader\PixelShader.hlsl">
+    <FxCompile Include="..\Assets\Default\Shader\VertexShader\TripleInputLayout\TripleVertexShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\Assets\Shader\PixelShader\PixelShaderAll.hlsl">
+    <FxCompile Include="..\Assets\Default\Shader\VertexShader\DefaultInputLayout\VertexShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\Assets\Shader\PixelShader\PixelShaderNull.hlsl">
+    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PixelShaderNull.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\Assets\Shader\VertexShader\DefaultInputLayout\VertexShader.hlsl">
+    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PixelShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\Assets\Shader\VertexShader\TripleInputLayout\TripleVertexShader.hlsl">
+    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PixelShaderAll.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

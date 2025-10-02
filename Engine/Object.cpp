@@ -7,7 +7,7 @@ vector<Object*> g_objects;
 
 static UINT s_idCounter = 0;
 
-void Object::SetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const
+void Object::GetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const
 {
 	*var1 = 0.0f;
 	*var2 = 0.0f;

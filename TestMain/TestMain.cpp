@@ -23,18 +23,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	// Create multiple windows with different shaders
 	VDW::CreateWindowAndRenderer(L"VooDoo Class1", L"VooDoo Engine1", 1280, 720);
-	VDW::CreateWindowAndRenderer(L"VooDoo Class2", L"VooDoo Engine2", 1280, 720, L"../Assets/Imposter/");
-	VDW::CreateWindowAndRenderer(L"VooDoo Class3", L"VooDoo Engine3", 1280, 480);
-	VDW::CreateWindowAndRenderer(L"VooDoo Class4", L"VooDoo Engine4", 640, 960, L"../Assets/Imposter/");
-	//VDW::CreateWindowAndRenderer(L"VooDoo Class5", L"VooDoo Engine5", 1280, 720);
+	VDW::CreateWindowAndRenderer(L"VooDoo Class2", L"VooDoo Engine2", 1280, 720, 1280, 720, L"../Assets/Imposter/");
+	VDW::CreateWindowAndRenderer(L"VooDoo Class3", L"VooDoo Engine3", 640, 960);
+	VDW::CreateWindowAndRenderer(L"VooDoo Class4", L"VooDoo Engine4", 640, 960, 640, 960, L"../Assets/Imposter/");
 
 	// Create and set the test scene
 	VDGM::g_currentScene = make_unique<TestScene>(L"../Assets/Default/ObjectPos/Trees.dat");
 
-	while (VDGM::GameLoop())
-	{
-		if (GetAsyncKeyState(VK_TAB) & 0x0001) VDGM::ChangeScene(L"TestScene");
-	}
+	while (VDGM::GameLoop()) if (GetAsyncKeyState(VK_TAB) & 0x0001) VDGM::ChangeScene(L"TestScene");
 
 	VDW::g_windows.clear();
 	for (auto& render : VDW::g_renders) delete render;

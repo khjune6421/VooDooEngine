@@ -120,7 +120,7 @@ namespace VDW
 		return true;
 	}
 
-	HWND CreateWindowAndRenderer(wstring className, wstring windowName, LONG width, LONG height, const wchar_t* resourcePath)
+	HWND CreateWindowAndRenderer(wstring className, wstring windowName, int width, int height, int posX, int posY, const wchar_t* resourcePath)
 	{
 		WNDCLASSEX wc =
 		{
@@ -146,7 +146,7 @@ namespace VDW
 			className.c_str(),
 			windowName.c_str(),
 			WS_POPUPWINDOW,
-			CW_USEDEFAULT, CW_USEDEFAULT,
+			posX, posY,
 			width, height,
 			GetDesktopWindow(),
 			nullptr,

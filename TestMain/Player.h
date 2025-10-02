@@ -24,7 +24,7 @@ class Player : public Object
 	float m_val4 = 0.0f;
 	float ATime = 0.0f;
 
-	void SetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const override;
+	void GetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const override;
 
 public:
 	Player(const std::vector<std::wstring>& shapes) : Object(shapes, L"TripleVertexShader") {}

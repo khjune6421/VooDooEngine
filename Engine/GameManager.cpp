@@ -6,8 +6,7 @@ namespace VDGM
 {
 	unique_ptr<Scene> g_currentScene = nullptr;
 
-	float g_deltaTimeF = 0.0f;
-	double g_deltaTimeD = 0.0;
+	float g_deltaTime = 0.0f;
 
 	void ChangeScene(const wstring& sceneName)
 	{
@@ -24,31 +23,33 @@ namespace VDGM
 	{
 		if (!VDW::ProcessMessage()) return false;
 
-		g_deltaTimeD = GetdeltaTime();
-		g_deltaTimeF = static_cast<float>(g_deltaTimeD);
+		g_deltaTime = GetdeltaTime();
 
-		Update(g_deltaTimeF);
+		Update(g_deltaTime);
 		Render();
 
 		return true;
 	}
 
-	double GetdeltaTime()
+	float GetdeltaTime()
 	{
 		static ULONGLONG previousTime = GetTickCount64();
 		ULONGLONG currentTime = GetTickCount64();
-		double deltaTime = static_cast<double>(currentTime - previousTime) / 1000.0;
+		float deltaTime = static_cast<float>(currentTime - previousTime) / 1000.0f;
 		previousTime = currentTime;
+
 		return deltaTime;
 	}
 
 	void Update(float deltaTime)
 	{
+		// TODO: See if this can be optimized with multithreading
 		if (g_currentScene) g_currentScene->Update(deltaTime);
 	}
 
 	void Render()
 	{
+		// This too
 		for (auto& render : VDW::g_renders) render->SceneRender();
 	}
 }
