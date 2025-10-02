@@ -27,7 +27,7 @@ class Player : public Object
 	void SetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const override;
 
 public:
-	Player(const std::vector<std::wstring>& shapes) : Object(shapes, VertexShaders::TripleInput) {}
+	Player(const std::vector<std::wstring>& shapes) : Object(shapes, L"TripleVertexShader") {}
 	~Player() override = default;
 
 	void Update(float deltaTime) override;

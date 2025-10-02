@@ -104,18 +104,27 @@ void Object::RemoveChild(Object* child)
 	}
 }
 
-Object::Object(const vector<wstring>& shapeNames, VertexShaders vertexShader, PixelShaders pixelShader)
-	:
-	m_vertexShader(vertexShader),
-	m_pixelShader(pixelShader),
-	m_id(s_idCounter++)
+Object::Object(const vector<wstring>& shapeNames, const wstring& vertexShader, const wstring& pixelShader) : m_id(s_idCounter++)
 {
 	for (const auto& shapeName : shapeNames)
 	{
 		if (shapeName == L"None") return;
+#ifdef _DEBUG
 		else if (g_shapeIdMap.find(shapeName) == g_shapeIdMap.end()) MessageBoxW(nullptr, (L"Shape name not found: " + shapeName).c_str(), L"Error", MB_OK);
+#endif
 		else m_shapeIds.emplace_back(g_shapeIdMap[shapeName]);
 	}
+
+#ifdef _DEBUG
+	if (g_vertexShaderIdMap.find(vertexShader) == g_vertexShaderIdMap.end()) MessageBoxW(nullptr, (L"Vertex shader not found: " + vertexShader).c_str(), L"Error", MB_OK);
+#endif
+	m_vertexShaderId = g_vertexShaderIdMap[vertexShader];
+
+#ifdef _DEBUG
+	if (g_pixelShaderIdMap.find(pixelShaderName) == g_pixelShaderIdMap.end()) MessageBoxW(nullptr, (L"Pixel shader not found: " + pixelShader).c_str(), L"Error", MB_OK);
+#endif
+	m_pixelShader = g_pixelShaderIdMap[pixelShader];
+
 	g_objects.emplace_back(this);
 
 #ifdef _DEBUG

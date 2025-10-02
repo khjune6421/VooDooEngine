@@ -7,7 +7,13 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
-UINT Render::s_nextShapeId = 1;
+UINT Render::s_vertexShaderId = 0;
+unordered_map<wstring, UINT> g_vertexShaderIdMap;
+
+UINT Render::s_pixelShaderId = 0;
+unordered_map<wstring, UINT> g_pixelShaderIdMap;
+
+UINT Render::s_nextShapeId = 0;
 unordered_map<wstring, UINT> g_shapeIdMap;
 
 D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[4] =
@@ -146,7 +152,7 @@ void Render::CreateDepthStencil()
 
 void Render::LoadFonts()
 {
-	wstring fontPath = L"../Assets/Fonts/";
+	wstring fontPath = L"../Assets/Default/Fonts/";
 	if (!filesystem::exists(fontPath))
 	{
 		MessageBoxW(nullptr, L"Font directory does not exist", L"Error", MB_OK);
@@ -351,11 +357,10 @@ void Render::DisplayDeviceInfo()
 	}
 }
 
-void Render::LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
+void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
 {
-	filesystem::path shaderDir(shaderPath);
-	filesystem::path vertexShaderPath = shaderDir / L"VertexShader/";
-	filesystem::path pixelShaderPath = shaderDir / L"PixelShader/";
+	filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
+	filesystem::path pixelShaderPath = shaderPath / L"PixelShader/";
 
 	filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
 	if (filesystem::exists(defaultInputLayoutPath) && filesystem::is_directory(defaultInputLayoutPath))
@@ -420,9 +425,8 @@ void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
 
-	// This is hardcoded for now, will improve later
-	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
-	if (shaderName == L"TripleVertexShader") m_vertexShaderMap[VertexShaders::TripleInput] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
+	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
+	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
 }
 
 void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
@@ -452,9 +456,9 @@ void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const 
 	}
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
-	if (shaderName == L"PixelShader") m_pixelShaderMap[PixelShaders::Default] = pixelShader;
-	else if (shaderName == L"PixelShaderNull") m_pixelShaderMap[PixelShaders::Greyscale] = pixelShader;
-	else if (shaderName == L"PixelShaderAll") m_pixelShaderMap[PixelShaders::ColorShift] = pixelShader;
+
+	if (g_pixelShaderIdMap.find(shaderName) == g_pixelShaderIdMap.end()) g_pixelShaderIdMap[shaderName] = s_pixelShaderId++;
+	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
 }
 
 void Render::LoadPrecompiledVertexShader(const wchar_t* file)
@@ -476,11 +480,16 @@ void Render::LoadPrecompiledVertexShader(const wchar_t* file)
 		return;
 	}
 
+	comPtr<ID3D11Buffer> constantBuffer;
+	CreateConstBuffer(sizeof(TestConstBuffer), &constantBuffer);
+
 	comPtr<ID3D11InputLayout> inputLayout;
 	CreateInputLayout(s_defaultInputLayoutDesc, _countof(s_defaultInputLayoutDesc), VSCode, &inputLayout);
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
-	if (shaderName == L"VertexShader") m_vertexShaderMap[VertexShaders::Default] = make_tuple(vertexShader, VSCode, nullptr, inputLayout);
+
+	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
+	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
 }
 
 void Render::LoadPrecompiledPixelShader(const wchar_t* file)
@@ -502,9 +511,9 @@ void Render::LoadPrecompiledPixelShader(const wchar_t* file)
 	}
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
-	if (shaderName == L"PixelShader") m_pixelShaderMap[PixelShaders::Default] = pixelShader;
-	else if (shaderName == L"PixelShaderNull") m_pixelShaderMap[PixelShaders::Greyscale] = pixelShader;
-	else if (shaderName == L"PixelShaderAll") m_pixelShaderMap[PixelShaders::ColorShift] = pixelShader;
+
+	if (g_pixelShaderIdMap.find(shaderName) == g_pixelShaderIdMap.end()) g_pixelShaderIdMap[shaderName] = s_pixelShaderId++;
+	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
 }
 
 void Render::CreateRasterState()
@@ -556,20 +565,8 @@ void Render::CreateRasterState()
 #endif
 }
 
-void Render::LoadDefaultShapes()
+void Render::CreateSampleShapes()
 {
-	static const wchar_t* defaultObjPath = L"../Assets/Shapes/Default.obj";
-
-	ObjFileParser shapes(defaultObjPath);
-	for (const auto& [name, vertices] : shapes.m_shapes)
-	{
-		if (g_shapeIdMap.find(name) == g_shapeIdMap.end()) g_shapeIdMap[name] = s_nextShapeId++;
-
-		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[name]].first, vertices.data(), sizeof(Vertex));
-		m_shapeVertexBufferMap[g_shapeIdMap[name]].second = static_cast<UINT>(vertices.size());
-	}
-	
-	// Other sample shapes
 	if (g_shapeIdMap.find(L"GreenPlane") == g_shapeIdMap.end()) g_shapeIdMap[L"GreenPlane"] = s_nextShapeId++;
 	Vertex plainVertices[] =
 	{
@@ -658,11 +655,11 @@ void Render::LoadDefaultShapes()
 	m_shapeVertexBufferMap[g_shapeIdMap[L"WindmillWing"]].second = 12;
 }
 
-void Render::LoadShapeFolder(const wchar_t* folderPath)
+void Render::LoadShapeFile(const filesystem::path filePath)
 {
-	ObjFileParser shapes(folderPath);
+	ObjFileParser shapes(filePath.c_str());
 
-	wstring parentName = filesystem::path(folderPath).stem().wstring();
+	wstring parentName = filePath.stem().wstring();
 	vector<Vertex> combinedVertices;
 
 	for (const auto& [name, vertices] : shapes.m_shapes)
@@ -679,6 +676,17 @@ void Render::LoadShapeFolder(const wchar_t* folderPath)
 	if (g_shapeIdMap.find(parentName) == g_shapeIdMap.end()) g_shapeIdMap[parentName] = s_nextShapeId++;
 	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
 	m_shapeVertexBufferMap[g_shapeIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
+}
+
+void Render::LoadDefaultShapes(const filesystem::path folderPath)
+{
+	if (filesystem::exists(folderPath) && filesystem::is_directory(folderPath))
+	{
+		for (const auto& entry : filesystem::directory_iterator(folderPath))
+		{
+			if (entry.path().extension() == L".obj") LoadShapeFile(entry.path().c_str());
+		}
+	}
 }
 
 void Render::EngineUpdate()
@@ -701,17 +709,21 @@ void Render::DrawObjects()
 	static float ATime = 0.0f; // Accumulated time
 	ATime += VDGM::g_deltaTimeF * 5.0f;
 
+	// Intrusive though: What if I make Object::Render(&Render) and call it here like object->Render(this)?
+	// It would work, but I have a feeling there is a reason why people don't do that
+	// But my rendering logic is quite far from common so maybe?
 	for (Object* object : g_objects)
 	{
 		if (!object || !object->m_isActive) continue;
+
 		constexpr UINT stride = sizeof(Vertex);
 		constexpr UINT offset = 0;
 
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShader]).Get(), nullptr, 0);
-		m_deviceContext->VSSetConstantBuffers(0, 1, get<2>(m_vertexShaderMap[object->m_vertexShader]).GetAddressOf());
+		m_deviceContext->VSSetShader(get<VertexShader>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), nullptr, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).GetAddressOf());
 		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
 
-		m_deviceContext->IASetInputLayout(get<3>(m_vertexShaderMap[object->m_vertexShader]).Get());
+		m_deviceContext->IASetInputLayout(get<InputLayout>(m_vertexShaderMap[object->m_vertexShaderId]).Get());
 		for (size_t i = 0; i < object->m_shapeIds.size(); i++)
 		{
 #ifdef _DEBUG
@@ -732,7 +744,7 @@ void Render::DrawObjects()
 
 		object->SetConstBufferVar(&constBufferData.VSFloatA, &constBufferData.VSFloatB, &constBufferData.VSFloatC, &constBufferData.VSFloatD);
 
-		m_deviceContext->UpdateSubresource(get<2>(m_vertexShaderMap[object->m_vertexShader]).Get(), 0, nullptr, &constBufferData, 0, 0);
+		m_deviceContext->UpdateSubresource(get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), 0, nullptr, &constBufferData, 0, 0);
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeIds[0]].second, 0);
 	}
@@ -743,7 +755,7 @@ void Render::UpdateRenderMode()
 	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
 }
 
-Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
+Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
@@ -763,14 +775,21 @@ Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
 	m_DXVersion = (m_deviceInfo.featureLevels & 0xf000) >> 12;
 	m_DXSubVersion = (m_deviceInfo.featureLevels & 0x0f00) >> 8;
 
+
 	// Initialize render
 	CreateRasterState();
-	LoadAllShaders(L"../Assets/Shader/", "main", "5_0");
+	CreateSampleShapes();
 
-	LoadDefaultShapes();
-	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationIdle.obj");
-	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationWalk0.obj");
-	LoadShapeFolder(L"../Assets/Shapes/PlayerAnimationWalk1.obj");
+	static const filesystem::path defaultPath(L"../Assets/Default/");
+	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");
+	LoadDefaultShapes(defaultPath / L"Shapes/");
+
+	if (resourcePath) // This will override the default assets if corrisponding files are found
+	{
+		filesystem::path resPath(resourcePath);
+		LoadAllShaders(resPath / L"Shader/", "main", "5_0");
+		LoadDefaultShapes(resPath / L"Shapes/");
+	}
 }
 
 Render::~Render()
@@ -793,8 +812,8 @@ Render::~Render()
 	m_depthStencilView.Reset();
 	m_deviceInfo.hardwareInfos.clear();
 
-	m_shapeVertexBufferMap.clear();
 	m_vertexShaderMap.clear();
+	m_shapeVertexBufferMap.clear();
 	m_pixelShaderMap.clear();
 
 	// Clear render

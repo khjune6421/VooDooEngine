@@ -64,7 +64,7 @@ class Render
 		float VSFloatD;
 	};
 
-	// Input layouts // this is cursed
+	// Input layouts // well this is cursed
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[4];
 	static D3D11_INPUT_ELEMENT_DESC s_tripleInputLayoutDesc[12];
 	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[2];
@@ -98,17 +98,26 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
-	// 0: Vertex shader, 1: VSCode, 2: constant buffer, 3: input layout // need to change this to not use struct like vertex buffer map?
-	std::unordered_map <VertexShaders, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
-	std::unordered_map<PixelShaders, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
+	static UINT s_vertexShaderId;
+	enum VertexShaderMapField
+	{
+		VertexShader = 0,
+		VSCode = 1,
+		ConstBuffer = 2,
+		InputLayout = 3
+	};
+	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+
+	static UINT s_pixelShaderId;
+	std::unordered_map<UINT, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
 
 	// Render
 	// 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
 	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
+	// Maps shape ID to its vertex buffer and vertex count // I might change this to vector later // not sure if it's a good idea to make this unintuitive thing more complicated
 	static UINT s_nextShapeId;
-	// Maps shape ID to its vertex buffer and vertex count // I might change this to vector later
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
 
 	// static view and projection matrix for all renders
@@ -136,7 +145,7 @@ class Render
 	void DisplayDeviceInfo();
 
 	// Shader
-	void LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel);
+	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
 	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex = 0);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 	void LoadPrecompiledVertexShader(const wchar_t* file);
@@ -145,8 +154,9 @@ class Render
 	// Render
 	void CreateRasterState();
 
-	void LoadDefaultShapes();
-	void LoadShapeFolder(const wchar_t* folderPath);
+	void CreateSampleShapes();
+	void LoadShapeFile(const std::filesystem::path filePath);
+	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void EngineUpdate();
 
@@ -155,7 +165,7 @@ class Render
 	void UpdateRenderMode();
 
 public:
-	Render(HWND hWnd, UINT width, UINT height);
+	Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath = nullptr);
 	~Render();
 
 	void Resize(UINT width, UINT height);

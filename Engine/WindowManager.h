@@ -11,6 +11,6 @@ namespace VDW
 	LRESULT CALLBACK Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	bool ProcessMessage();
 
-	HWND CreateWindowAndRenderer(std::wstring className, std::wstring windowName, LONG width = 1280, LONG height = 720);
+	HWND CreateWindowAndRenderer(std::wstring className, std::wstring windowName, LONG width = 1280, LONG height = 720, const wchar_t* resourcePath = nullptr);
 	void ResizeWindow(HWND hWnd, LONG width, LONG height);
 }

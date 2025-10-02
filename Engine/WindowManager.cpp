@@ -120,7 +120,7 @@ namespace VDW
 		return true;
 	}
 
-	HWND CreateWindowAndRenderer(wstring className, wstring windowName, LONG width, LONG height)
+	HWND CreateWindowAndRenderer(wstring className, wstring windowName, LONG width, LONG height, const wchar_t* resourcePath)
 	{
 		WNDCLASSEX wc =
 		{
@@ -163,7 +163,7 @@ namespace VDW
 		UpdateWindow(hWnd);
 		SetCursor(LoadCursorW(nullptr, IDC_ARROW));
 
-		g_renders.push_back(new Render(hWnd, width, height));
+		g_renders.push_back(new Render(hWnd, width, height, resourcePath));
 		g_windows[hWnd] = g_renders.back();
 		ResizeWindow(hWnd, width, height);
 

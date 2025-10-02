@@ -3,21 +3,10 @@
 #include "DirectXLib.h"
 #include "UtilityHeaders.h"
 
-// Converts string to uint
+// Converts string to uint for mapped shader, shape, etc
+extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
+extern std::unordered_map<std::wstring, UINT> g_pixelShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_shapeIdMap;
-
-// Rendering related enums
-enum class VertexShaders // Should it also includes corresponding constant buffer and input layout?
-{
-	Default,
-	TripleInput
-};
-enum class PixelShaders
-{
-	Default,
-	ColorShift,
-	Greyscale
-};
 
 enum class Directions
 {
@@ -37,8 +26,8 @@ class Object
 	UINT m_id = 0; // For debug purpose
 
 	std::vector<UINT> m_shapeIds;
-	VertexShaders m_vertexShader = VertexShaders::Default;
-	PixelShaders m_pixelShader = PixelShaders::Default;
+	UINT m_vertexShaderId = 0;
+	UINT m_pixelShader = 0;
 
 	// TODO: Remove this later
 	virtual void SetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const; // For setting constant buffer variables
@@ -82,14 +71,14 @@ public:
 	Object
 	(
 		const std::vector<std::wstring>& shapeNames = std::vector<std::wstring>{ L"None" },
-		VertexShaders vertexShader = VertexShaders::Default,
-		PixelShaders pixelShader = PixelShaders::Default
+		const std::wstring& vertexShader = L"VertexShader",
+		const std::wstring& pixelShader = L"PixelShader"
 	);
 	Object
 	(
 		const std::wstring& shapeName,
-		VertexShaders vertexShader = VertexShaders::Default,
-		PixelShaders pixelShader = PixelShaders::Default
+		const std::wstring& vertexShader = L"VertexShader",
+		const std::wstring& pixelShader = L"PixelShader"
 	) : Object(std::vector<std::wstring>{ shapeName }, vertexShader, pixelShader) {}
 	virtual ~Object();
 
