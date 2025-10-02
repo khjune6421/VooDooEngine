@@ -139,7 +139,7 @@ class Render
 	void DisplayDeviceInfo();
 
 	// Shader
-	void LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel);
+	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
 	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex = 0);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 	void LoadPrecompiledVertexShader(const wchar_t* file);
@@ -148,8 +148,9 @@ class Render
 	// Render
 	void CreateRasterState();
 
-	void LoadDefaultShapes();
-	void LoadShapeFile(const wchar_t* folderPath);
+	void CreateSampleShapes();
+	void LoadShapeFile(const std::filesystem::path filePath);
+	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void EngineUpdate();
 
@@ -158,7 +159,7 @@ class Render
 	void UpdateRenderMode();
 
 public:
-	Render(HWND hWnd, UINT width, UINT height);
+	Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath = nullptr);
 	~Render();
 
 	void Resize(UINT width, UINT height);

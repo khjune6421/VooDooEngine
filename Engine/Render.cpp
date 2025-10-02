@@ -152,7 +152,7 @@ void Render::CreateDepthStencil()
 
 void Render::LoadFonts()
 {
-	wstring fontPath = L"../Assets/Fonts/";
+	wstring fontPath = L"../Assets/Default/Fonts/";
 	if (!filesystem::exists(fontPath))
 	{
 		MessageBoxW(nullptr, L"Font directory does not exist", L"Error", MB_OK);
@@ -357,11 +357,10 @@ void Render::DisplayDeviceInfo()
 	}
 }
 
-void Render::LoadAllShaders(const wchar_t* shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
+void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
 {
-	filesystem::path shaderDir(shaderPath);
-	filesystem::path vertexShaderPath = shaderDir / L"VertexShader/";
-	filesystem::path pixelShaderPath = shaderDir / L"PixelShader/";
+	filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
+	filesystem::path pixelShaderPath = shaderPath / L"PixelShader/";
 
 	filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
 	if (filesystem::exists(defaultInputLayoutPath) && filesystem::is_directory(defaultInputLayoutPath))
@@ -566,20 +565,8 @@ void Render::CreateRasterState()
 #endif
 }
 
-void Render::LoadDefaultShapes()
+void Render::CreateSampleShapes()
 {
-	static const wchar_t* defaultObjPath = L"../Assets/Shapes/Default.obj";
-
-	ObjFileParser shapes(defaultObjPath);
-	for (const auto& [name, vertices] : shapes.m_shapes)
-	{
-		if (g_shapeIdMap.find(name) == g_shapeIdMap.end()) g_shapeIdMap[name] = s_nextShapeId++;
-
-		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[name]].first, vertices.data(), sizeof(Vertex));
-		m_shapeVertexBufferMap[g_shapeIdMap[name]].second = static_cast<UINT>(vertices.size());
-	}
-	
-	// Other sample shapes
 	if (g_shapeIdMap.find(L"GreenPlane") == g_shapeIdMap.end()) g_shapeIdMap[L"GreenPlane"] = s_nextShapeId++;
 	Vertex plainVertices[] =
 	{
@@ -668,11 +655,11 @@ void Render::LoadDefaultShapes()
 	m_shapeVertexBufferMap[g_shapeIdMap[L"WindmillWing"]].second = 12;
 }
 
-void Render::LoadShapeFile(const wchar_t* folderPath)
+void Render::LoadShapeFile(const filesystem::path filePath)
 {
-	ObjFileParser shapes(folderPath);
+	ObjFileParser shapes(filePath.c_str());
 
-	wstring parentName = filesystem::path(folderPath).stem().wstring();
+	wstring parentName = filePath.stem().wstring();
 	vector<Vertex> combinedVertices;
 
 	for (const auto& [name, vertices] : shapes.m_shapes)
@@ -689,6 +676,17 @@ void Render::LoadShapeFile(const wchar_t* folderPath)
 	if (g_shapeIdMap.find(parentName) == g_shapeIdMap.end()) g_shapeIdMap[parentName] = s_nextShapeId++;
 	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
 	m_shapeVertexBufferMap[g_shapeIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
+}
+
+void Render::LoadDefaultShapes(const filesystem::path folderPath)
+{
+	if (filesystem::exists(folderPath) && filesystem::is_directory(folderPath))
+	{
+		for (const auto& entry : filesystem::directory_iterator(folderPath))
+		{
+			if (entry.path().extension() == L".obj") LoadShapeFile(entry.path().c_str());
+		}
+	}
 }
 
 void Render::EngineUpdate()
@@ -753,7 +751,7 @@ void Render::UpdateRenderMode()
 	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
 }
 
-Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
+Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
@@ -773,14 +771,15 @@ Render::Render(HWND hWnd, UINT width, UINT height) : m_hWnd(hWnd)
 	m_DXVersion = (m_deviceInfo.featureLevels & 0xf000) >> 12;
 	m_DXSubVersion = (m_deviceInfo.featureLevels & 0x0f00) >> 8;
 
+
 	// Initialize render
 	CreateRasterState();
-	LoadAllShaders(L"../Assets/Shader/", "main", "5_0");
 
-	LoadDefaultShapes();
-	LoadShapeFile(L"../Assets/Shapes/PlayerAnimationIdle.obj");
-	LoadShapeFile(L"../Assets/Shapes/PlayerAnimationWalk0.obj");
-	LoadShapeFile(L"../Assets/Shapes/PlayerAnimationWalk1.obj");
+	static const filesystem::path defaultPath(L"../Assets/Default/");
+	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");
+	LoadDefaultShapes(defaultPath / L"Shapes/");
+
+	CreateSampleShapes();
 }
 
 Render::~Render()
