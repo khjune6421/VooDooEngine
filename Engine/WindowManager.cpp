@@ -145,7 +145,7 @@ namespace VDW
 		(
 			className.c_str(),
 			windowName.c_str(),
-			WS_POPUPWINDOW,
+			WS_OVERLAPPEDWINDOW,
 			posX, posY,
 			width, height,
 			GetDesktopWindow(),
