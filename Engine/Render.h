@@ -26,8 +26,6 @@ namespace VDGM
 
 class Render
 {
-	// Structs and Enums
-
 	// Device
 	struct HardwareInfo
 	{

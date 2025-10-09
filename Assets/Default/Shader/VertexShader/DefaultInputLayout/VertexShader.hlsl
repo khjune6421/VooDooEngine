@@ -37,8 +37,8 @@ VSOutput main(VSInput input)
     input.pos.w = 1.0f;
     input.pos = mul(input.pos, WVP);
     
-    input.norm = mul((float3x3) world, input.norm); // Later change it so that only light get calculated with inverse transpose world matrix
-    input.norm = normalize(input.norm);
+    //input.norm = mul((float3x3) world, input.norm); // Later change it so that only light get calculated with inverse transpose world matrix
+    //input.norm = normalize(input.norm);
     
     output.pos = input.pos;
     output.col = input.col;
