@@ -1,5 +1,7 @@
 #include "Render.h"
 
+#include "Camera.h"
+#include "Light.h"
 #include "ObjFileParser.h"
 
 using namespace std;
@@ -45,6 +47,8 @@ pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { { Render::s_d
 Camera* g_camera = nullptr;
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
 XMMATRIX Render::s_projectionMatrix = XMMatrixIdentity();
+
+vector<Light*> g_lights;
 
 void Render::CreateDeviceSwapChain()
 {
@@ -418,6 +422,7 @@ void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const
 		return;
 	}
 
+	// TODO: remove this
 	comPtr<ID3D11Buffer> constantBuffer;
 	CreateConstBuffer(sizeof(TestConstBuffer), &constantBuffer);
 
@@ -450,61 +455,6 @@ void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const 
 
 	comPtr<ID3D11PixelShader> pixelShader;
 	hr = m_device->CreatePixelShader(PSCode->GetBufferPointer(), PSCode->GetBufferSize(), nullptr, pixelShader.GetAddressOf());
-	if (FAILED(hr))
-	{
-		MessageBoxW(nullptr, L"Failed to create pixel shader", L"Error", MB_OK);
-		return;
-	}
-
-	wstring shaderName = filesystem::path(file).stem().wstring();
-
-	if (g_pixelShaderIdMap.find(shaderName) == g_pixelShaderIdMap.end()) g_pixelShaderIdMap[shaderName] = s_pixelShaderId++;
-	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
-}
-
-void Render::LoadPrecompiledVertexShader(const wchar_t* file)
-{
-	comPtr<ID3DBlob> VSCode;
-
-	HRESULT hr = D3DReadFileToBlob(file, VSCode.GetAddressOf());
-	if (FAILED(hr))
-	{
-		MessageBoxW(nullptr, L"Failed to read precompiled vertex shader", L"Error", MB_OK);
-		return;
-	}
-
-	comPtr<ID3D11VertexShader> vertexShader;
-	hr = m_device->CreateVertexShader(VSCode.Get()->GetBufferPointer(), VSCode.Get()->GetBufferSize(), nullptr, vertexShader.GetAddressOf());
-	if (FAILED(hr))
-	{
-		MessageBoxW(nullptr, L"Failed to create vertex shader", L"Error", MB_OK);
-		return;
-	}
-
-	comPtr<ID3D11Buffer> constantBuffer;
-	CreateConstBuffer(sizeof(TestConstBuffer), &constantBuffer);
-
-	comPtr<ID3D11InputLayout> inputLayout;
-	CreateInputLayout(s_defaultInputLayoutDesc, _countof(s_defaultInputLayoutDesc), VSCode, &inputLayout);
-
-	wstring shaderName = filesystem::path(file).stem().wstring();
-
-	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
-	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
-}
-
-void Render::LoadPrecompiledPixelShader(const wchar_t* file)
-{
-	comPtr<ID3DBlob> PSCode;
-	HRESULT hr = D3DReadFileToBlob(file, PSCode.GetAddressOf());
-	if (FAILED(hr))
-	{
-		MessageBoxW(nullptr, L"Failed to read precompiled pixel shader", L"Error", MB_OK);
-		return;
-	}
-
-	comPtr<ID3D11PixelShader> pixelShader;
-	hr = m_device->CreatePixelShader(PSCode.Get()->GetBufferPointer(), PSCode.Get()->GetBufferSize(), nullptr, pixelShader.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBoxW(nullptr, L"Failed to create pixel shader", L"Error", MB_OK);
@@ -720,8 +670,7 @@ void Render::DrawObjects()
 		object->Render(this); // Where should this be?
 
 		m_deviceContext->VSSetShader(get<VertexShader>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), nullptr, 0);
-		m_deviceContext->VSSetConstantBuffers(0, 1, get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).GetAddressOf());
-		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShader].Get(), nullptr, 0);
+		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShaderId].Get(), nullptr, 0);
 
 		m_deviceContext->IASetInputLayout(get<InputLayout>(m_vertexShaderMap[object->m_vertexShaderId]).Get());
 		for (size_t i = 0; i < object->m_shapeIds.size(); i++)
@@ -745,6 +694,21 @@ void Render::DrawObjects()
 		object->GetConstBufferVar(&constBufferData.VSFloatA, &constBufferData.VSFloatB, &constBufferData.VSFloatC, &constBufferData.VSFloatD);
 
 		m_deviceContext->UpdateSubresource(get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), 0, nullptr, &constBufferData, 0, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).GetAddressOf());
+
+		// Update light constant buffer
+		LightConstBuffer lightData = {};
+		lightData.localPosition = XMVector3Transform(g_lights[0]->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
+
+		lightData.ambientColor = g_lights[0]->GetAmbientColor();
+		lightData.diffuseColor = g_lights[0]->GetDiffuseColor();
+
+		lightData.range = g_lights[0]->GetRange();
+		lightData.intensity = g_lights[0]->GetIntensity();
+		lightData.attenuation = g_lights[0]->GetAttenuation();
+
+		m_deviceContext->UpdateSubresource(m_lightConstBuffer.Get(), 0, nullptr, &lightData, 0, 0);
+		m_deviceContext->VSSetConstantBuffers(1, 1, m_lightConstBuffer.GetAddressOf());
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeIds[0]].second, 0);
 	}
@@ -791,6 +755,8 @@ Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) 
 		LoadAllShaders(resPath / L"Shader/", "main", "5_0");
 		LoadDefaultShapes(resPath / L"Shapes/");
 	}
+
+	CreateConstBuffer(sizeof(LightConstBuffer), &m_lightConstBuffer);
 }
 
 Render::~Render()

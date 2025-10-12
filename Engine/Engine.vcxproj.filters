@@ -23,6 +23,9 @@
     <ClCompile Include="ObjFileParser.cpp">
       <Filter>Parser</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">
@@ -76,6 +79,9 @@
     <ClInclude Include="ObjFileParser.h">
       <Filter>Parser</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -87,13 +93,7 @@
     <FxCompile Include="..\Assets\Default\Shader\VertexShader\DefaultInputLayout\VertexShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PixelShaderNull.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
     <FxCompile Include="..\Assets\Default\Shader\PixelShader\PixelShader.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PixelShaderAll.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

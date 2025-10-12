@@ -1,6 +1,5 @@
 #pragma once
 
-#include "DirectXLib.h"
 #include "Object.h"
 
 class Camera : public Object

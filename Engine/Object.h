@@ -27,7 +27,7 @@ class Object
 
 	std::vector<UINT> m_shapeIds;
 	UINT m_vertexShaderId = 0;
-	UINT m_pixelShader = 0;
+	UINT m_pixelShaderId = 0;
 
 	// TODO: Remove this later
 	virtual void GetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const; // For setting constant buffer variables
