@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AnimationObject.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -154,6 +155,7 @@
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimationObject.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DirectXLib.h" />
     <ClInclude Include="GameManager.h" />

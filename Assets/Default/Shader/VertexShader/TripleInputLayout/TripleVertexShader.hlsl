@@ -4,11 +4,6 @@ cbuffer TestConstBuffer : register(b0)
     matrix view;
     matrix projection;
     matrix WVP;
-    
-    float VSFloatA;
-    float VSFloatB;
-    float VSFloatC;
-    float VSFloatD;
 }
 
 cbuffer LightConstBuffer : register(b1)
@@ -21,6 +16,15 @@ cbuffer LightConstBuffer : register(b1)
     float intensity;
     float attenuation;
     float padding;
+}
+
+cbuffer AnimationConstBuffer : register(b2)
+{
+    int currentShapeIndex;
+    int nextShapeIndex;
+    float interpolationFactor;
+
+    float padding0;
 }
 
 struct VSInput
@@ -53,21 +57,19 @@ VSOutput main(VSInput input)
 {
     VSOutput output = (VSOutput) 0;
     
-    float4 lerpPos0 = lerp(input.pos1, input.pos2, VSFloatA);
-    float4 lerpPos1 = lerp(input.pos0, lerpPos0, VSFloatB);
+    float4 lerpPos = lerp(input.pos1, input.pos2, interpolationFactor);
     
-    float3 lerpNorm0 = lerp(input.norm1, input.norm2, VSFloatA);
-    float3 lerpNorm1 = lerp(input.norm0, lerpNorm0, VSFloatB);
+    float3 lerpNorm = lerp(input.norm1, input.norm2, interpolationFactor);
     
-    lerpPos1.w = 1.0f;
-    output.pos = mul(lerpPos1, WVP);
+    lerpPos.w = 1.0f;
+    output.pos = mul(lerpPos, WVP);
     
-    float3 localVertexPos = lerpPos1.xyz;
+    float3 localVertexPos = lerpPos.xyz;
     float3 toLight = localPosition.xyz - localVertexPos;
     float distance = length(toLight);
     
     float3 lightDir = normalize(toLight);
-    float3 normal = normalize(lerpNorm1);
+    float3 normal = normalize(lerpNorm);
     float diffuseFactor = max(dot(normal, lightDir), 0.0f);
     
     float attenuationFactor = 1.0f;

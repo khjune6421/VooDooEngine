@@ -3,14 +3,6 @@
 using namespace std;
 using namespace DirectX;
 
-void Player::GetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const
-{
-	*var1 = m_val1;
-	*var2 = m_val2;
-	*var3 = m_val3;
-	*var4 = m_val4;
-}
-
 void Player::Update(float deltaTime)
 {
 	if (m_windmillWing) m_windmillWing->Update(deltaTime);
@@ -20,7 +12,6 @@ void Player::Update(float deltaTime)
 
 	if (m_isMovingToTarget)
 	{
-
 		ATime += deltaTime * 5.0f;
 		m_val1 = sin(ATime) / 2.0f + 0.5f;
 

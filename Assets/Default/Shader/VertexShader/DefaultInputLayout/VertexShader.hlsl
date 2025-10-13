@@ -4,11 +4,6 @@ cbuffer TestConstBuffer : register(b0)
     matrix view;
     matrix projection;
     matrix WVP;
-    
-    float VSFloatA;
-    float VSFloatB;
-    float VSFloatC;
-    float VSFloatD;
 }
 
 cbuffer LightConstBuffer : register(b1)

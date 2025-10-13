@@ -7,14 +7,6 @@ vector<Object*> g_objects;
 
 static UINT s_idCounter = 0;
 
-void Object::GetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const
-{
-	*var1 = 0.0f;
-	*var2 = 0.0f;
-	*var3 = 0.0f;
-	*var4 = 0.0f;
-}
-
 DirectX::XMVECTOR Object::QuaternionToEuler(const DirectX::XMVECTOR& quat) const // Do I know how this works? No. Does it work? As far as I know, yes but even if it doesn't how would I know?
 {
 	XMFLOAT4 fQuat = {};
@@ -104,16 +96,13 @@ void Object::RemoveChild(Object* child)
 	}
 }
 
-Object::Object(const vector<wstring>& shapeNames, const wstring& vertexShader, const wstring& pixelShader) : m_id(s_idCounter++)
+Object::Object(const wstring& shapeName, const wstring& vertexShader, const wstring& pixelShader)
 {
-	for (const auto& shapeName : shapeNames)
-	{
-		if (shapeName == L"None") return;
+	if (shapeName == L"None") return;
 #ifdef _DEBUG
-		else if (g_shapeIdMap.find(shapeName) == g_shapeIdMap.end()) MessageBoxW(nullptr, (L"Shape name not found: " + shapeName).c_str(), L"Error", MB_OK);
+	if (g_shapeIdMap.find(shapeName) == g_shapeIdMap.end()) MessageBoxW(nullptr, (L"Shape name not found: " + shapeName).c_str(), L"Error", MB_OK);
 #endif
-		else m_shapeIds.emplace_back(g_shapeIdMap[shapeName]);
-	}
+	m_shapeId = g_shapeIdMap[shapeName];
 
 #ifdef _DEBUG
 	if (g_vertexShaderIdMap.find(vertexShader) == g_vertexShaderIdMap.end()) MessageBoxW(nullptr, (L"Vertex shader not found: " + vertexShader).c_str(), L"Error", MB_OK);

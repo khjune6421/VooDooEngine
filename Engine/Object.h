@@ -25,12 +25,9 @@ class Object
 
 	UINT m_id = 0; // For debug purpose
 
-	std::vector<UINT> m_shapeIds;
+	UINT m_shapeId = 0;
 	UINT m_vertexShaderId = 0;
 	UINT m_pixelShaderId = 0;
-
-	// TODO: Remove this later
-	virtual void GetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const; // For setting constant buffer variables
 
 	// Not sure if these should be private or protected
 	DirectX::XMMATRIX m_positionMatrix = DirectX::XMMatrixIdentity();
@@ -70,11 +67,10 @@ protected:
 public:
 	Object
 	(
-		const std::vector<std::wstring>& shapeNames = std::vector<std::wstring>{ L"None" },
+		const std::wstring& shapeName = std::wstring{ L"None" },
 		const std::wstring& vertexShader = L"VertexShader",
 		const std::wstring& pixelShader = L"PixelShader"
 	);
-	Object(const std::wstring& shapeName) : Object(std::vector<std::wstring>{ shapeName }) {}
 	virtual ~Object();
 
 	void AddChild(Object* child);

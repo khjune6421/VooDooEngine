@@ -47,21 +47,13 @@ class Render
 		std::vector<HardwareInfo> hardwareInfos = {};
 	};
 
-	// Shader
-	struct TestConstBuffer
+	struct MatrixConstBuffer
 	{
 		DirectX::XMMATRIX world; // world matrix
 		DirectX::XMMATRIX view; // view matrix
 		DirectX::XMMATRIX projection; // projection matrix
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
-
-		float VSFloatA;
-		float VSFloatB;
-		float VSFloatC;
-		float VSFloatD;
 	};
-	comPtr<ID3D11Buffer> m_testConstBuffer = nullptr;
-
 	struct LightConstBuffer
 	{
 		DirectX::XMVECTOR localPosition;
@@ -71,14 +63,33 @@ class Render
 		float range;
 		float intensity;
 		float attenuation;
+		float padding; // TODO
+	};
+	struct AnimationConstBuffer
+	{
+		int currentShapeIndex;
+		int nextShapeIndex;
+		float interpolationFactor;
+
 		float padding;
 	};
-	comPtr<ID3D11Buffer> m_lightConstBuffer = nullptr; // this is just for testing purpose
+	enum ConstBufferField
+	{
+		MatrixBuffer = 0,
+		LightBuffer = 1,
+		AnimationBuffer = 2
+	};
+
+	// 0: MatrixConstBuffer, 1: LightConstBuffer 2: AnimationConstBuffer
+	comPtr<ID3D11Buffer> m_constBuffers[3] = {};
+
 	Light m_light; // this is also for testing purpose
 
 	// Input layouts // well this is cursed
-	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[4];
-	static D3D11_INPUT_ELEMENT_DESC s_tripleInputLayoutDesc[12];
+	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
+	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
+	constexpr static UINT TRIPLE_LAYOUT_SIZE = 12;
+	static D3D11_INPUT_ELEMENT_DESC s_tripleInputLayoutDesc[TRIPLE_LAYOUT_SIZE];
 	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[2];
 
 	// Render
@@ -111,7 +122,14 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
 	static UINT s_vertexShaderId;
-	std::unordered_map<UINT, std::pair<comPtr<ID3D11VertexShader>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+	//std::unordered_map<UINT, std::pair<comPtr<ID3D11VertexShader>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+	enum VertexShaderMapField
+	{
+		VertexShader = 0,
+		ConstBuffers = 1,
+		InputLayout = 2
+	};
+	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, std::vector<UINT>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 
 	static UINT s_pixelShaderId;
 	std::unordered_map<UINT, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
@@ -151,7 +169,8 @@ class Render
 
 	// Shader
 	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
-	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex = 0);
+	//void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex = 0);
+	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const std::vector<UINT> constBufferIds = { MatrixBuffer, LightBuffer }, const int layoutIndex = 0);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 
 	// Render
@@ -164,6 +183,7 @@ class Render
 	void EngineUpdate();
 
 	void DrawObjects();
+	void SetConstantBuffers(const Object* object, const std::vector<UINT>& constBufferIds);
 
 	void UpdateRenderMode();
 

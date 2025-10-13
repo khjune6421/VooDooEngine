@@ -2,7 +2,7 @@
 
 #include "WindMillWing.h"
 
-class Player : public Object
+class Player : public AnimationObject
 {
 	friend class TestScene;
 
@@ -24,10 +24,8 @@ class Player : public Object
 	float m_val4 = 0.0f;
 	float ATime = 0.0f;
 
-	void GetConstBufferVar(_Out_ float* var1, _Out_ float* var2, _Out_ float* var3, _Out_ float* var4) const override;
-
 public:
-	Player(const std::vector<std::wstring>& shapes) : Object(shapes, L"TripleVertexShader") {}
+	Player(const std::vector<std::wstring>& shapes) : AnimationObject(shapes, L"TripleVertexShader") {}
 	~Player() override = default;
 
 	void Update(float deltaTime) override;

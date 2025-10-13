@@ -26,6 +26,9 @@
     <ClCompile Include="Light.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="AnimationObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">
@@ -80,6 +83,9 @@
       <Filter>Parser</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationObject.h">
       <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
