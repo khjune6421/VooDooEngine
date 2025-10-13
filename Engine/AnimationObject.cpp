@@ -8,8 +8,8 @@ AnimationObject::AnimationObject(const vector<wstring>& shapeNames, const wstrin
 	{
 		if (shapeName == L"None") return;
 #ifdef _DEBUG
-		else if (g_shapeIdMap.find(shapeName) == g_shapeIdMap.end()) MessageBoxW(nullptr, (L"Shape name not found: " + shapeName).c_str(), L"Error", MB_OK);
+		if (g_shapeIdMap.find(shapeName) == g_shapeIdMap.end()) MessageBoxW(nullptr, (L"Shape name not found: " + shapeName).c_str(), L"Error", MB_OK);
 #endif
-		else m_shapeIds.emplace_back(g_shapeIdMap[shapeName]);
+		m_shapeIds.emplace_back(g_shapeIdMap[shapeName]);
 	}
 }

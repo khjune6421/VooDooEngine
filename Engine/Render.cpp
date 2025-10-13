@@ -648,7 +648,7 @@ void Render::DrawObjects()
 		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShaderId].Get(), nullptr, 0);
 
 #ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(object->m_shapeIds[i]) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(object->m_shapeId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
+		if (m_shapeVertexBufferMap.find(object->m_shapeId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(object->m_shapeId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
 #endif
 		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeId].first.Get();
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
@@ -708,7 +708,7 @@ void Render::SetConstantBuffers(const Object* object, const vector<UINT>& constB
 			for (size_t i = 1; i < animObject->m_shapeIds.size(); i++)
 			{
 #ifdef _DEBUG
-				if (m_shapeVertexBufferMap.find(object->m_shapeIds[i]) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(object->m_shapeIds[i]) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
+				if (m_shapeVertexBufferMap.find(animObject->m_shapeIds[i]) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(animObject->m_shapeIds[i]) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
 #endif
 				ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[animObject->m_shapeIds[i]].first.Get();
 				m_deviceContext->IASetVertexBuffers(static_cast<UINT>(i), 1, &vertexBuffer, &stride, &offset);

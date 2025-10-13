@@ -14,6 +14,6 @@ protected:
 	float m_interpolationFactor = 0.0f;
 
 public:
-	AnimationObject(const std::vector<std::wstring>& shapeNames, const std::wstring& vertexShader = L"DefaultVertexShader", const std::wstring& pixelShader = L"DefaultPixelShader");
+	AnimationObject(const std::vector<std::wstring>& shapeNames, const std::wstring& vertexShader = L"VertexShader", const std::wstring& pixelShader = L"PixelShader");
 	virtual ~AnimationObject() override = default;
 };
