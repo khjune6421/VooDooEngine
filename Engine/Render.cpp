@@ -382,7 +382,7 @@ void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entry
 	{
 		for (const auto& entry : filesystem::directory_iterator(tripleInputLayoutPath))
 		{
-			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel, { MatrixBuffer, LightBuffer, AnimationBuffer }, 1);
+			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel, { MatrixBuffer, LightBuffer, AnimationBuffer }, TripleInputLayout);
 		}
 	}
 

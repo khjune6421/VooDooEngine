@@ -90,6 +90,12 @@ class Render
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
 	constexpr static UINT TRIPLE_LAYOUT_SIZE = 12;
 	static D3D11_INPUT_ELEMENT_DESC s_tripleInputLayoutDesc[TRIPLE_LAYOUT_SIZE];
+	enum InputLayoutField
+	{
+		DefaultInputLayout = 0,
+		TripleInputLayout = 1
+	};
+
 	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[2];
 
 	// Render
@@ -170,7 +176,7 @@ class Render
 	// Shader
 	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
 	//void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex = 0);
-	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const std::vector<UINT> constBufferIds = { MatrixBuffer, LightBuffer }, const int layoutIndex = 0);
+	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const std::vector<UINT> constBufferIds = { MatrixBuffer, LightBuffer }, const int layoutIndex = DefaultInputLayout);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 
 	// Render
