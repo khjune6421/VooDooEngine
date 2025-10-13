@@ -55,23 +55,35 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 
 			while (ss >> vertexData)
 			{
-				size_t slashPos = vertexData.find(L'/');
-				wstring positionIndex = (slashPos != wstring::npos) ? vertexData.substr(0, slashPos) : vertexData;
-				faceIndices.push_back(stoi(positionIndex) - 1);
+				wstringstream vertexStream(vertexData);
+				wstring token;
+				vector<wstring> indices;
+
+				while (getline(vertexStream, token, L'/')) indices.push_back(token);
+
+				int positionIndex = indices.size() > 0 && !indices[0].empty() ? stoi(indices[0]) - 1 : -1;
+				faceIndices.push_back(positionIndex);
+
+				int uvIndex = indices.size() > 1 && !indices[1].empty() ? stoi(indices[1]) - 1 : -1;
+				faceIndices.push_back(uvIndex);
+
+				int normalIndex = indices.size() > 2 && !indices[2].empty() ? stoi(indices[2]) - 1 : -1;
+				faceIndices.push_back(normalIndex);
 			}
 
-			for (size_t i = 1; i < faceIndices.size() - 1; ++i)
+			for (size_t i = 0; i < faceIndices.size(); i += 3)
 			{
-				for (int idx : {faceIndices[0], faceIndices[i], faceIndices[i + 1]})
-				{
-					Vertex vertex = {};
+				Vertex vertex = {};
 
-					if (idx >= 0 && idx < positions.size()) vertex.position = positions[idx];
-					if (idx >= 0 && idx < uvs.size()) vertex.uv = uvs[idx];
-					if (idx >= 0 && idx < normals.size()) vertex.normal = normals[idx];
+				int posIdx = faceIndices[i];
+				int uvIdx = faceIndices[i + 1];
+				int normalIdx = faceIndices[i + 2];
 
-					currentShape->vertices.push_back(vertex);
-				}
+				if (posIdx >= 0 && posIdx < positions.size()) vertex.position = positions[posIdx];
+				if (uvIdx >= 0 && uvIdx < uvs.size()) vertex.uv = uvs[uvIdx];
+				if (normalIdx >= 0 && normalIdx < normals.size()) vertex.normal = normals[normalIdx];
+
+				currentShape->vertices.push_back(vertex);
 			}
 		}
 	}

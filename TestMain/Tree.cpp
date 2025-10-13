@@ -9,6 +9,8 @@ vector<Object*> g_attachableObjects;
 
 void Tree::Update(float deltaTime)
 {
+	Rotate(XMVectorSet(0.0f, deltaTime, 0.0f, 0.0f));
+
 	for (const auto& obj : g_collidibleObjects)
 	{
 		const XMVECTOR distance = XMVectorSubtract(GetWorldPosition(), obj->GetWorldPosition());
