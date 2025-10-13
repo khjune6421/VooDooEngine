@@ -8,7 +8,7 @@
 
 // Other header files
 #include "Scene.h"
-#include "Camera.h"
+#include "Light.h"
 
 // I usually don't use 'using' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
@@ -26,8 +26,6 @@ namespace VDGM
 
 class Render
 {
-	// Structs and Enums
-
 	// Device
 	struct HardwareInfo
 	{
@@ -62,6 +60,20 @@ class Render
 		float VSFloatC;
 		float VSFloatD;
 	};
+
+	struct LightConstBuffer
+	{
+		DirectX::XMVECTOR localPosition;
+		DirectX::XMFLOAT4 ambientColor;
+		DirectX::XMFLOAT4 diffuseColor;
+
+		float range;
+		float intensity;
+		float attenuation;
+		float padding;
+	};
+	comPtr<ID3D11Buffer> m_lightConstBuffer = nullptr; // this is just for testing purpose
+	Light m_light; // this is also for testing purpose
 
 	// Input layouts // well this is cursed
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[4];
@@ -147,8 +159,6 @@ class Render
 	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
 	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex = 0);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
-	void LoadPrecompiledVertexShader(const wchar_t* file);
-	void LoadPrecompiledPixelShader(const wchar_t* file);
 
 	// Render
 	void CreateRasterState();
