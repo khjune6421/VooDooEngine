@@ -53,9 +53,6 @@ VSOutput main(VSInput input)
 {
     VSOutput output = (VSOutput) 0;
     
-    //float4 outPos0 = lerp(input.pos1, input.pos2, VSFloatA);
-    //float4 outPos = lerp(input.pos0, outPos0, VSFloatB);
-    
     float4 lerpPos0 = lerp(input.pos1, input.pos2, VSFloatA);
     float4 lerpPos1 = lerp(input.pos0, lerpPos0, VSFloatB);
     

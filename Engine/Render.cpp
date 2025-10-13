@@ -422,17 +422,13 @@ void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const
 		return;
 	}
 
-	// TODO: remove this
-	comPtr<ID3D11Buffer> constantBuffer;
-	CreateConstBuffer(sizeof(TestConstBuffer), &constantBuffer);
-
 	comPtr<ID3D11InputLayout> inputLayout;
 	CreateInputLayout(s_layoutDescs[layoutIndex].first, s_layoutDescs[layoutIndex].second, VSCode, &inputLayout);
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
 
 	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
-	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_tuple(vertexShader, VSCode, constantBuffer, inputLayout);
+	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_pair(vertexShader, inputLayout);
 }
 
 void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
@@ -564,28 +560,6 @@ void Render::CreateSampleShapes()
 	CreateVertexBuffer(sizeof(triHouseVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"TriHouse"]].first, triHouseVertices, sizeof(Vertex));
 	m_shapeVertexBufferMap[g_shapeIdMap[L"TriHouse"]].second = 18;
 
-	if (g_shapeIdMap.find(L"Tree") == g_shapeIdMap.end()) g_shapeIdMap[L"Tree"] = s_nextShapeId++;
-	Vertex treeVertices[] =
-	{
-		{ XMFLOAT3(-0.5f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.5f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f) },
-
-		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(-0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.5f, 0.5f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-
-		{ XMFLOAT3(0.0f, 0.0f, -0.5f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, 0.5f), XMFLOAT4(0.0f, 0.3f, 0.0f, 1.0f) },
-
-		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.5f, -0.5f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.5f, 0.5f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) }
-	};
-	CreateVertexBuffer(sizeof(treeVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"Tree"]].first, treeVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_shapeIdMap[L"Tree"]].second = 12;
-
 	if (g_shapeIdMap.find(L"WindmillWing") == g_shapeIdMap.end()) g_shapeIdMap[L"WindmillWing"] = s_nextShapeId++;
 	Vertex wingVertices[] =
 	{
@@ -669,10 +643,10 @@ void Render::DrawObjects()
 
 		object->Render(this); // Where should this be?
 
-		m_deviceContext->VSSetShader(get<VertexShader>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), nullptr, 0);
+		m_deviceContext->VSSetShader(m_vertexShaderMap[object->m_vertexShaderId].first.Get(), nullptr, 0);
 		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShaderId].Get(), nullptr, 0);
 
-		m_deviceContext->IASetInputLayout(get<InputLayout>(m_vertexShaderMap[object->m_vertexShaderId]).Get());
+		m_deviceContext->IASetInputLayout(m_vertexShaderMap[object->m_vertexShaderId].second.Get());
 		for (size_t i = 0; i < object->m_shapeIds.size(); i++)
 		{
 #ifdef _DEBUG
@@ -693,8 +667,8 @@ void Render::DrawObjects()
 
 		object->GetConstBufferVar(&constBufferData.VSFloatA, &constBufferData.VSFloatB, &constBufferData.VSFloatC, &constBufferData.VSFloatD);
 
-		m_deviceContext->UpdateSubresource(get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), 0, nullptr, &constBufferData, 0, 0);
-		m_deviceContext->VSSetConstantBuffers(0, 1, get<ConstBuffer>(m_vertexShaderMap[object->m_vertexShaderId]).GetAddressOf());
+		m_deviceContext->UpdateSubresource(m_testConstBuffer.Get(), 0, nullptr, &constBufferData, 0, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, m_testConstBuffer.GetAddressOf());
 
 		// Update light constant buffer
 		LightConstBuffer lightData = {};
@@ -725,11 +699,11 @@ Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) 
 {
 	// Initialize device
 	GetHardwareInfo();
-	//m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
-	//m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
+	m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
+	m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
 
-	m_deviceInfo.displayMode.Width = width;
-	m_deviceInfo.displayMode.Height = height;
+	//m_deviceInfo.displayMode.Width = width;
+	//m_deviceInfo.displayMode.Height = height;
 
 	CreateDeviceSwapChain();
 	CreateRenderTarget();
@@ -756,6 +730,7 @@ Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) 
 		LoadDefaultShapes(resPath / L"Shapes/");
 	}
 
+	CreateConstBuffer(sizeof(TestConstBuffer), &m_testConstBuffer);
 	CreateConstBuffer(sizeof(LightConstBuffer), &m_lightConstBuffer);
 }
 

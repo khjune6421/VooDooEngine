@@ -19,34 +19,34 @@ namespace VDW
 			PostQuitMessage(0);
 			return 0;
 
-		//case WM_SIZE:
-		//	if (wParam != SIZE_MINIMIZED)
-		//	{
-		//		LONG width = LOWORD(lParam);
-		//		LONG height = HIWORD(lParam);
-		//		if (width != 0 && height != 0) ResizeWindow(hWnd, width, height);
-		//	}
-		//	return 0;
+		case WM_SIZE:
+			if (wParam != SIZE_MINIMIZED)
+			{
+				LONG width = LOWORD(lParam);
+				LONG height = HIWORD(lParam);
+				if (width != 0 && height != 0) ResizeWindow(hWnd, width, height);
+			}
+			return 0;
 
-		//case WM_MOVE:
-		//	if (g_windows[hWnd])
-		//	{
-		//		RECT rect = {};
-		//		GetWindowRect(hWnd, &rect);
-		//		g_windows[hWnd]->SetViewport(static_cast<float>(rect.left), static_cast<float>(rect.top));
-		//	}
-		//	return 0;
+		case WM_MOVE:
+			if (g_windows[hWnd])
+			{
+				RECT rect = {};
+				GetWindowRect(hWnd, &rect);
+				g_windows[hWnd]->SetViewport(static_cast<float>(rect.left), static_cast<float>(rect.top));
+			}
+			return 0;
 
-		//case WM_LBUTTONDOWN:
-		//	isDragging = true;
-		//	GetCursorPos(&lastMousePos);
-		//	SetCapture(hWnd);
-		//	return 0;
+		case WM_LBUTTONDOWN:
+			isDragging = true;
+			GetCursorPos(&lastMousePos);
+			SetCapture(hWnd);
+			return 0;
 
-		//case WM_LBUTTONUP:
-		//	isDragging = false;
-		//	ReleaseCapture();
-		//	return 0;
+		case WM_LBUTTONUP:
+			isDragging = false;
+			ReleaseCapture();
+			return 0;
 
 		case WM_RBUTTONUP:
 		{
@@ -55,35 +55,35 @@ namespace VDW
 			return 0;
 		}
 
-		//case WM_MOUSEMOVE:
-		//	if (isDragging)
-		//	{
-		//		POINT currentMousePos = {};
-		//		GetCursorPos(&currentMousePos);
+		case WM_MOUSEMOVE:
+			if (isDragging)
+			{
+				POINT currentMousePos = {};
+				GetCursorPos(&currentMousePos);
 
-		//		int deltaX = currentMousePos.x - lastMousePos.x;
-		//		int deltaY = currentMousePos.y - lastMousePos.y;
+				int deltaX = currentMousePos.x - lastMousePos.x;
+				int deltaY = currentMousePos.y - lastMousePos.y;
 
-		//		RECT rect = {};
-		//		GetWindowRect(hWnd, &rect);
+				RECT rect = {};
+				GetWindowRect(hWnd, &rect);
 
-		//		int newLeft = rect.left + deltaX;
-		//		int newTop = rect.top + deltaY;
+				int newLeft = rect.left + deltaX;
+				int newTop = rect.top + deltaY;
 
-		//		SetWindowPos
-		//		(
-		//			hWnd, nullptr,
-		//			newLeft,
-		//			newTop,
-		//			0, 0,
-		//			SWP_NOSIZE | SWP_NOZORDER
-		//		);
+				SetWindowPos
+				(
+					hWnd, nullptr,
+					newLeft,
+					newTop,
+					0, 0,
+					SWP_NOSIZE | SWP_NOZORDER
+				);
 
-		//		if (g_windows[hWnd]) g_windows[hWnd]->SetViewport(static_cast<float>(newLeft), static_cast<float>(newTop));
+				if (g_windows[hWnd]) g_windows[hWnd]->SetViewport(static_cast<float>(newLeft), static_cast<float>(newTop));
 
-		//		lastMousePos = currentMousePos;
-		//	}
-		//	return 0;
+				lastMousePos = currentMousePos;
+			}
+			return 0;
 
 		case WM_KEYDOWN:
 			switch (wParam)
@@ -197,7 +197,7 @@ namespace VDW
 		if (g_windows[hWnd])
 		{
 			g_windows[hWnd]->Resize(width, height);
-			//g_windows[hWnd]->SetViewport(static_cast<float>(oldRect.left), static_cast<float>(oldRect.top));
+			g_windows[hWnd]->SetViewport(static_cast<float>(oldRect.left), static_cast<float>(oldRect.top));
 		}
 	}
 }

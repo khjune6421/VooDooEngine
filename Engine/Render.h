@@ -60,6 +60,7 @@ class Render
 		float VSFloatC;
 		float VSFloatD;
 	};
+	comPtr<ID3D11Buffer> m_testConstBuffer = nullptr;
 
 	struct LightConstBuffer
 	{
@@ -110,14 +111,7 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
 	static UINT s_vertexShaderId;
-	enum VertexShaderMapField
-	{
-		VertexShader = 0,
-		VSCode = 1,
-		ConstBuffer = 2,
-		InputLayout = 3
-	};
-	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, comPtr<ID3DBlob>, comPtr<ID3D11Buffer>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+	std::unordered_map<UINT, std::pair<comPtr<ID3D11VertexShader>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 
 	static UINT s_pixelShaderId;
 	std::unordered_map<UINT, comPtr<ID3D11PixelShader>> m_pixelShaderMap;

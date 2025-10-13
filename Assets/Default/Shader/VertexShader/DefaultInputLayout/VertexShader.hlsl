@@ -53,9 +53,10 @@ VSOutput main(VSInput input)
     float3 lightDir = normalize(toLight);
     float3 normal = normalize(input.norm0);
     float diffuseFactor = max(dot(normal, lightDir), 0.0f);
+    //float diffuseFactor = abs(dot(normal, lightDir));
     
     float attenuationFactor = 1.0f;
-    if (distance > 0.0f) attenuationFactor = 1.0f / (1.0f + attenuation * distance * distance); // + 1.0f to prevent div by 0
+    if (distance > 0.0f) attenuationFactor = 1.0f / (1.0f + attenuation * distance * distance); // + 1.0f to prevent div by 0 // TODO: change this
     if (distance > range) attenuationFactor = 0.0f;
     
     output.light = diffuseColor * diffuseFactor * attenuationFactor * intensity + ambientColor;
