@@ -4,19 +4,26 @@ cbuffer TestConstBuffer : register(b0)
     matrix view;
     matrix projection;
     matrix WVP;
+}
+
+cbuffer LightConstBuffer : register(b1)
+{
+    float4 localPosition;
+    float4 ambientColor;
+    float4 diffuseColor;
     
-    float VSFloatA;
-    float VSFloatB;
-    float VSFloatC;
-    float VSFloatD;
+    float range;
+    float intensity;
+    float attenuation;
+    int isBackfaceLighting;
 }
 
 struct VSInput
 {
-    float4 pos : POSITION0;
-    float4 col : COLOR0;
-    float2 uv : TEXCOORD0;
-    float3 norm : NORMAL0;
+    float4 pos0 : POSITION0;
+    float4 col0 : COLOR0;
+    float3 norm0 : NORMAL0;
+    float2 uv0 : TEXCOORD0;
 };
 
 struct VSOutput
@@ -24,26 +31,34 @@ struct VSOutput
     float4 pos : SV_POSITION0;
     float4 col : COLOR0;
     
-    float PSFloatA : TEXCOORD0;
-    float PSFloatB : TEXCOORD1;
-    float PSFloatC : TEXCOORD2;
-    float PSFloatD : TEXCOORD3;
+    float4 light : TEXCOORD0;
 };
 
 VSOutput main(VSInput input)
 {
     VSOutput output = (VSOutput) 0;
     
-    input.pos.w = 1.0f;
-    input.pos = mul(input.pos, WVP);
+    input.pos0.w = 1.0f;
+    output.pos = mul(input.pos0, WVP);
     
-    output.pos = input.pos;
-    output.col = input.col;
+    float3 localVertexPos = input.pos0.xyz;
+    float3 toLight = localPosition.xyz - localVertexPos;
+    float distance = length(toLight);
     
-    output.PSFloatA = VSFloatA;
-    output.PSFloatB = VSFloatB;
-    output.PSFloatC = VSFloatC;
-    output.PSFloatD = VSFloatD;
+    float3 lightDir = normalize(toLight);
+    float3 normal = normalize(input.norm0);
+    
+    float diffuseFactor;
+    if (isBackfaceLighting) diffuseFactor = abs(dot(normal, lightDir));
+    else diffuseFactor = max(dot(normal, lightDir), 0.0f);
+    
+    float attenuationFactor = 1.0f;
+    if (distance > 0.0f) attenuationFactor = 1.0f / (1.0f + attenuation * distance * distance); // + 1.0f to prevent div by 0 // TODO: change this
+    if (distance > range) attenuationFactor = 0.0f;
+    
+    output.light = diffuseColor * diffuseFactor * attenuationFactor * intensity + ambientColor;
+    
+    output.col = input.col0;
     
     return output;
 }
