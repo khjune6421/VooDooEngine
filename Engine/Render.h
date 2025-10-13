@@ -63,7 +63,7 @@ class Render
 		float range;
 		float intensity;
 		float attenuation;
-		float padding; // TODO
+		int isBackfaceLighting;
 	};
 	struct AnimationConstBuffer
 	{

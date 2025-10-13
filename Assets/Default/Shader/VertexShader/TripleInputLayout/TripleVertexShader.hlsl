@@ -15,7 +15,7 @@ cbuffer LightConstBuffer : register(b1)
     float range;
     float intensity;
     float attenuation;
-    float padding;
+    int isBackfaceLighting;
 }
 
 cbuffer AnimationConstBuffer : register(b2)
@@ -24,7 +24,7 @@ cbuffer AnimationConstBuffer : register(b2)
     int nextShapeIndex;
     float interpolationFactor;
 
-    float padding0;
+    float padding;
 }
 
 struct VSInput

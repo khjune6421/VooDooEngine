@@ -32,14 +32,13 @@ void Player::Update(float deltaTime)
 			t = 1.0f;
 			m_isMovingToTarget = false;
 
-			m_nextShapeIndex = 0;
-			m_interpolationFactor = 0.0f;
+			m_currentShapeIndex = 0;
 		}
 		LerpPosition(m_startPosition, m_targetPosition, t);
 		float rot = clamp(t * 5.0f, 0.0f, 1.0f);
 		LerpRotation(m_startRotation, m_targetRotation, rot);
 	}
-	else m_interpolationFactor = clamp(m_interpolationFactor + deltaTime * 3.0f, 0.0f, 1.0f);
+	else m_interpolationFactor = clamp(m_interpolationFactor - deltaTime, 0.0f, 1.0f);
 }
 
 void Player::MoveToTarget(const XMVECTOR& target, const XMVECTOR& targetRotation)
