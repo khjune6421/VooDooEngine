@@ -13,7 +13,16 @@ void Player::Update(float deltaTime)
 	if (m_isMovingToTarget)
 	{
 		ATime += deltaTime * 5.0f;
-		m_val1 = sin(ATime) / 2.0f + 0.5f;
+		m_interpolationFactor += deltaTime * 3.0f;
+
+		if (m_interpolationFactor > 1.0f)
+		{
+			m_currentShapeIndex = m_nextShapeIndex;
+			if (m_nextShapeIndex == 1) m_nextShapeIndex = 2;
+			else if (m_nextShapeIndex == 2) m_nextShapeIndex = 1;
+
+			m_interpolationFactor = 0.0f;
+		}
 
 		m_moveToTargetElapsed += deltaTime;
 		float t = m_moveToTargetElapsed / m_moveToTargetTime;
@@ -22,15 +31,15 @@ void Player::Update(float deltaTime)
 		{
 			t = 1.0f;
 			m_isMovingToTarget = false;
+
+			m_nextShapeIndex = 0;
+			m_interpolationFactor = 0.0f;
 		}
 		LerpPosition(m_startPosition, m_targetPosition, t);
-		m_val2 = clamp(m_val2 + deltaTime * 5.0f, 0.0f, 1.0f);
-		LerpRotation(m_startRotation, m_targetRotation, m_val2);
+		float rot = clamp(t * 5.0f, 0.0f, 1.0f);
+		LerpRotation(m_startRotation, m_targetRotation, rot);
 	}
-	else
-	{
-		if (m_val2 > 0.0f) m_val2 -= deltaTime * 5.0f;
-	}
+	else m_interpolationFactor = clamp(m_interpolationFactor + deltaTime * 3.0f, 0.0f, 1.0f);
 }
 
 void Player::MoveToTarget(const XMVECTOR& target, const XMVECTOR& targetRotation)
@@ -49,6 +58,8 @@ void Player::MoveToTarget(const XMVECTOR& target, const XMVECTOR& targetRotation
 	m_moveToTargetElapsed = 0.0f;
 
 	ATime = 0.0f;
-	m_val1 = 0.0f;
-	m_val2 = 0.0f;
+
+	m_currentShapeIndex = 0;
+	m_nextShapeIndex = 1;
+	m_interpolationFactor = 0.0f;
 }

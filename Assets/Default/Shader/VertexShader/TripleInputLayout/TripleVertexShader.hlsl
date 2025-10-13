@@ -57,9 +57,45 @@ VSOutput main(VSInput input)
 {
     VSOutput output = (VSOutput) 0;
     
-    float4 lerpPos = lerp(input.pos1, input.pos2, interpolationFactor);
+    float4 currentPos;
+    float4 nextPos;
+    float3 currentNorm;
+    float3 nextNorm;
     
-    float3 lerpNorm = lerp(input.norm1, input.norm2, interpolationFactor);
+    if (currentShapeIndex == 0)
+    {
+        currentPos = input.pos0;
+        currentNorm = input.norm0;
+    }
+    else if (currentShapeIndex == 1)
+    {
+        currentPos = input.pos1;
+        currentNorm = input.norm1;
+    }
+    else if (currentShapeIndex == 2)
+    {
+        currentPos = input.pos2;
+        currentNorm = input.norm2;
+    }
+    
+    if (nextShapeIndex == 0)
+    {
+        nextPos = input.pos0;
+        nextNorm = input.norm0;
+    }
+    else if (nextShapeIndex == 1)
+    {
+        nextPos = input.pos1;
+        nextNorm = input.norm1;
+    }
+    else if (nextShapeIndex == 2)
+    {
+        nextPos = input.pos2;
+        nextNorm = input.norm2;
+    }
+    
+    float4 lerpPos = lerp(currentPos, nextPos, interpolationFactor);
+    float3 lerpNorm = lerp(currentNorm, nextNorm, interpolationFactor);
     
     lerpPos.w = 1.0f;
     output.pos = mul(lerpPos, WVP);

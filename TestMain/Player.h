@@ -18,10 +18,6 @@ class Player : public AnimationObject
 	float m_moveToTargetTime = 0.0f;
 	float m_moveToTargetElapsed = 0.0f;
 
-	float m_val1 = 0.0f;
-	float m_val2 = 0.0f;
-	float m_val3 = 0.0f;
-	float m_val4 = 0.0f;
 	float ATime = 0.0f;
 
 public:
