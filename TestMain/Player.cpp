@@ -32,6 +32,7 @@ void Player::Update(float deltaTime)
 			t = 1.0f;
 			m_isMovingToTarget = false;
 
+			m_nextShapeIndex = m_currentShapeIndex;
 			m_currentShapeIndex = 0;
 		}
 		LerpPosition(m_startPosition, m_targetPosition, t);
