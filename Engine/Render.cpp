@@ -616,7 +616,7 @@ void Render::EngineUpdate()
 		DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 		return;
 	}
-	g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height);
+	g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height); // Feels wasteful to do this every frame
 
 	s_viewMatrix = g_camera->GetViewMatrix();
 	s_projectionMatrix = g_camera->GetProjectionMatrix();
