@@ -467,6 +467,7 @@ void Render::CreateRasterState()
 	rasterDesc.DepthBiasClamp = 0.0f;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 	rasterDesc.DepthClipEnable = TRUE;
+	rasterDesc.ScissorEnable = FALSE;
 	rasterDesc.MultisampleEnable = TRUE; // Base value is FALSE
 	rasterDesc.AntialiasedLineEnable = TRUE; // Base value is FALSE
 	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[0].GetAddressOf())))
@@ -610,14 +611,6 @@ void Render::LoadDefaultShapes(const filesystem::path folderPath)
 
 void Render::EngineUpdate()
 {
-	UpdateRenderMode();
-}
-
-constexpr UINT stride = sizeof(Vertex);
-constexpr UINT offset = 0;
-
-void Render::DrawObjects()
-{
 	if (!g_camera)
 	{
 		DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -628,6 +621,14 @@ void Render::DrawObjects()
 	s_viewMatrix = g_camera->GetViewMatrix();
 	s_projectionMatrix = g_camera->GetProjectionMatrix();
 
+	UpdateRenderMode();
+}
+
+constexpr UINT stride = sizeof(Vertex);
+constexpr UINT offset = 0;
+
+void Render::DrawObjects()
+{
 	DrawShapes();
 }
 
