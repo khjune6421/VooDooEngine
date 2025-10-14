@@ -7,6 +7,7 @@
 
 extern std::unordered_map<std::wstring, UINT> g_meshIdMap;
 extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
+extern std::unordered_map<std::wstring, UINT> g_geometryShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_pixelShaderIdMap;
 
 struct ShapeData

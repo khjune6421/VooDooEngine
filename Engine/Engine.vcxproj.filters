@@ -114,5 +114,14 @@
     <FxCompile Include="..\Assets\Default\Shader\PixelShader\PixelShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\GeometryShader\GSShowNormal.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PSShowNormal.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\VertexShader\DefaultInputLayout\VSShowNormal.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

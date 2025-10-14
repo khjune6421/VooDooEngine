@@ -7,14 +7,17 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
+UINT Render::s_nextShapeId = 0;
+unordered_map<wstring, UINT> g_meshIdMap;
+
 UINT Render::s_vertexShaderId = 0;
 unordered_map<wstring, UINT> g_vertexShaderIdMap;
 
+UINT Render::s_geometryShaderId = 0;
+unordered_map<wstring, UINT> g_geometryShaderIdMap;
+
 UINT Render::s_pixelShaderId = 0;
 unordered_map<wstring, UINT> g_pixelShaderIdMap;
-
-UINT Render::s_nextShapeId = 0;
-unordered_map<wstring, UINT> g_meshIdMap;
 
 D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 {
@@ -370,6 +373,7 @@ void Render::DisplayDeviceInfo()
 void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
 {
 	filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
+	filesystem::path geometryShaderPath = shaderPath / L"GeometryShader/";
 	filesystem::path pixelShaderPath = shaderPath / L"PixelShader/";
 
 	filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
@@ -377,7 +381,6 @@ void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entry
 	{
 		for (const auto& entry : filesystem::directory_iterator(defaultInputLayoutPath))
 		{
-			//if (entry.path().extension() == L".cso") LoadPrecompiledVertexShader(entry.path().c_str()); loading precompiled shader is disabled for now
 			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
 	}
@@ -390,12 +393,18 @@ void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entry
 		}
 	}
 
+	if (filesystem::exists(geometryShaderPath) && filesystem::is_directory(geometryShaderPath))
+	{
+		for (const auto& entry : filesystem::directory_iterator(geometryShaderPath))
+		{
+			if (entry.path().extension() == L".hlsl") LoadGeometryShader(entry.path().c_str(), entryPoint, shaderModel);
+		}
+	}
 
 	if (filesystem::exists(pixelShaderPath) && filesystem::is_directory(pixelShaderPath))
 	{
 		for (const auto& entry : filesystem::directory_iterator(pixelShaderPath))
 		{
-			//if (entry.path().extension() == L".cso") LoadPrecompiledPixelShader(entry.path().c_str());
 			if (entry.path().extension() == L".hlsl") LoadPixelShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
 	}
@@ -433,6 +442,37 @@ void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const
 	wstring shaderName = filesystem::path(file).stem().wstring();
 	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
 	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_tuple(vertexShader, constBufferIds, inputLayout);
+}
+
+void Render::LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
+{
+	comPtr<ID3DBlob> GSCode;
+	comPtr<ID3DBlob> errorBlob;
+
+	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
+#ifdef _DEBUG
+	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("gs_" + string(shaderModel)).c_str(), compileFlags, 0, GSCode.GetAddressOf(), errorBlob.GetAddressOf());
+	if (FAILED(hr))
+	{
+		if (errorBlob) MessageBoxA(nullptr, (char*)errorBlob->GetBufferPointer(), "Geometry Shader Compilation Error", MB_OK);
+		else MessageBoxW(nullptr, L"Failed to compile geometry shader", L"Error", MB_OK);
+		return;
+	}
+
+	comPtr<ID3D11GeometryShader> geometryShader;
+	hr = m_device->CreateGeometryShader(GSCode->GetBufferPointer(), GSCode->GetBufferSize(), nullptr, geometryShader.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBoxW(nullptr, L"Failed to create geometry shader", L"Error", MB_OK);
+		return;
+	}
+
+	wstring shaderName = filesystem::path(file).stem().wstring();
+	if (g_geometryShaderIdMap.find(shaderName) == g_geometryShaderIdMap.end()) g_geometryShaderIdMap[shaderName] = s_geometryShaderId++;
+	m_geometryShaderMap[g_geometryShaderIdMap[shaderName]] = geometryShader;
 }
 
 void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
@@ -637,9 +677,15 @@ void Render::EngineUpdate()
 constexpr UINT stride = sizeof(Vertex);
 constexpr UINT offset = 0;
 
+// TODO: CreateDepthStencilState
 void Render::DrawObjects()
 {
 	DrawShapes();
+
+	if (m_currentRasterState == RasterState::Wireframe_CullNone || m_currentRasterState == RasterState::Wireframe_CullBack)
+	{
+		DrawNormalLines();
+	}
 }
 
 void Render::DrawShapes()
@@ -683,6 +729,41 @@ void Render::DrawShapes()
 		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
+	}
+}
+
+void Render::DrawNormalLines()
+{
+	for (const auto& [object, shapeData] : g_renderShapes)
+	{
+#ifdef _DEBUG
+		if (m_shapeVertexBufferMap.find(shapeData->meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData->meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
+#endif
+		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
+		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]]).Get(), nullptr, 0);
+		m_deviceContext->GSSetShader(m_geometryShaderMap[g_geometryShaderIdMap[L"GSShowNormal"]].Get(), nullptr, 0);
+		m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"PSShowNormal"]].Get(), nullptr, 0);
+
+		XMMATRIX worldMatrix = object->GetWorldMatrix();
+
+		MatrixConstBuffer constBufferData = {};
+		constBufferData.world = XMMatrixTranspose(worldMatrix);
+		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
+		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
+		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
+
+		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
+		m_deviceContext->GSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
+
+		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
+
+		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
+
+		m_deviceContext->GSSetShader(nullptr, nullptr, 0);
 	}
 }
 
