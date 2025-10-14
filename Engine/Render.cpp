@@ -1,7 +1,5 @@
 #include "Render.h"
 
-#include "Camera.h"
-#include "Light.h"
 #include "ObjFileParser.h"
 
 using namespace std;
