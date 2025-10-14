@@ -9,6 +9,7 @@
 // Other header files
 #include "Scene.h"
 
+#include "Camera.h"
 #include "Shape.h"
 #include "Light.h"
 
@@ -16,8 +17,9 @@
 #define comPtr Microsoft::WRL::ComPtr
 
 class Object;
-extern std::vector<std::pair<Object*, ShapeData>> g_renderShapes;
-extern std::vector<std::pair<Object*, LightData>> g_lightDatas;
+extern Camera* g_camera;
+extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
+extern std::vector<std::pair<Object*, LightData*>> g_lightDatas;
 
 namespace VDGM
 {
@@ -190,6 +192,8 @@ class Render
 	void EngineUpdate();
 
 	void DrawObjects();
+	// Draw shapes // does not have animation
+	void DrawShapes();
 
 	void UpdateRenderMode();
 

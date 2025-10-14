@@ -17,7 +17,7 @@ struct ShapeData
 	UINT pixelShaderId = 0;
 };
 
-extern std::vector<std::pair<Object*, ShapeData>> g_renderShapes;
+extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
 
 class Shape : public IComponent
 {
@@ -26,6 +26,6 @@ class Shape : public IComponent
 public:
 	Shape(const std::wstring& mesh, const std::wstring& vertexShader = L"VertexShader", const std::wstring& pixelShader = L"PixelShader");
 
-	void OnAttached(class Object* owner) override { IComponent::OnAttached(owner); g_renderShapes.emplace_back(owner, m_renderData); }
+	void OnAttached(class Object* owner) override { IComponent::OnAttached(owner); g_renderShapes.emplace_back(owner, &m_renderData); }
 	void OnDetached() override;
 };

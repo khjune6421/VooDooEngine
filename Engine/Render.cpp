@@ -44,7 +44,6 @@ D3D11_INPUT_ELEMENT_DESC Render::s_tripleInputLayoutDesc[TRIPLE_LAYOUT_SIZE] =
 };
 pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { { Render::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE }, { Render::s_tripleInputLayoutDesc, TRIPLE_LAYOUT_SIZE } };
 
-Camera* g_camera = nullptr;
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
 XMMATRIX Render::s_projectionMatrix = XMMatrixIdentity();
 
@@ -631,18 +630,22 @@ void Render::DrawObjects()
 	s_viewMatrix = g_camera->GetViewMatrix();
 	s_projectionMatrix = g_camera->GetProjectionMatrix();
 
-	// Draw shapes // does not have animation
+	DrawShapes();
+}
+
+void Render::DrawShapes()
+{
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
 #ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(shapeData.meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData.meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
+		if (m_shapeVertexBufferMap.find(shapeData->meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData->meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
 #endif
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData.meshId].first.Get();
+		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		m_deviceContext->IASetPrimitiveTopology(shapeData.topology);
+		m_deviceContext->IASetPrimitiveTopology(shapeData->topology);
 
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[shapeData.vertexShaderId]).Get(), nullptr, 0);
-		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData.pixelShaderId].Get(), nullptr, 0);
+		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[shapeData->vertexShaderId]).Get(), nullptr, 0);
+		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData->pixelShaderId].Get(), nullptr, 0);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
 
@@ -658,19 +661,19 @@ void Render::DrawObjects()
 		LightConstBuffer lightData = {};
 		lightData.localPosition = XMVector3Transform(g_lightDatas[0].first->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
 
-		lightData.ambientColor = g_lightDatas[0].second.ambientColor;
-		lightData.diffuseColor = g_lightDatas[0].second.diffuseColor;
+		lightData.ambientColor = g_lightDatas[0].second->ambientColor;
+		lightData.diffuseColor = g_lightDatas[0].second->diffuseColor;
 
-		lightData.range = g_lightDatas[0].second.range;
-		lightData.intensity = g_lightDatas[0].second.intensity;
-		lightData.attenuation = g_lightDatas[0].second.attenuation;
+		lightData.range = g_lightDatas[0].second->range;
+		lightData.intensity = g_lightDatas[0].second->intensity;
+		lightData.attenuation = g_lightDatas[0].second->attenuation;
 
 		m_deviceContext->UpdateSubresource(m_constBuffers[LightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
 		m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[LightBuffer].GetAddressOf());
 
-		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData.vertexShaderId]).Get());
+		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
 
-		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData.meshId].second, 0);
+		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
 	}
 }
 

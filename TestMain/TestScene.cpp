@@ -7,6 +7,7 @@ TestScene::TestScene(wstring dataFile)
 {
 	m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
+	m_camera->AddComponent<Camera>();
 
 	unique_ptr<Object> plane = make_unique<Object>();
 	plane->AddComponent<Shape>(L"GreenPlane");

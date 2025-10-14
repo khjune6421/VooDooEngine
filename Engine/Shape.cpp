@@ -2,7 +2,7 @@
 
 using namespace std;
 
-vector<pair<Object*, ShapeData>> g_renderShapes;
+vector<pair<Object*, ShapeData*>> g_renderShapes;
 
 Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader)
 {
@@ -24,8 +24,7 @@ Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pi
 
 void Shape::OnDetached()
 {
-	auto it = find_if(g_renderShapes.begin(), g_renderShapes.end(), [this](const pair<Object*, ShapeData>& p) { return p.first == m_owner; });
-	if (it != g_renderShapes.end()) g_renderShapes.erase(it);
+	erase_if(g_renderShapes, [this](const pair<Object*, ShapeData*>& p) { return p.first == m_owner; });
 
 	IComponent::OnDetached();
 }

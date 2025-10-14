@@ -1,8 +1,11 @@
 #pragma once
 
+#include "DirectXLib.h"
+
+#include "IComponent.h"
 #include "Object.h"
 
-class Camera : public Object
+class Camera : public IComponent
 {
 	float m_fov;
 
@@ -23,12 +26,9 @@ public:
 		UINT screenWidth = 1920, UINT screenHeight = 1080,
 		float nearPlane = 0.1f, float farPlane = 1000.0f
 	);
-	~Camera() = default;
 
 	void SetScreen(float fov = -1.0f, UINT screenWidth = 0, UINT screenHeight = 0, float nearPlane = -1.0f, float farPlane = -1.0f);
 
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() const { return m_projectionMatrix; }
 };
-
-extern Camera* g_camera;

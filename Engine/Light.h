@@ -14,7 +14,7 @@ struct LightData
 	float attenuation = 0.0f;
 };
 
-extern std::vector<std::pair<Object*, LightData>> g_lightDatas;
+extern std::vector<std::pair<Object*, LightData*>> g_lightDatas;
 
 class Light : public IComponent
 {
@@ -30,7 +30,7 @@ public:
 		float attenuation = 0.0f
 	) : m_lightData{ ambient, diffuse, range, intensity, attenuation } {}
 
-	void OnAttached(class Object* owner) override { IComponent::OnAttached(owner); g_lightDatas.emplace_back(owner, m_lightData); }
+	void OnAttached(class Object* owner) override { IComponent::OnAttached(owner); g_lightDatas.emplace_back(owner, &m_lightData); }
 	void OnDetached() override;
 
 	DirectX::XMFLOAT4 GetAmbientColor() const { return m_lightData.ambientColor; }
