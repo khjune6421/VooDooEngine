@@ -29,6 +29,7 @@ public:
 		float intensity = 1.0f,
 		float attenuation = 0.0f
 	) : m_lightData{ ambient, diffuse, range, intensity, attenuation } {}
+	~Light() { OnDetached(); }
 
 	void OnAttached(class Object* owner) override { IComponent::OnAttached(owner); g_lightDatas.emplace_back(owner, &m_lightData); }
 	void OnDetached() override;

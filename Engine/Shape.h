@@ -25,6 +25,7 @@ class Shape : public IComponent
 
 public:
 	Shape(const std::wstring& mesh, const std::wstring& vertexShader = L"VertexShader", const std::wstring& pixelShader = L"PixelShader");
+	~Shape() { OnDetached(); }
 
 	void OnAttached(class Object* owner) override { IComponent::OnAttached(owner); g_renderShapes.emplace_back(owner, &m_renderData); }
 	void OnDetached() override;
