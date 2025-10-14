@@ -23,11 +23,14 @@
     <ClCompile Include="ObjFileParser.cpp">
       <Filter>Parser</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Object</Filter>
+    <ClCompile Include="IComponent.cpp">
+      <Filter>Component</Filter>
     </ClCompile>
-    <ClCompile Include="AnimationObject.cpp">
-      <Filter>Object</Filter>
+    <ClCompile Include="Shape.cpp">
+      <Filter>Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -51,6 +54,9 @@
     </Filter>
     <Filter Include="LibrariesAndIncludes">
       <UniqueIdentifier>{9606c912-bcd4-4e40-b771-0f4344ff78c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Component">
+      <UniqueIdentifier>{74d01adb-e5fc-4323-b2e0-3c3d03d9440a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -82,11 +88,14 @@
     <ClInclude Include="ObjFileParser.h">
       <Filter>Parser</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>Object</Filter>
+    <ClInclude Include="IComponent.h">
+      <Filter>Component</Filter>
     </ClInclude>
-    <ClInclude Include="AnimationObject.h">
-      <Filter>Object</Filter>
+    <ClInclude Include="Shape.h">
+      <Filter>Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,10 +3,8 @@
 #include "DirectXLib.h"
 #include "UtilityHeaders.h"
 
-// Converts string to uint for mapped shader, shape, etc
-extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
-extern std::unordered_map<std::wstring, UINT> g_pixelShaderIdMap;
-extern std::unordered_map<std::wstring, UINT> g_shapeIdMap;
+#include "IComponent.h"
+
 
 enum class Directions
 {
@@ -20,27 +18,21 @@ enum class Directions
 
 class Object
 {
-	// is this a good idea?
-	friend class Render;
-
 	UINT m_id = 0; // For debug purpose
-
-	UINT m_shapeId = 0;
-	UINT m_vertexShaderId = 0;
-	UINT m_pixelShaderId = 0;
 
 	// Not sure if these should be private or protected
 	DirectX::XMMATRIX m_positionMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_rotationMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_scaleMatrix = DirectX::XMMatrixIdentity();
+	mutable DirectX::XMMATRIX m_worldMatrix = DirectX::XMMatrixIdentity();
 
 	DirectX::XMVECTOR QuaternionToEuler(const DirectX::XMVECTOR& quat) const;
 
-	// mutable so that it can be modified in const function GetWorldMatrix
-	mutable DirectX::XMMATRIX m_worldMatrix = DirectX::XMMatrixIdentity();
 	mutable bool m_isDirty = true;
-
 	void SetDirty(); // Recursive
+
+	// Component system
+	std::unordered_map<std::type_index, std::unique_ptr<IComponent>> m_components;
 
 protected:
 	DirectX::XMVECTOR m_position = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
@@ -52,30 +44,9 @@ protected:
 	Object* m_parent = nullptr;
 	std::vector<Object*> m_childrens;
 
-	enum IgnoreParentAxis // TODO: later change this to bit field
-	{
-		None = 0,
-		X = 2,
-		Y = 3,
-		Z = 5
-	};
-
-	UINT m_ignorePosition = IgnoreParentAxis::None;
-	UINT m_ignoreRotation = IgnoreParentAxis::None;
-	UINT m_ignoreScale = IgnoreParentAxis::None;
-
 public:
-	Object
-	(
-		const std::wstring& shapeName = std::wstring{ L"None" },
-		const std::wstring& vertexShader = L"VertexShader",
-		const std::wstring& pixelShader = L"PixelShader"
-	);
-	virtual ~Object();
-
-	void AddChild(Object* child);
-	void AddChildViaWorldPosition(Object* child);
-	void RemoveChild(Object* child);
+	Object() = default;
+	virtual ~Object() = default;
 
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);
@@ -101,6 +72,53 @@ public:
 
 	DirectX::XMMATRIX GetWorldMatrix() const;
 
-	virtual void Update(float deltaTime) { (void)deltaTime; } // (void) to avoid unused parameter warning // feels odd but makes sense
-	virtual void Render(class Render* renderer) const {} // Perhaps this is what VooDoo is all about
+	void AddChild(Object* child);
+	void AddChildViaWorldPosition(Object* child);
+	void RemoveChild(Object* child);
+
+	virtual void Update(float deltaTime) {}
+
+	// Component system
+	template<typename T, typename... Args>
+	T* AddComponent(Args&&... args)
+	{
+		static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+
+		auto component = std::make_unique<T>(std::forward<Args>(args)...);
+		T* componentPtr = component.get();
+
+		m_components[std::type_index(typeid(T))] = std::move(component);
+		componentPtr->OnAttached(this);
+
+		return componentPtr;
+	}
+	template<typename T>
+	const T* GetComponent() const
+	{
+		static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+
+		auto it = m_components.find(std::type_index(typeid(T)));
+		if (it != m_components.end()) return static_cast<const T*>(it->second.get());
+
+		return nullptr;
+	}
+	template<typename T>
+	bool RemoveComponent()
+	{
+		static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+
+		auto it = m_components.find(std::type_index(typeid(T)));
+		if (it != m_components.end())
+		{
+			it->second->OnDetached();
+			m_components.erase(it);
+
+			return true;
+		}
+
+#ifdef _DEBUG
+		MessageBoxA(nullptr, "Component to remove not found", "Error", MB_OK | MB_ICONERROR);
+#endif
+		return false;
+	}
 };

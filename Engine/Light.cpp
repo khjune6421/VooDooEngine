@@ -1,16 +1,13 @@
 #include "Light.h"
 
-Light::Light(DirectX::XMFLOAT4 ambient, DirectX::XMFLOAT4 diffuse, float range, float intensity, float attenuation)
-	: Object(),
-	  m_ambientColor(ambient),
-	  m_diffuseColor(diffuse),
-	  m_range(range),
-	  m_intensity(intensity),
-	  m_attenuation(attenuation)
-{ g_lights.push_back(this); }
+using namespace std;
 
-Light::~Light()
+vector<pair<Object*, LightData>> g_lightDatas;
+
+void Light::OnDetached()
 {
-	auto it = find(g_lights.begin(), g_lights.end(), this);
-	if (it != g_lights.end()) g_lights.erase(it);
+	auto it = find_if(g_lightDatas.begin(), g_lightDatas.end(), [this](const pair<Object*, LightData>& p) { return p.first == m_owner; });
+	if (it != g_lightDatas.end()) g_lightDatas.erase(it);
+
+	IComponent::OnDetached();
 }

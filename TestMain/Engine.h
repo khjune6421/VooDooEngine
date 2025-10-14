@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AnimationObject.h"
 #include "Object.h"
 #include "ObjectPositionParser.h"
 #include "Camera.h"

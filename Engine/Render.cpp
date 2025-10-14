@@ -2,7 +2,6 @@
 
 #include "Camera.h"
 #include "Light.h"
-#include "AnimationObject.h"
 #include "ObjFileParser.h"
 
 using namespace std;
@@ -17,7 +16,7 @@ UINT Render::s_pixelShaderId = 0;
 unordered_map<wstring, UINT> g_pixelShaderIdMap;
 
 UINT Render::s_nextShapeId = 0;
-unordered_map<wstring, UINT> g_shapeIdMap;
+unordered_map<wstring, UINT> g_meshIdMap;
 
 D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 {
@@ -48,8 +47,6 @@ pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { { Render::s_d
 Camera* g_camera = nullptr;
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
 XMMATRIX Render::s_projectionMatrix = XMMatrixIdentity();
-
-vector<Light*> g_lights;
 
 void Render::CreateDeviceSwapChain()
 {
@@ -514,7 +511,7 @@ void Render::CreateRasterState()
 
 void Render::CreateSampleShapes()
 {
-	if (g_shapeIdMap.find(L"GreenPlane") == g_shapeIdMap.end()) g_shapeIdMap[L"GreenPlane"] = s_nextShapeId++;
+	if (g_meshIdMap.find(L"GreenPlane") == g_meshIdMap.end()) g_meshIdMap[L"GreenPlane"] = s_nextShapeId++;
 	Vertex plainVertices[] =
 	{
 		{ XMFLOAT3(-50.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
@@ -525,10 +522,10 @@ void Render::CreateSampleShapes()
 		{ XMFLOAT3(50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
 		{ XMFLOAT3(-50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) }
 	};
-	CreateVertexBuffer(sizeof(plainVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"GreenPlane"]].first, plainVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_shapeIdMap[L"GreenPlane"]].second = 6;
+	CreateVertexBuffer(sizeof(plainVertices), &m_shapeVertexBufferMap[g_meshIdMap[L"GreenPlane"]].first, plainVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_meshIdMap[L"GreenPlane"]].second = 6;
 
-	if (g_shapeIdMap.find(L"TriHouse") == g_shapeIdMap.end()) g_shapeIdMap[L"TriHouse"] = s_nextShapeId++;
+	if (g_meshIdMap.find(L"TriHouse") == g_meshIdMap.end()) g_meshIdMap[L"TriHouse"] = s_nextShapeId++;
 	Vertex triHouseVertices[] =
 	{
 		// Triangles
@@ -557,10 +554,10 @@ void Render::CreateSampleShapes()
 		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
 		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) }
 	};
-	CreateVertexBuffer(sizeof(triHouseVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"TriHouse"]].first, triHouseVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_shapeIdMap[L"TriHouse"]].second = 18;
+	CreateVertexBuffer(sizeof(triHouseVertices), &m_shapeVertexBufferMap[g_meshIdMap[L"TriHouse"]].first, triHouseVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_meshIdMap[L"TriHouse"]].second = 18;
 
-	if (g_shapeIdMap.find(L"WindmillWing") == g_shapeIdMap.end()) g_shapeIdMap[L"WindmillWing"] = s_nextShapeId++;
+	if (g_meshIdMap.find(L"WindmillWing") == g_meshIdMap.end()) g_meshIdMap[L"WindmillWing"] = s_nextShapeId++;
 	Vertex wingVertices[] =
 	{
 		{ XMFLOAT3(-1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
@@ -576,8 +573,8 @@ void Render::CreateSampleShapes()
 		{ XMFLOAT3(0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
 		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) }
 	};
-	CreateVertexBuffer(sizeof(wingVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"WindmillWing"]].first, wingVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_shapeIdMap[L"WindmillWing"]].second = 12;
+	CreateVertexBuffer(sizeof(wingVertices), &m_shapeVertexBufferMap[g_meshIdMap[L"WindmillWing"]].first, wingVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_meshIdMap[L"WindmillWing"]].second = 12;
 }
 
 void Render::LoadShapeFile(const filesystem::path filePath)
@@ -590,17 +587,17 @@ void Render::LoadShapeFile(const filesystem::path filePath)
 	for (const auto& [name, vertices] : shapes.m_shapes)
 	{
 		wstring childName = parentName + L"_" + name; // Save child shapes as parentName_childName
-		if (g_shapeIdMap.find(parentName) == g_shapeIdMap.end()) g_shapeIdMap[parentName] = s_nextShapeId++;
+		if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextShapeId++;
 
-		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
-		m_shapeVertexBufferMap[g_shapeIdMap[parentName]].second = static_cast<UINT>(vertices.size());
+		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_meshIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
+		m_shapeVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(vertices.size());
 
 		combinedVertices.insert(combinedVertices.end(), vertices.begin(), vertices.end());
 	}
 
-	if (g_shapeIdMap.find(parentName) == g_shapeIdMap.end()) g_shapeIdMap[parentName] = s_nextShapeId++;
-	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
-	m_shapeVertexBufferMap[g_shapeIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
+	if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextShapeId++;
+	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_shapeVertexBufferMap[g_meshIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
+	m_shapeVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
 }
 
 void Render::LoadDefaultShapes(const filesystem::path folderPath)
@@ -634,98 +631,46 @@ void Render::DrawObjects()
 	s_viewMatrix = g_camera->GetViewMatrix();
 	s_projectionMatrix = g_camera->GetProjectionMatrix();
 
-	// Intrusive though: What if I make Object::Render(Render*) and call it here like object->Render(this)?
-	// It would work, but I have a feeling there is a reason why people don't do that
-	// But my rendering logic is quite far from common so maybe?
-	for (Object* object : g_objects)
+	// Draw shapes // does not have animation
+	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-		if (!object || !object->m_isActive) continue;
-
-		object->Render(this); // Where should this be?
-
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), nullptr, 0);
-		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[object->m_vertexShaderId]).Get());
-		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShaderId].Get(), nullptr, 0);
-
 #ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(object->m_shapeId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(object->m_shapeId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
+		if (m_shapeVertexBufferMap.find(shapeData.meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData.meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
 #endif
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeId].first.Get();
+		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData.meshId].first.Get();
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetPrimitiveTopology(shapeData.topology);
 
-		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[shapeData.vertexShaderId]).Get(), nullptr, 0);
+		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData.pixelShaderId].Get(), nullptr, 0);
 
-		SetConstantBuffers(object, get<1>(m_vertexShaderMap[object->m_vertexShaderId]));
+		XMMATRIX worldMatrix = object->GetWorldMatrix();
 
-		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeId].second, 0);
-	}
-}
-// IDirect3DDevice9::SetMaterial
-// IDirect3DDevice9::SetLight
+		MatrixConstBuffer constBufferData = {};
+		constBufferData.world = XMMatrixTranspose(worldMatrix);
+		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
+		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
+		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
 
-void Render::SetConstantBuffers(const Object* object, const vector<UINT>& constBufferIds)
-{
-	XMMATRIX worldMatrix = object->GetWorldMatrix();
+		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 
-	for (size_t i = 0; i < constBufferIds.size(); i++)
-	{
-		switch (constBufferIds[i])
-		{
-		case MatrixBuffer:
-		{
-			MatrixConstBuffer constBufferData = {};
-			constBufferData.world = XMMatrixTranspose(worldMatrix);
-			constBufferData.view = XMMatrixTranspose(s_viewMatrix);
-			constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
-			constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
+		LightConstBuffer lightData = {};
+		lightData.localPosition = XMVector3Transform(g_lightDatas[0].first->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
 
-			m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
-			m_deviceContext->VSSetConstantBuffers(static_cast<UINT>(i), 1, m_constBuffers[MatrixBuffer].GetAddressOf());
-			break;
-		}
+		lightData.ambientColor = g_lightDatas[0].second.ambientColor;
+		lightData.diffuseColor = g_lightDatas[0].second.diffuseColor;
 
-		case LightBuffer:
-		{
-			LightConstBuffer lightData = {};
-			lightData.localPosition = XMVector3Transform(g_lights[0]->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
+		lightData.range = g_lightDatas[0].second.range;
+		lightData.intensity = g_lightDatas[0].second.intensity;
+		lightData.attenuation = g_lightDatas[0].second.attenuation;
 
-			lightData.ambientColor = g_lights[0]->GetAmbientColor();
-			lightData.diffuseColor = g_lights[0]->GetDiffuseColor();
+		m_deviceContext->UpdateSubresource(m_constBuffers[LightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
+		m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[LightBuffer].GetAddressOf());
 
-			lightData.range = g_lights[0]->GetRange();
-			lightData.intensity = g_lights[0]->GetIntensity();
-			lightData.attenuation = g_lights[0]->GetAttenuation();
+		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData.vertexShaderId]).Get());
 
-			m_deviceContext->UpdateSubresource(m_constBuffers[LightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
-			m_deviceContext->VSSetConstantBuffers(static_cast<UINT>(i), 1, m_constBuffers[LightBuffer].GetAddressOf());
-			break;
-		}
-
-		case AnimationBuffer: // TODO: fix this
-		{
-			AnimationObject* animObject = dynamic_cast<AnimationObject*>(const_cast<Object*>(object)); // Change this to use static_cast if possible
-
-			for (size_t i = 1; i < animObject->m_shapeIds.size(); i++)
-			{
-#ifdef _DEBUG
-				if (m_shapeVertexBufferMap.find(animObject->m_shapeIds[i]) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(animObject->m_shapeIds[i]) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
-#endif
-				ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[animObject->m_shapeIds[i]].first.Get();
-				m_deviceContext->IASetVertexBuffers(static_cast<UINT>(i), 1, &vertexBuffer, &stride, &offset);
-			}
-			m_deviceContext->VSSetConstantBuffers(static_cast<UINT>(i), 1, m_constBuffers[AnimationBuffer].GetAddressOf());
-
-			AnimationConstBuffer animConstBufferData = {};
-			animObject->GetAnimationState(animConstBufferData.currentShapeIndex, animConstBufferData.nextShapeIndex, animConstBufferData.interpolationFactor);
-			m_deviceContext->UpdateSubresource(m_constBuffers[AnimationBuffer].Get(), 0, nullptr, &animConstBufferData, 0, 0);
-			m_deviceContext->VSSetConstantBuffers(static_cast<UINT>(i), 1, m_constBuffers[AnimationBuffer].GetAddressOf());
-			break;
-		}
-
-		default:
-			MessageBoxW(nullptr, L"Unknown constant buffer ID", L"Error", MB_OK);
-			break;
-		}
+		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData.meshId].second, 0);
 	}
 }
 

@@ -8,13 +8,16 @@
 
 // Other header files
 #include "Scene.h"
+
+#include "Shape.h"
 #include "Light.h"
 
 // I usually don't use 'using' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
 class Object;
-extern std::vector<Object*> g_objects;
+extern std::vector<std::pair<Object*, ShapeData>> g_renderShapes;
+extern std::vector<std::pair<Object*, LightData>> g_lightDatas;
 
 namespace VDGM
 {
@@ -82,8 +85,6 @@ class Render
 
 	// 0: MatrixConstBuffer, 1: LightConstBuffer 2: AnimationConstBuffer
 	comPtr<ID3D11Buffer> m_constBuffers[3] = {};
-
-	Light m_light; // this is also for testing purpose
 
 	// Input layouts // well this is cursed
 	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
@@ -189,7 +190,6 @@ class Render
 	void EngineUpdate();
 
 	void DrawObjects();
-	void SetConstantBuffers(const Object* object, const std::vector<UINT>& constBufferIds);
 
 	void UpdateRenderMode();
 

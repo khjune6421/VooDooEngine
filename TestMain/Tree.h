@@ -2,9 +2,6 @@
 
 #include "Engine.h"
 
-extern std::vector<Object*> g_collidibleObjects;
-extern std::vector<Object*> g_attachableObjects;
-
 class Tree : public Object
 {
 	bool m_isDead = false;
@@ -13,7 +10,6 @@ class Tree : public Object
 	DirectX::XMVECTOR m_fallAngle = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
 public:
-	Tree() : Object({ L"Tree" }) {}
 	~Tree() override = default;
 
 	void Update(float deltaTime) override;
