@@ -162,6 +162,7 @@ class Render
 	void CreateDeviceSwapChain();
 	void CreateRenderTarget();
 	void CreateDepthStencil();
+	void SetScissorRect(LONG width, LONG height);
 	void LoadFonts();
 	void GetHardwareInfo();
 
@@ -198,7 +199,7 @@ class Render
 	void UpdateRenderMode();
 
 public:
-	Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath = nullptr);
+	Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath = nullptr);
 	~Render();
 
 	void Resize(UINT width, UINT height);

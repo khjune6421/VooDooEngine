@@ -150,6 +150,16 @@ void Render::CreateDepthStencil()
 	}
 }
 
+void Render::SetScissorRect(LONG width, LONG height)
+{
+	D3D11_RECT scissorRect = {};
+	scissorRect.left = 0;
+	scissorRect.top = 0;
+	scissorRect.right = width;
+	scissorRect.bottom = height;
+	m_deviceContext->RSSetScissorRects(1, &scissorRect);
+}
+
 void Render::LoadFonts()
 {
 	wstring fontPath = L"../Assets/Default/Fonts/";
@@ -467,7 +477,7 @@ void Render::CreateRasterState()
 	rasterDesc.DepthBiasClamp = 0.0f;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 	rasterDesc.DepthClipEnable = TRUE;
-	rasterDesc.ScissorEnable = FALSE;
+	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.MultisampleEnable = TRUE; // Base value is FALSE
 	rasterDesc.AntialiasedLineEnable = TRUE; // Base value is FALSE
 	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[0].GetAddressOf())))
@@ -681,7 +691,7 @@ void Render::UpdateRenderMode()
 	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
 }
 
-Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) : m_hWnd(hWnd)
+Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
@@ -696,6 +706,8 @@ Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) 
 	CreateDepthStencil();
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 	SetViewport();
+	SetScissorRect(width, height);
+
 	LoadFonts();
 
 	m_DXVersion = (m_deviceInfo.featureLevels & 0xf000) >> 12;
@@ -769,6 +781,7 @@ void Render::Resize(UINT width, UINT height)
 	CreateRenderTarget();
 	CreateDepthStencil();
 
+	SetScissorRect(width, height);
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }
 
@@ -783,6 +796,7 @@ void Render::SetViewport(float topLeftX, float topLeftY)
 	viewport.Height = static_cast<FLOAT>(m_deviceInfo.displayMode.Height);
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
+
 	m_deviceContext->RSSetViewports(VEWPORT_NUM, &viewport);
 }
 
