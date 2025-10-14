@@ -96,7 +96,7 @@ void Object::RemoveChild(Object* child)
 	}
 }
 
-Object::Object(const wstring& shapeName, const wstring& vertexShader, const wstring& pixelShader)
+Object::Object(const wstring& shapeName, const wstring& vertexShader, const wstring& pixelShader) : m_id(s_idCounter++)
 {
 	if (shapeName == L"None") return;
 #ifdef _DEBUG
@@ -219,7 +219,7 @@ void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this 
 
 	if (!m_isDirty) SetDirty();
 }
-void Object::LerpRotation(const XMVECTOR& start, const XMVECTOR& target, float t)
+void Object::LerpRotation(const XMVECTOR& start, const XMVECTOR& target, float t) // This is buggy and inefficient
 {
 	//m_rotation = XMVectorLerp(start, target, t);
 	//m_rotation = XMQuaternionSlerp(start, target, t);
