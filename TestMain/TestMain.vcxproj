@@ -131,12 +131,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="TestMain.cpp" />
     <ClCompile Include="TestScene.cpp" />
     <ClCompile Include="Tree.cpp" />
-    <ClCompile Include="WindMill.cpp" />
-    <ClCompile Include="WindMillWing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -148,11 +145,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
-    <ClInclude Include="Player.h" />
     <ClInclude Include="TestScene.h" />
     <ClInclude Include="Tree.h" />
-    <ClInclude Include="WindMill.h" />
-    <ClInclude Include="WindMillWing.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

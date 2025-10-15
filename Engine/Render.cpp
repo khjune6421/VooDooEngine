@@ -1,8 +1,5 @@
 #include "Render.h"
 
-#include "Camera.h"
-#include "Light.h"
-#include "AnimationObject.h"
 #include "ObjFileParser.h"
 
 using namespace std;
@@ -10,14 +7,17 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
+UINT Render::s_nextShapeId = 0;
+unordered_map<wstring, UINT> g_meshIdMap;
+
 UINT Render::s_vertexShaderId = 0;
 unordered_map<wstring, UINT> g_vertexShaderIdMap;
 
+UINT Render::s_geometryShaderId = 0;
+unordered_map<wstring, UINT> g_geometryShaderIdMap;
+
 UINT Render::s_pixelShaderId = 0;
 unordered_map<wstring, UINT> g_pixelShaderIdMap;
-
-UINT Render::s_nextShapeId = 0;
-unordered_map<wstring, UINT> g_shapeIdMap;
 
 D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 {
@@ -45,11 +45,8 @@ D3D11_INPUT_ELEMENT_DESC Render::s_tripleInputLayoutDesc[TRIPLE_LAYOUT_SIZE] =
 };
 pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { { Render::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE }, { Render::s_tripleInputLayoutDesc, TRIPLE_LAYOUT_SIZE } };
 
-Camera* g_camera = nullptr;
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
 XMMATRIX Render::s_projectionMatrix = XMMatrixIdentity();
-
-vector<Light*> g_lights;
 
 void Render::CreateDeviceSwapChain()
 {
@@ -154,6 +151,16 @@ void Render::CreateDepthStencil()
 		m_depthStencilBuffer.Reset();
 		return;
 	}
+}
+
+void Render::SetScissorRect(LONG width, LONG height)
+{
+	D3D11_RECT scissorRect = {};
+	scissorRect.left = 0;
+	scissorRect.top = 0;
+	scissorRect.right = width;
+	scissorRect.bottom = height;
+	m_deviceContext->RSSetScissorRects(1, &scissorRect);
 }
 
 void Render::LoadFonts()
@@ -366,6 +373,7 @@ void Render::DisplayDeviceInfo()
 void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
 {
 	filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
+	filesystem::path geometryShaderPath = shaderPath / L"GeometryShader/";
 	filesystem::path pixelShaderPath = shaderPath / L"PixelShader/";
 
 	filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
@@ -373,7 +381,6 @@ void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entry
 	{
 		for (const auto& entry : filesystem::directory_iterator(defaultInputLayoutPath))
 		{
-			//if (entry.path().extension() == L".cso") LoadPrecompiledVertexShader(entry.path().c_str()); loading precompiled shader is disabled for now
 			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
 	}
@@ -386,12 +393,18 @@ void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entry
 		}
 	}
 
+	if (filesystem::exists(geometryShaderPath) && filesystem::is_directory(geometryShaderPath))
+	{
+		for (const auto& entry : filesystem::directory_iterator(geometryShaderPath))
+		{
+			if (entry.path().extension() == L".hlsl") LoadGeometryShader(entry.path().c_str(), entryPoint, shaderModel);
+		}
+	}
 
 	if (filesystem::exists(pixelShaderPath) && filesystem::is_directory(pixelShaderPath))
 	{
 		for (const auto& entry : filesystem::directory_iterator(pixelShaderPath))
 		{
-			//if (entry.path().extension() == L".cso") LoadPrecompiledPixelShader(entry.path().c_str());
 			if (entry.path().extension() == L".hlsl") LoadPixelShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
 	}
@@ -429,6 +442,37 @@ void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const
 	wstring shaderName = filesystem::path(file).stem().wstring();
 	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
 	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_tuple(vertexShader, constBufferIds, inputLayout);
+}
+
+void Render::LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
+{
+	comPtr<ID3DBlob> GSCode;
+	comPtr<ID3DBlob> errorBlob;
+
+	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
+#ifdef _DEBUG
+	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("gs_" + string(shaderModel)).c_str(), compileFlags, 0, GSCode.GetAddressOf(), errorBlob.GetAddressOf());
+	if (FAILED(hr))
+	{
+		if (errorBlob) MessageBoxA(nullptr, (char*)errorBlob->GetBufferPointer(), "Geometry Shader Compilation Error", MB_OK);
+		else MessageBoxW(nullptr, L"Failed to compile geometry shader", L"Error", MB_OK);
+		return;
+	}
+
+	comPtr<ID3D11GeometryShader> geometryShader;
+	hr = m_device->CreateGeometryShader(GSCode->GetBufferPointer(), GSCode->GetBufferSize(), nullptr, geometryShader.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBoxW(nullptr, L"Failed to create geometry shader", L"Error", MB_OK);
+		return;
+	}
+
+	wstring shaderName = filesystem::path(file).stem().wstring();
+	if (g_geometryShaderIdMap.find(shaderName) == g_geometryShaderIdMap.end()) g_geometryShaderIdMap[shaderName] = s_geometryShaderId++;
+	m_geometryShaderMap[g_geometryShaderIdMap[shaderName]] = geometryShader;
 }
 
 void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
@@ -473,6 +517,7 @@ void Render::CreateRasterState()
 	rasterDesc.DepthBiasClamp = 0.0f;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 	rasterDesc.DepthClipEnable = TRUE;
+	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.MultisampleEnable = TRUE; // Base value is FALSE
 	rasterDesc.AntialiasedLineEnable = TRUE; // Base value is FALSE
 	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[0].GetAddressOf())))
@@ -514,7 +559,7 @@ void Render::CreateRasterState()
 
 void Render::CreateSampleShapes()
 {
-	if (g_shapeIdMap.find(L"GreenPlane") == g_shapeIdMap.end()) g_shapeIdMap[L"GreenPlane"] = s_nextShapeId++;
+	if (g_meshIdMap.find(L"GreenPlane") == g_meshIdMap.end()) g_meshIdMap[L"GreenPlane"] = s_nextShapeId++;
 	Vertex plainVertices[] =
 	{
 		{ XMFLOAT3(-50.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
@@ -525,10 +570,10 @@ void Render::CreateSampleShapes()
 		{ XMFLOAT3(50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
 		{ XMFLOAT3(-50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) }
 	};
-	CreateVertexBuffer(sizeof(plainVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"GreenPlane"]].first, plainVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_shapeIdMap[L"GreenPlane"]].second = 6;
+	CreateVertexBuffer(sizeof(plainVertices), &m_shapeVertexBufferMap[g_meshIdMap[L"GreenPlane"]].first, plainVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_meshIdMap[L"GreenPlane"]].second = 6;
 
-	if (g_shapeIdMap.find(L"TriHouse") == g_shapeIdMap.end()) g_shapeIdMap[L"TriHouse"] = s_nextShapeId++;
+	if (g_meshIdMap.find(L"TriHouse") == g_meshIdMap.end()) g_meshIdMap[L"TriHouse"] = s_nextShapeId++;
 	Vertex triHouseVertices[] =
 	{
 		// Triangles
@@ -557,10 +602,10 @@ void Render::CreateSampleShapes()
 		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
 		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) }
 	};
-	CreateVertexBuffer(sizeof(triHouseVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"TriHouse"]].first, triHouseVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_shapeIdMap[L"TriHouse"]].second = 18;
+	CreateVertexBuffer(sizeof(triHouseVertices), &m_shapeVertexBufferMap[g_meshIdMap[L"TriHouse"]].first, triHouseVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_meshIdMap[L"TriHouse"]].second = 18;
 
-	if (g_shapeIdMap.find(L"WindmillWing") == g_shapeIdMap.end()) g_shapeIdMap[L"WindmillWing"] = s_nextShapeId++;
+	if (g_meshIdMap.find(L"WindmillWing") == g_meshIdMap.end()) g_meshIdMap[L"WindmillWing"] = s_nextShapeId++;
 	Vertex wingVertices[] =
 	{
 		{ XMFLOAT3(-1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
@@ -576,8 +621,8 @@ void Render::CreateSampleShapes()
 		{ XMFLOAT3(0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
 		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) }
 	};
-	CreateVertexBuffer(sizeof(wingVertices), &m_shapeVertexBufferMap[g_shapeIdMap[L"WindmillWing"]].first, wingVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_shapeIdMap[L"WindmillWing"]].second = 12;
+	CreateVertexBuffer(sizeof(wingVertices), &m_shapeVertexBufferMap[g_meshIdMap[L"WindmillWing"]].first, wingVertices, sizeof(Vertex));
+	m_shapeVertexBufferMap[g_meshIdMap[L"WindmillWing"]].second = 12;
 }
 
 void Render::LoadShapeFile(const filesystem::path filePath)
@@ -590,17 +635,17 @@ void Render::LoadShapeFile(const filesystem::path filePath)
 	for (const auto& [name, vertices] : shapes.m_shapes)
 	{
 		wstring childName = parentName + L"_" + name; // Save child shapes as parentName_childName
-		if (g_shapeIdMap.find(parentName) == g_shapeIdMap.end()) g_shapeIdMap[parentName] = s_nextShapeId++;
+		if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextShapeId++;
 
-		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
-		m_shapeVertexBufferMap[g_shapeIdMap[parentName]].second = static_cast<UINT>(vertices.size());
+		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_meshIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
+		m_shapeVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(vertices.size());
 
 		combinedVertices.insert(combinedVertices.end(), vertices.begin(), vertices.end());
 	}
 
-	if (g_shapeIdMap.find(parentName) == g_shapeIdMap.end()) g_shapeIdMap[parentName] = s_nextShapeId++;
-	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_shapeVertexBufferMap[g_shapeIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
-	m_shapeVertexBufferMap[g_shapeIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
+	if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextShapeId++;
+	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_shapeVertexBufferMap[g_meshIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
+	m_shapeVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
 }
 
 void Render::LoadDefaultShapes(const filesystem::path folderPath)
@@ -616,116 +661,109 @@ void Render::LoadDefaultShapes(const filesystem::path folderPath)
 
 void Render::EngineUpdate()
 {
+	if (!g_camera)
+	{
+		DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+		return;
+	}
+	g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height); // Feels wasteful to do this every frame
+
+	s_viewMatrix = g_camera->GetViewMatrix();
+	s_projectionMatrix = g_camera->GetProjectionMatrix();
+
 	UpdateRenderMode();
 }
 
 constexpr UINT stride = sizeof(Vertex);
 constexpr UINT offset = 0;
 
+// TODO: CreateDepthStencilState
 void Render::DrawObjects()
 {
-	if (!g_camera)
+	DrawShapes();
+
+	if (m_currentRasterState == RasterState::Wireframe_CullNone || m_currentRasterState == RasterState::Wireframe_CullBack)
 	{
-		DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-		return;
-	}
-	g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height);
-
-	s_viewMatrix = g_camera->GetViewMatrix();
-	s_projectionMatrix = g_camera->GetProjectionMatrix();
-
-	// Intrusive though: What if I make Object::Render(Render*) and call it here like object->Render(this)?
-	// It would work, but I have a feeling there is a reason why people don't do that
-	// But my rendering logic is quite far from common so maybe?
-	for (Object* object : g_objects)
-	{
-		if (!object || !object->m_isActive) continue;
-
-		object->Render(this); // Where should this be?
-
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[object->m_vertexShaderId]).Get(), nullptr, 0);
-		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[object->m_vertexShaderId]).Get());
-		m_deviceContext->PSSetShader(m_pixelShaderMap[object->m_pixelShaderId].Get(), nullptr, 0);
-
-#ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(object->m_shapeId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(object->m_shapeId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
-#endif
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[object->m_shapeId].first.Get();
-		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-
-		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		SetConstantBuffers(object, get<1>(m_vertexShaderMap[object->m_vertexShaderId]));
-
-		m_deviceContext->Draw(m_shapeVertexBufferMap[object->m_shapeId].second, 0);
+		DrawNormalLines();
 	}
 }
-// IDirect3DDevice9::SetMaterial
-// IDirect3DDevice9::SetLight
 
-void Render::SetConstantBuffers(const Object* object, const vector<UINT>& constBufferIds)
+void Render::DrawShapes()
 {
-	XMMATRIX worldMatrix = object->GetWorldMatrix();
-
-	for (size_t i = 0; i < constBufferIds.size(); i++)
+	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-		switch (constBufferIds[i])
-		{
-		case MatrixBuffer:
-		{
-			MatrixConstBuffer constBufferData = {};
-			constBufferData.world = XMMatrixTranspose(worldMatrix);
-			constBufferData.view = XMMatrixTranspose(s_viewMatrix);
-			constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
-			constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
-
-			m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
-			m_deviceContext->VSSetConstantBuffers(static_cast<UINT>(i), 1, m_constBuffers[MatrixBuffer].GetAddressOf());
-			break;
-		}
-
-		case LightBuffer:
-		{
-			LightConstBuffer lightData = {};
-			lightData.localPosition = XMVector3Transform(g_lights[0]->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
-
-			lightData.ambientColor = g_lights[0]->GetAmbientColor();
-			lightData.diffuseColor = g_lights[0]->GetDiffuseColor();
-
-			lightData.range = g_lights[0]->GetRange();
-			lightData.intensity = g_lights[0]->GetIntensity();
-			lightData.attenuation = g_lights[0]->GetAttenuation();
-
-			m_deviceContext->UpdateSubresource(m_constBuffers[LightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
-			m_deviceContext->VSSetConstantBuffers(static_cast<UINT>(i), 1, m_constBuffers[LightBuffer].GetAddressOf());
-			break;
-		}
-
-		case AnimationBuffer: // TODO: fix this
-		{
-			AnimationObject* animObject = dynamic_cast<AnimationObject*>(const_cast<Object*>(object)); // Change this to use static_cast if possible
-
-			for (size_t i = 1; i < animObject->m_shapeIds.size(); i++)
-			{
 #ifdef _DEBUG
-				if (m_shapeVertexBufferMap.find(animObject->m_shapeIds[i]) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(animObject->m_shapeIds[i]) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
+		if (m_shapeVertexBufferMap.find(shapeData->meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData->meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
 #endif
-				ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[animObject->m_shapeIds[i]].first.Get();
-				m_deviceContext->IASetVertexBuffers(static_cast<UINT>(i), 1, &vertexBuffer, &stride, &offset);
-			}
-			m_deviceContext->VSSetConstantBuffers(static_cast<UINT>(i), 1, m_constBuffers[AnimationBuffer].GetAddressOf());
+		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
+		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetPrimitiveTopology(shapeData->topology);
 
-			AnimationConstBuffer animConstBufferData = {};
-			animObject->GetAnimationState(animConstBufferData.currentShapeIndex, animConstBufferData.nextShapeIndex, animConstBufferData.interpolationFactor);
-			m_deviceContext->UpdateSubresource(m_constBuffers[AnimationBuffer].Get(), 0, nullptr, &animConstBufferData, 0, 0);
-			m_deviceContext->VSSetConstantBuffers(static_cast<UINT>(i), 1, m_constBuffers[AnimationBuffer].GetAddressOf());
-			break;
-		}
+		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[shapeData->vertexShaderId]).Get(), nullptr, 0);
+		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData->pixelShaderId].Get(), nullptr, 0);
 
-		default:
-			MessageBoxW(nullptr, L"Unknown constant buffer ID", L"Error", MB_OK);
-			break;
-		}
+		XMMATRIX worldMatrix = object->GetWorldMatrix();
+
+		MatrixConstBuffer constBufferData = {};
+		constBufferData.world = XMMatrixTranspose(worldMatrix);
+		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
+		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
+		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
+
+		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
+
+		LightConstBuffer lightData = {};
+		lightData.localPosition = XMVector3Transform(g_lightDatas[0].first->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
+
+		lightData.ambientColor = g_lightDatas[0].second->ambientColor;
+		lightData.diffuseColor = g_lightDatas[0].second->diffuseColor;
+
+		lightData.range = g_lightDatas[0].second->range;
+		lightData.intensity = g_lightDatas[0].second->intensity;
+		lightData.attenuation = g_lightDatas[0].second->attenuation;
+
+		m_deviceContext->UpdateSubresource(m_constBuffers[LightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
+		m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[LightBuffer].GetAddressOf());
+
+		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
+
+		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
+	}
+}
+
+void Render::DrawNormalLines()
+{
+	for (const auto& [object, shapeData] : g_renderShapes)
+	{
+#ifdef _DEBUG
+		if (m_shapeVertexBufferMap.find(shapeData->meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData->meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
+#endif
+		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
+		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]]).Get(), nullptr, 0);
+		m_deviceContext->GSSetShader(m_geometryShaderMap[g_geometryShaderIdMap[L"GSShowNormal"]].Get(), nullptr, 0);
+		m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"PSShowNormal"]].Get(), nullptr, 0);
+
+		XMMATRIX worldMatrix = object->GetWorldMatrix();
+
+		MatrixConstBuffer constBufferData = {};
+		constBufferData.world = XMMatrixTranspose(worldMatrix);
+		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
+		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
+		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
+
+		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
+		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
+		m_deviceContext->GSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
+
+		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
+
+		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
+
+		m_deviceContext->GSSetShader(nullptr, nullptr, 0);
 	}
 }
 
@@ -734,7 +772,7 @@ void Render::UpdateRenderMode()
 	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
 }
 
-Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) : m_hWnd(hWnd)
+Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
@@ -749,6 +787,8 @@ Render::Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath) 
 	CreateDepthStencil();
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 	SetViewport();
+	SetScissorRect(width, height);
+
 	LoadFonts();
 
 	m_DXVersion = (m_deviceInfo.featureLevels & 0xf000) >> 12;
@@ -822,6 +862,7 @@ void Render::Resize(UINT width, UINT height)
 	CreateRenderTarget();
 	CreateDepthStencil();
 
+	SetScissorRect(width, height);
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }
 
@@ -836,6 +877,7 @@ void Render::SetViewport(float topLeftX, float topLeftY)
 	viewport.Height = static_cast<FLOAT>(m_deviceInfo.displayMode.Height);
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
+
 	m_deviceContext->RSSetViewports(VEWPORT_NUM, &viewport);
 }
 

@@ -8,13 +8,18 @@
 
 // Other header files
 #include "Scene.h"
+
+#include "Camera.h"
+#include "Shape.h"
 #include "Light.h"
 
 // I usually don't use 'using' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
 class Object;
-extern std::vector<Object*> g_objects;
+extern Camera* g_camera;
+extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
+extern std::vector<std::pair<Object*, LightData*>> g_lightDatas;
 
 namespace VDGM
 {
@@ -83,8 +88,6 @@ class Render
 	// 0: MatrixConstBuffer, 1: LightConstBuffer 2: AnimationConstBuffer
 	comPtr<ID3D11Buffer> m_constBuffers[3] = {};
 
-	Light m_light; // this is also for testing purpose
-
 	// Input layouts // well this is cursed
 	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
@@ -127,8 +130,11 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
+	// Maps shape ID to its vertex buffer and vertex count // I might change this to vector later // not sure if it's a good idea to make this unintuitive thing more complicated
+	static UINT s_nextShapeId;
+	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
+
 	static UINT s_vertexShaderId;
-	//std::unordered_map<UINT, std::pair<comPtr<ID3D11VertexShader>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 	enum VertexShaderMapField
 	{
 		VertexShader = 0,
@@ -136,6 +142,9 @@ class Render
 		InputLayout = 2
 	};
 	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, std::vector<UINT>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+
+	static UINT s_geometryShaderId;
+	std::unordered_map<UINT, comPtr<ID3D11GeometryShader>> m_geometryShaderMap;
 
 	static UINT s_pixelShaderId;
 	std::unordered_map<UINT, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
@@ -145,9 +154,6 @@ class Render
 	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
-	// Maps shape ID to its vertex buffer and vertex count // I might change this to vector later // not sure if it's a good idea to make this unintuitive thing more complicated
-	static UINT s_nextShapeId;
-	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
 
 	// static view and projection matrix for all renders
 	static DirectX::XMMATRIX s_viewMatrix;
@@ -159,6 +165,7 @@ class Render
 	void CreateDeviceSwapChain();
 	void CreateRenderTarget();
 	void CreateDepthStencil();
+	void SetScissorRect(LONG width, LONG height);
 	void LoadFonts();
 	void GetHardwareInfo();
 
@@ -175,8 +182,8 @@ class Render
 
 	// Shader
 	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
-	//void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, int layoutIndex = 0);
 	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const std::vector<UINT> constBufferIds = { MatrixBuffer, LightBuffer }, const int layoutIndex = DefaultInputLayout);
+	void LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 
 	// Render
@@ -189,12 +196,14 @@ class Render
 	void EngineUpdate();
 
 	void DrawObjects();
-	void SetConstantBuffers(const Object* object, const std::vector<UINT>& constBufferIds);
+	// Draw shapes // does not have animation
+	void DrawShapes();
+	void DrawNormalLines();
 
 	void UpdateRenderMode();
 
 public:
-	Render(HWND hWnd, UINT width, UINT height, const wchar_t* resourcePath = nullptr);
+	Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath = nullptr);
 	~Render();
 
 	void Resize(UINT width, UINT height);

@@ -13,5 +13,5 @@ public:
 
 	virtual void Update(float deltaTime) = 0;
 
-	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) = 0;
+	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}
 };
