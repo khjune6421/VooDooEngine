@@ -11,11 +11,11 @@ TestScene::TestScene(wstring dataFile)
 
 	m_player->AddChild(m_camera.get());
 	m_windmill->SetPosition(XMVECTOR{ 5.0f, 0.0f, 5.0f, 1.0f });
-	m_windmill->SetScale(XMFLOAT3{ 1.5f, 0.1f, 1.5f });
+	m_windmill->SetScale(XMFLOAT3{ 1.5f, 1.5f, 1.5f });
 
 	unique_ptr<Object> plane = make_unique<Object>();
 	plane->AddComponent<Shape>(L"Plane");
-	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
+	plane->SetScale(XMFLOAT3{ 100.0f, 100.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 
 	unique_ptr<Object> lightObj = make_unique<Object>();

@@ -4,6 +4,8 @@ cbuffer TestConstBuffer : register(b0)
     matrix view;
     matrix projection;
     matrix WVP;
+    
+    matrix normalMatrix;
 }
 
 cbuffer LightConstBuffer : register(b1)
@@ -46,7 +48,8 @@ VSOutput main(VSInput input)
     float distance = length(toLight);
     
     float3 lightDir = normalize(toLight);
-    float3 normal = normalize(input.norm0);
+    float3 worldNormal = mul(input.norm0, (float3x3) normalMatrix);
+    float3 normal = normalize(worldNormal);
     
     float diffuseFactor;
     if (isBackfaceLighting) diffuseFactor = abs(dot(normal, lightDir));
