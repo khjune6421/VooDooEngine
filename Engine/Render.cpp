@@ -700,20 +700,19 @@ void Render::DrawShapes()
 		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData->pixelShaderId].Get(), nullptr, 0);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
-		XMMATRIX normalMatrix = XMMatrixInverse(nullptr, worldMatrix);
 
 		MatrixConstBuffer constBufferData = {};
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
 		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
 		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
-		constBufferData.normalMatrix = XMMatrixTranspose(normalMatrix);
+		constBufferData.normalMatrix = XMMatrixTranspose(XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
 
 		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 
 		LightConstBuffer lightData = {};
-		lightData.localPosition = XMVector3Transform(g_lightDatas[0].first->GetWorldPosition(), normalMatrix);
+		lightData.localPosition = XMVector3Transform(g_lightDatas[0].first->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
 
 		lightData.ambientColor = g_lightDatas[0].second->ambientColor;
 		lightData.diffuseColor = g_lightDatas[0].second->diffuseColor;
@@ -747,14 +746,13 @@ void Render::DrawNormalLines()
 		m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"PSShowNormal"]].Get(), nullptr, 0);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
-		XMMATRIX normalMatrix = XMMatrixInverse(nullptr, worldMatrix);
 
 		MatrixConstBuffer constBufferData = {};
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
 		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
 		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
-		constBufferData.normalMatrix = XMMatrixTranspose(normalMatrix);
+		constBufferData.normalMatrix = XMMatrixTranspose(XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix)));
 
 		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());

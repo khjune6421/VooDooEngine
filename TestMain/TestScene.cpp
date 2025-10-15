@@ -15,7 +15,7 @@ TestScene::TestScene(wstring dataFile)
 
 	unique_ptr<Object> plane = make_unique<Object>();
 	plane->AddComponent<Shape>(L"Plane");
-	plane->SetScale(XMFLOAT3{ 100.0f, 100.0f, 100.0f });
+	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 
 	unique_ptr<Object> lightObj = make_unique<Object>();
