@@ -49,10 +49,8 @@ VSOutput main(VSInput input)
     float3 normal = normalize(input.norm0);
     
     float diffuseFactor;
-    if (isBackfaceLighting)
-        diffuseFactor = abs(dot(normal, lightDir));
-    else
-        diffuseFactor = max(dot(normal, lightDir), 0.0f);
+    if (isBackfaceLighting) diffuseFactor = abs(dot(normal, lightDir));
+    else diffuseFactor = max(dot(normal, lightDir), 0.0f);
     
     float attenuationFactor = 1.0f;
     if (distance > 0.0f) attenuationFactor = 1.0f / (1.0f + attenuation * distance * distance); // + 1.0f to prevent div by 0 // TODO: change this
