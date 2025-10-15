@@ -58,8 +58,6 @@ class Render
 		DirectX::XMMATRIX view; // view matrix
 		DirectX::XMMATRIX projection; // projection matrix
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
-
-		DirectX::XMMATRIX normalMatrix; // inverse transpose of world matrix for normals
 	};
 	struct LightConstBuffer
 	{

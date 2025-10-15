@@ -4,8 +4,6 @@ cbuffer MatrixBuffer : register(b0)
     matrix view;
     matrix projection;
     matrix WVP;
-    
-    matrix normalMatrix;
 };
 
 struct VS_OUTPUT
@@ -27,7 +25,7 @@ void main(point VS_OUTPUT input[1], inout LineStream<GS_OUTPUT> outputStream)
 {
     GS_OUTPUT output;
     
-    float3 worldNormal = normalize(mul(float4(input[0].normal, 0.0f), normalMatrix).xyz);
+    float3 worldNormal = normalize(mul(float4(input[0].normal, 0.0f), world).xyz); // this does not work if scale is applied to certain axis
     
     float4 worldPos = mul(float4(input[0].position.xyz, 1.0f), world);
     
