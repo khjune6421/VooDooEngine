@@ -46,7 +46,7 @@ protected:
 
 public:
 	Object() = default;
-	virtual ~Object() = default;
+	virtual ~Object();
 
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);

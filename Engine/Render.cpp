@@ -682,10 +682,7 @@ void Render::DrawObjects()
 {
 	DrawShapes();
 
-	if (m_currentRasterState == RasterState::Wireframe_CullNone || m_currentRasterState == RasterState::Wireframe_CullBack)
-	{
-		DrawNormalLines();
-	}
+	if (m_drawNormalLines) DrawNormalLines();
 }
 
 void Render::DrawShapes()

@@ -92,6 +92,10 @@ namespace VDW
 				PostQuitMessage(0);
 				return 0;
 
+			case VK_F3:
+				g_windows[hWnd]->ToggleNormalLines();
+				return 0;
+
 			case VK_F4:
 				g_windows[hWnd]->ChangeState();
 				return 0;

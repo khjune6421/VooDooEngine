@@ -52,6 +52,20 @@ void Object::SetDirty()
 	for (auto& child : m_childrens) child->SetDirty();
 }
 
+Object::~Object()
+{
+	if (m_parent)
+	{
+		auto& siblings = m_parent->m_childrens;
+		siblings.erase(remove(siblings.begin(), siblings.end(), this), siblings.end());
+	}
+	for (auto& child : m_childrens) child->m_parent = nullptr;
+	m_childrens.clear();
+
+	//for (auto& componentPair : m_components) componentPair.second->OnDetached(); // This is done automatically by IComponent's destructor
+	//m_components.clear();
+}
+
 void Object::SetPosition(const XMVECTOR& pos)
 {
 	m_position = pos;

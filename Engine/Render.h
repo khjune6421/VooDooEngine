@@ -198,6 +198,8 @@ class Render
 	void DrawObjects();
 	// Draw shapes // does not have animation
 	void DrawShapes();
+
+	bool m_drawNormalLines = false; // for debugging
 	void DrawNormalLines();
 
 	void UpdateRenderMode();
@@ -213,6 +215,7 @@ public:
 
 	void SceneRender();
 
+	void ToggleNormalLines() { m_drawNormalLines = !m_drawNormalLines; }
 	void ChangeState();
 
 	void ScreenPointToWorld(POINT screenPos) const;
