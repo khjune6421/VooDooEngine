@@ -814,9 +814,6 @@ void Render::DrawNormalLines()
 
 		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
 
-		m_deviceContext->PSSetShaderResources(0, 1, m_textureMap[shapeData->textureId].GetAddressOf());
-		m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
-
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
 
 		m_deviceContext->GSSetShader(nullptr, nullptr, 0);
