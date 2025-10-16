@@ -9,6 +9,7 @@ extern std::unordered_map<std::wstring, UINT> g_meshIdMap;
 extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_geometryShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_pixelShaderIdMap;
+extern std::unordered_map<std::wstring, UINT> g_textureIdMap;
 
 struct ShapeData
 {
@@ -16,6 +17,7 @@ struct ShapeData
 	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT vertexShaderId = 0;
 	UINT pixelShaderId = 0;
+	UINT textureId = 0;
 };
 
 extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
@@ -25,7 +27,7 @@ class Shape : public IComponent
 	ShapeData m_renderData = {};
 
 public:
-	Shape(const std::wstring& mesh, const std::wstring& vertexShader = L"VertexShader", const std::wstring& pixelShader = L"PixelShader");
+	Shape(const std::wstring& mesh, const std::wstring& vertexShader = L"VertexShader", const std::wstring& pixelShader = L"PixelShader", const std::wstring& texture = L"NoTexture");
 	~Shape() { OnDetached(); }
 
 	void OnAttached(class Object* owner) override { IComponent::OnAttached(owner); g_renderShapes.emplace_back(owner, &m_renderData); }

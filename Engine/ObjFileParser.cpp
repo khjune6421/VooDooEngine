@@ -80,8 +80,8 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 				int normalIdx = faceIndices[i + 2];
 
 				if (posIdx >= 0 && posIdx < positions.size()) vertex.position = positions[posIdx];
-				if (uvIdx >= 0 && uvIdx < uvs.size()) vertex.uv = uvs[uvIdx];
 				if (normalIdx >= 0 && normalIdx < normals.size()) vertex.normal = normals[normalIdx];
+				if (uvIdx >= 0 && uvIdx < uvs.size()) vertex.uv = XMFLOAT2{ uvs[uvIdx].x, 1.0f - uvs[uvIdx].y }; // Flip V for DirectX
 
 				currentShape->vertices.push_back(vertex);
 			}

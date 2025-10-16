@@ -4,7 +4,7 @@ using namespace std;
 
 vector<pair<Object*, ShapeData*>> g_renderShapes;
 
-Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader)
+Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader, const wstring& texture)
 {
 #ifdef _DEBUG
 	if (g_meshIdMap.find(mesh) == g_meshIdMap.end()) MessageBoxW(nullptr, (L"Shape name not found: " + mesh).c_str(), L"Error", MB_OK);
@@ -20,11 +20,15 @@ Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pi
 	if (g_pixelShaderIdMap.find(pixelShader) == g_pixelShaderIdMap.end()) MessageBoxW(nullptr, (L"Pixel shader not found: " + pixelShader).c_str(), L"Error", MB_OK);
 #endif
 	m_renderData.pixelShaderId = g_pixelShaderIdMap[pixelShader];
+
+#ifdef _DEBUG
+	if (g_textureIdMap.find(texture) == g_textureIdMap.end()) MessageBoxW(nullptr, (L"Texture not found: " + texture).c_str(), L"Error", MB_OK);
+#endif
+	m_renderData.textureId = g_textureIdMap[texture];
 }
 
 void Shape::OnDetached()
 {
-	erase_if(g_renderShapes, [this](const pair<Object*, ShapeData*>& p) { return p.first == m_owner; });
-
+	//erase_if(g_renderShapes, [this](const pair<Object*, ShapeData*>& p) { return p.first == m_owner; });
 	IComponent::OnDetached();
 }
