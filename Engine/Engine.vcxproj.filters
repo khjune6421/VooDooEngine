@@ -105,9 +105,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Assets\Default\Shader\VertexShader\TripleInputLayout\TripleVertexShader.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
     <FxCompile Include="..\Assets\Default\Shader\VertexShader\DefaultInputLayout\VertexShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
