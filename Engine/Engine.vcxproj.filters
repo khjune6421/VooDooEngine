@@ -20,7 +20,7 @@
     <ClCompile Include="ObjFileParser.cpp">
       <Filter>Parser</Filter>
     </ClCompile>
-    <ClCompile Include="IComponent.cpp">
+    <ClCompile Include="Component.cpp">
       <Filter>Component</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
@@ -88,7 +88,7 @@
     <ClInclude Include="ObjFileParser.h">
       <Filter>Parser</Filter>
     </ClInclude>
-    <ClInclude Include="IComponent.h">
+    <ClInclude Include="Component.h">
       <Filter>Component</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">

@@ -3,7 +3,7 @@
 #include "UtilityHeaders.h"
 #include "DirectXLib.h"
 
-#include "IComponent.h"
+#include "Component.h"
 
 struct LightData
 {
@@ -16,7 +16,7 @@ struct LightData
 
 extern std::vector<std::pair<Object*, LightData*>> g_lightDatas;
 
-class Light : public IComponent
+class Light : public Component
 {
 	LightData m_lightData = {};
 
@@ -28,11 +28,10 @@ public:
 		float range = 100.0f,
 		float intensity = 1.0f,
 		float attenuation = 0.0f
-	) : m_lightData{ ambient, diffuse, range, intensity, attenuation } {}
-	~Light() { OnDetached(); }
+	) : m_lightData{ ambient, diffuse, range, intensity, attenuation } {
+	}
 
-	void OnAttached(class Object* owner) override { IComponent::OnAttached(owner); g_lightDatas.emplace_back(owner, &m_lightData); }
-	void OnDetached() override;
+	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_lightDatas.emplace_back(owner, &m_lightData); }
 
 	DirectX::XMFLOAT4 GetAmbientColor() const { return m_lightData.ambientColor; }
 	void SetAmbientColor(const DirectX::XMFLOAT4& color) { m_lightData.ambientColor = color; }

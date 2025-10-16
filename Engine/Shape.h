@@ -3,7 +3,7 @@
 #include "UtilityHeaders.h"
 #include "DirectXLib.h"
 
-#include "IComponent.h"
+#include "Component.h"
 
 extern std::unordered_map<std::wstring, UINT> g_meshIdMap;
 extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
@@ -22,14 +22,12 @@ struct ShapeData
 
 extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
 
-class Shape : public IComponent
+class Shape : public Component
 {
 	ShapeData m_renderData = {};
 
 public:
 	Shape(const std::wstring& mesh, const std::wstring& vertexShader = L"VertexShader", const std::wstring& pixelShader = L"PixelShader", const std::wstring& texture = L"NoTexture");
-	~Shape() { OnDetached(); }
 
-	void OnAttached(class Object* owner) override { IComponent::OnAttached(owner); g_renderShapes.emplace_back(owner, &m_renderData); }
-	void OnDetached() override;
+	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_renderShapes.emplace_back(owner, &m_renderData); }
 };

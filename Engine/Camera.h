@@ -2,12 +2,12 @@
 
 #include "DirectXLib.h"
 
-#include "IComponent.h"
+#include "Component.h"
 #include "Object.h"
 
 extern class Camera* g_camera;
 
-class Camera : public IComponent
+class Camera : public Component
 {
 	float m_fov;
 

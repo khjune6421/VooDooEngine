@@ -26,9 +26,3 @@ Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pi
 #endif
 	m_renderData.textureId = g_textureIdMap[texture];
 }
-
-void Shape::OnDetached()
-{
-	//erase_if(g_renderShapes, [this](const pair<Object*, ShapeData*>& p) { return p.first == m_owner; });
-	IComponent::OnDetached();
-}

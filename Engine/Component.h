@@ -2,13 +2,13 @@
 
 class Object;
 
-class IComponent
+class Component
 {
 protected:
 	Object* m_owner = nullptr;
 
 public:
-	virtual ~IComponent() = default;
+	~Component() { OnDetached(); }
 
 	virtual void Update(float deltaTime) {}
 	virtual void OnAttached(class Object* owner) { m_owner = owner; }

@@ -3,7 +3,7 @@
 #include "DirectXLib.h"
 #include "UtilityHeaders.h"
 
-#include "IComponent.h"
+#include "Component.h"
 
 
 enum class Directions
@@ -32,7 +32,7 @@ class Object
 	void SetDirty(); // Recursive
 
 	// Component system
-	std::unordered_map<std::type_index, std::unique_ptr<IComponent>> m_components;
+	std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components;
 
 protected:
 	DirectX::XMVECTOR m_position = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
@@ -82,7 +82,7 @@ public:
 	template<typename T, typename... Args>
 	T* AddComponent(Args&&... args)
 	{
-		static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+		static_assert(std::is_base_of_v<Component, T>, "T must derive from IComponent");
 
 		auto component = std::make_unique<T>(std::forward<Args>(args)...);
 		T* componentPtr = component.get();
@@ -95,7 +95,7 @@ public:
 	template<typename T>
 	const T* GetComponent() const
 	{
-		static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+		static_assert(std::is_base_of_v<Component, T>, "T must derive from IComponent");
 
 		auto it = m_components.find(std::type_index(typeid(T)));
 		if (it != m_components.end()) return static_cast<const T*>(it->second.get());
@@ -105,7 +105,7 @@ public:
 	template<typename T>
 	bool RemoveComponent()
 	{
-		static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+		static_assert(std::is_base_of_v<Component, T>, "T must derive from IComponent");
 
 		auto it = m_components.find(std::type_index(typeid(T)));
 		if (it != m_components.end())
