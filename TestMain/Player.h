@@ -8,7 +8,6 @@ class Player : public Object
 
 public:
 	Player();
-	~Player() = default;
 
 	void Update(float deltaTime) override;
 };

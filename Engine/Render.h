@@ -219,6 +219,10 @@ class Render
 public:
 	Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath = nullptr);
 	~Render();
+	Render(const Render& other) = default;
+	Render& operator=(const Render& other) = default;
+	Render(Render&& other) noexcept = default;
+	Render& operator=(Render&& other) noexcept = default;
 
 	void Resize(UINT width, UINT height);
 	void SetViewport(float topLeftX = 0.0f, float topLeftY = 0.0f);

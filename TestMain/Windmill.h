@@ -8,7 +8,6 @@ class Windmill : public Object
 
 public:
 	Windmill();
-	~Windmill() = default;
 
 	void Update(float deltaTime) override;
 };

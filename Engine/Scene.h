@@ -9,7 +9,6 @@ protected:
 
 public:
 	Scene() = default;
-	virtual ~Scene() = default;
 
 	virtual void Update(float deltaTime) = 0;
 

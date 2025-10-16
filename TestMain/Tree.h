@@ -10,7 +10,5 @@ class Tree : public Object
 	DirectX::XMVECTOR m_fallAngle = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
 public:
-	~Tree() override = default;
-
 	void Update(float deltaTime) override;
 };

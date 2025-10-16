@@ -29,6 +29,10 @@ public:
 		float nearPlane = 0.1f, float farPlane = 1000.0f
 	);
 	~Camera() { if (g_camera == this) g_camera = nullptr; }
+	Camera(const Camera& other) = default;
+	Camera& operator=(const Camera& other) = default;
+	Camera(Camera&& other) noexcept = default;
+	Camera& operator=(Camera&& other) noexcept = default;
 
 	void SetScreen(float fov = -1.0f, UINT screenWidth = 0, UINT screenHeight = 0, float nearPlane = -1.0f, float farPlane = -1.0f);
 
