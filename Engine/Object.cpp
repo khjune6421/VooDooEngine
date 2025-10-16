@@ -154,21 +154,14 @@ void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this 
 
 	if (!m_isDirty) SetDirty();
 }
-void Object::LerpRotation(const XMVECTOR& start, const XMVECTOR& target, float t) // This is buggy and inefficient
+void Object::LerpRotation(const XMVECTOR& start, const XMVECTOR& target, float t)
 {
-	//m_rotation = XMVectorLerp(start, target, t);
-	//m_rotation = XMQuaternionSlerp(start, target, t);
+	XMVECTOR startQuat = XMQuaternionRotationRollPitchYawFromVector(start);
+	XMVECTOR targetQuat = XMQuaternionRotationRollPitchYawFromVector(target);
 
-	// I dont like this
-	XMVECTOR angleDiff = target - start;
-	if (XMVectorGetX(angleDiff) > XM_PI) angleDiff = XMVectorSetX(angleDiff, XMVectorGetX(angleDiff) - XM_2PI);
-	else if (XMVectorGetX(angleDiff) < -XM_PI) angleDiff = XMVectorSetX(angleDiff, XMVectorGetX(angleDiff) + XM_2PI);
-	if (XMVectorGetY(angleDiff) > XM_PI) angleDiff = XMVectorSetY(angleDiff, XMVectorGetY(angleDiff) - XM_2PI);
-	else if (XMVectorGetY(angleDiff) < -XM_PI) angleDiff = XMVectorSetY(angleDiff, XMVectorGetY(angleDiff) + XM_2PI);
-	if (XMVectorGetZ(angleDiff) > XM_PI) angleDiff = XMVectorSetZ(angleDiff, XMVectorGetZ(angleDiff) - XM_2PI);
-	else if (XMVectorGetZ(angleDiff) < -XM_PI) angleDiff = XMVectorSetZ(angleDiff, XMVectorGetZ(angleDiff) + XM_2PI);
-	m_rotation = start + angleDiff * t;
+	XMVECTOR resultQuat = XMQuaternionSlerp(startQuat, targetQuat, t);
 
+	m_rotation = QuaternionToEuler(resultQuat);
 	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
 
 	if (!m_isDirty) SetDirty();
