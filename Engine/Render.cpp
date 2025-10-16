@@ -870,7 +870,7 @@ Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) 
 	}
 }
 
-Render::~Render()
+Render::~Render() // Not sure all this is necessary // teorically the comPtr should handle it
 {
 	// Clear device
 	m_SpriteFontMap.clear();
