@@ -877,7 +877,7 @@ Render::~Render() // Not sure all this is necessary // teorically the comPtr sho
 	m_SpriteBatchMap.clear();
 	m_device.Reset();
 
-	// Not sure if this is necessary // microsoft doesn't recommend it
+	// Microsoft doesn't recommend this
 	if (m_deviceContext)
 	{
 		m_deviceContext->ClearState();
