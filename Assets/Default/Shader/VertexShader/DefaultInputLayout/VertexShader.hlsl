@@ -30,8 +30,8 @@ struct VSOutput
 {
     float4 pos : SV_POSITION0;
     float4 col : COLOR0;
-    
     float4 light : TEXCOORD0;
+    float2 uv : TEXCOORD1;
 };
 
 VSOutput main(VSInput input)
@@ -39,7 +39,6 @@ VSOutput main(VSInput input)
     VSOutput output = (VSOutput) 0;
     
     input.pos0.w = 1.0f;
-    output.pos = mul(input.pos0, WVP);
     
     float3 localVertexPos = input.pos0.xyz;
     float3 toLight = localPosition.xyz - localVertexPos;
@@ -56,9 +55,10 @@ VSOutput main(VSInput input)
     if (distance > 0.0f) attenuationFactor = 1.0f / (1.0f + attenuation * distance * distance); // + 1.0f to prevent div by 0 // TODO: change this
     if (distance > range) attenuationFactor = 0.0f;
     
+    output.pos = mul(input.pos0, WVP);
     output.light = diffuseColor * diffuseFactor * attenuationFactor * intensity + ambientColor;
-    
     output.col = input.col0;
+    output.uv = input.uv0;
     
     return output;
 }

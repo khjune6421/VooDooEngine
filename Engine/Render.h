@@ -59,7 +59,7 @@ class Render
 		DirectX::XMMATRIX projection; // projection matrix
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
 	};
-	struct LightConstBuffer
+	struct LightConstBuffer // This does not compensate for changes in object scale // it just goes into local space of original object shape
 	{
 		DirectX::XMVECTOR localPosition;
 		DirectX::XMFLOAT4 ambientColor;
@@ -93,13 +93,19 @@ class Render
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
 	constexpr static UINT TRIPLE_LAYOUT_SIZE = 12;
 	static D3D11_INPUT_ELEMENT_DESC s_tripleInputLayoutDesc[TRIPLE_LAYOUT_SIZE];
-	enum InputLayoutField
+	enum InputLayoutType
 	{
 		DefaultInputLayout = 0,
 		TripleInputLayout = 1
 	};
-
 	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[2];
+
+	static D3D11_SAMPLER_DESC s_defaultSamplerDesc;
+	enum SamplerType
+	{
+		DefaultSampler = 0
+	};
+	comPtr<ID3D11SamplerState> m_samplers[1] = {};
 
 	// Render
 	enum class RasterState
@@ -135,7 +141,7 @@ class Render
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
 
 	static UINT s_vertexShaderId;
-	enum VertexShaderMapField
+	enum VertexShaderType
 	{
 		VertexShader = 0,
 		ConstBuffers = 1,
@@ -148,6 +154,9 @@ class Render
 
 	static UINT s_pixelShaderId;
 	std::unordered_map<UINT, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
+
+	static UINT s_textureId;
+	std::unordered_map<UINT, comPtr<ID3D11ShaderResourceView>> m_textureMap;
 
 	// Render
 	// 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
@@ -186,8 +195,11 @@ class Render
 	void LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 
+	void LoadAllTextures(const std::filesystem::path texturePath);
+
 	// Render
 	void CreateRasterState();
+	void CreateSamplerState();
 
 	void CreateSampleShapes();
 	void LoadShapeFile(const std::filesystem::path filePath);

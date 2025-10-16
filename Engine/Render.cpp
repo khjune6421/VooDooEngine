@@ -19,6 +19,9 @@ unordered_map<wstring, UINT> g_geometryShaderIdMap;
 UINT Render::s_pixelShaderId = 0;
 unordered_map<wstring, UINT> g_pixelShaderIdMap;
 
+UINT Render::s_textureId = 0;
+unordered_map<wstring, UINT> g_textureIdMap;
+
 D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 {
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -44,6 +47,20 @@ D3D11_INPUT_ELEMENT_DESC Render::s_tripleInputLayoutDesc[TRIPLE_LAYOUT_SIZE] =
 	{ "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { { Render::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE }, { Render::s_tripleInputLayoutDesc, TRIPLE_LAYOUT_SIZE } };
+
+D3D11_SAMPLER_DESC Render::s_defaultSamplerDesc =
+{
+	D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+	D3D11_TEXTURE_ADDRESS_CLAMP,
+	D3D11_TEXTURE_ADDRESS_CLAMP,
+	D3D11_TEXTURE_ADDRESS_CLAMP,
+	0.0f,
+	1,
+	D3D11_COMPARISON_NEVER,
+	{ 1, 1, 1, 1 },
+	0.0f,
+	D3D11_FLOAT32_MAX
+};
 
 XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
 XMMATRIX Render::s_projectionMatrix = XMMatrixIdentity();
@@ -507,6 +524,33 @@ void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const 
 	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
 }
 
+void Render::LoadAllTextures(const std::filesystem::path texturePath)
+{
+	if (filesystem::exists(texturePath) && filesystem::is_directory(texturePath))
+	{
+		for (const auto& entry : filesystem::directory_iterator(texturePath))
+		{
+			wstring textureName = entry.path().stem().wstring();
+			if (g_textureIdMap.find(textureName) == g_textureIdMap.end()) g_textureIdMap[textureName] = s_textureId++;
+
+			comPtr<ID3D11ShaderResourceView> texture;
+			HRESULT hr = DirectX::CreateWICTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, texture.GetAddressOf());
+			if (FAILED(hr))
+			{
+				hr = DirectX::CreateDDSTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, texture.GetAddressOf());
+				if (FAILED(hr))
+				{
+					MessageBoxW(nullptr, (L"Failed to load texture: " + entry.path().wstring()).c_str(), L"Error", MB_OK);
+					continue;
+				}
+			}
+
+			m_textureMap[g_textureIdMap[textureName]] = texture;
+		}
+	}
+	else MessageBoxW(nullptr, L"Texture directory does not exist", L"Error", MB_OK);
+}
+
 void Render::CreateRasterState()
 {
 	D3D11_RASTERIZER_DESC rasterDesc = {};
@@ -555,6 +599,15 @@ void Render::CreateRasterState()
 	m_deviceContext->RSSetState(g_rasterState[2].Get());
 	m_currentRasterState = RasterState::Solid_CullNone;
 #endif
+}
+
+void Render::CreateSamplerState()
+{
+	if (FAILED(m_device->CreateSamplerState(&s_defaultSamplerDesc, m_samplers[0].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create sampler state", L"Error", MB_OK);
+		return;
+	}
 }
 
 void Render::CreateSampleShapes()
@@ -725,6 +778,9 @@ void Render::DrawShapes()
 
 		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
 
+		m_deviceContext->PSSetShaderResources(0, 1, m_textureMap[0].GetAddressOf());
+		m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
+
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
 	}
 }
@@ -757,6 +813,9 @@ void Render::DrawNormalLines()
 		m_deviceContext->GSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 
 		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
+
+		m_deviceContext->PSSetShaderResources(0, 1, m_textureMap[0].GetAddressOf());
+		m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
 
@@ -793,6 +852,7 @@ Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) 
 
 	// Initialize render
 	CreateRasterState();
+	CreateSamplerState();
 	CreateSampleShapes();
 
 	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[0]);
@@ -802,12 +862,14 @@ Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) 
 	static const filesystem::path defaultPath(L"../Assets/Default/");
 	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");
 	LoadDefaultShapes(defaultPath / L"Shapes/");
+	LoadAllTextures(defaultPath / L"Texture/");
 
 	if (resourcePath) // This will override the default assets if corrisponding files are found
 	{
 		filesystem::path resPath(resourcePath);
 		LoadAllShaders(resPath / L"Shader/", "main", "5_0");
 		LoadDefaultShapes(resPath / L"Shapes/");
+		LoadAllTextures(resPath / L"Texture/");
 	}
 }
 
