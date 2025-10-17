@@ -59,10 +59,10 @@ struct Attenuation
 constexpr int MAX_POINT_LIGHTS = 4;
 struct PointLightConstBuffer
 {
+	DirectX::XMVECTOR position = { 0.0f, 0.0f, 0.0f, 1.0f };
 	DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float range = 100.0f;
 	Attenuation attenuation = {};
-	DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
 };
 class PointLight;
 extern std::vector<PointLight*> g_pointLights;
@@ -73,10 +73,11 @@ class PointLight : public Component
 public:
 	PointLight
 	(
+		const DirectX::XMVECTOR& position = { 0.0f, 0.0f, 0.0f, 1.0f },
 		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
 		float range = 100.0f,
 		const Attenuation& attenuation = { DEFAULT_CONSTANT_ATTENUATION, DEFAULT_LINEAR_ATTENUATION, DEFAULT_QUADRATIC_ATTENUATION }
-	) : m_lightData{ color, range, attenuation } {}
+	) : m_lightData{ position, color, range, attenuation } {}
 
 	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_pointLights.push_back(this); }
 
@@ -91,7 +92,7 @@ public:
 
 	PointLightConstBuffer& GetLightData()
 	{
-		m_lightData.worldMatrix = XMMatrixTranspose(m_owner->GetWorldMatrix());
+		m_lightData.position = m_owner->GetWorldPosition();
 		return m_lightData;
 	}
 };

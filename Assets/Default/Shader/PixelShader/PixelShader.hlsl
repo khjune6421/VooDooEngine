@@ -8,6 +8,7 @@ cbuffer AmbientLightConstBuffer : register(b0)
 
 struct PointLight
 {
+    float4 worldPos;
     float4 color; // w is intensity
     float range;
     
@@ -15,8 +16,6 @@ struct PointLight
     float aConstant;
     float aLinear;
     float aQuadratic;
-    
-    matrix worldMatrix;
 };
 
 cbuffer PointLightConstBuffer : register(b1)
@@ -38,8 +37,8 @@ float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = _MainTex.Sample(sampler_MainTex, input.uv);
     
-    float3 vecToLight = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), pointLights.worldMatrix).xyz - input.posWorld.xyz;
-    float diffuseFactor = saturate(dot(normalize(input.norm), normalize(vecToLight)));
+    float3 vecToLight = normalize(pointLights.worldPos.xyz - input.posWorld.xyz);
+    float diffuseFactor = saturate(dot(normalize(input.norm), vecToLight));
     float4 diffuseColor = pointLights.color * diffuseFactor;
     
     return texColor * (diffuseColor + ambientColor);
