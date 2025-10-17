@@ -90,9 +90,5 @@ public:
 	Attenuation GetAttenuation() const { return m_lightData.attenuation; }
 	void SetAttenuation(const Attenuation& attenuation) { m_lightData.attenuation = attenuation; }
 
-	PointLightConstBuffer& GetLightData()
-	{
-		m_lightData.position = m_owner->GetWorldPosition();
-		return m_lightData;
-	}
+	PointLightConstBuffer& GetLightData() { m_lightData.position = m_owner->GetWorldPosition(); return m_lightData; }
 };
