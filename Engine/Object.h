@@ -86,7 +86,7 @@ public:
 	template<typename T, typename... Args>
 	T* AddComponent(Args&&... args)
 	{
-		static_assert(std::is_base_of_v<Component, T>, "T must derive from IComponent");
+		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
 		auto component = std::make_unique<T>(std::forward<Args>(args)...);
 		T* componentPtr = component.get();
@@ -99,7 +99,7 @@ public:
 	template<typename T>
 	const T* GetComponent() const
 	{
-		static_assert(std::is_base_of_v<Component, T>, "T must derive from IComponent");
+		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
 		auto it = m_components.find(std::type_index(typeid(T)));
 		if (it != m_components.end()) return static_cast<const T*>(it->second.get());
@@ -109,7 +109,7 @@ public:
 	template<typename T>
 	bool RemoveComponent()
 	{
-		static_assert(std::is_base_of_v<Component, T>, "T must derive from IComponent");
+		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
 		auto it = m_components.find(std::type_index(typeid(T)));
 		if (it != m_components.end())
