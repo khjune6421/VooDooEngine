@@ -42,8 +42,8 @@ float4 main(PSInput input) : SV_TARGET
     float diffuseFactor = saturate(dot(norm, normalize(vecToLight)));
     
     float distance = length(vecToLight);
-    float3 attenuate_constants = float3(pointLights.aConstant, pointLights.aLinear, pointLights.aQuadratic);
-    float attenuate = 1.0f / dot(attenuate_constants, float3(1.0f, distance, distance * distance));
+    float3 attenuateConstants = float3(pointLights.aConstant, pointLights.aLinear, pointLights.aQuadratic);
+    float attenuate = 1.0f / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
     
     float4 diffuseColor = pointLights.color * diffuseFactor * attenuate * pointLights.color.w;
     
