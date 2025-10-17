@@ -44,7 +44,7 @@ public:
 		s_ambientColor.z += m_color.z * m_color.w;
 	}
 
-	static DirectX::XMFLOAT4& GetAmbientColor() { return s_ambientColor; }
+	static const DirectX::XMFLOAT4& GetAmbientColor() { return s_ambientColor; }
 };
 
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
@@ -56,6 +56,7 @@ struct Attenuation
 	float linear = DEFAULT_LINEAR_ATTENUATION;
 	float quadratic = DEFAULT_QUADRATIC_ATTENUATION;
 };
+constexpr int MAX_POINT_LIGHTS = 4;
 struct PointLightConstBuffer
 {
 	DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -63,6 +64,8 @@ struct PointLightConstBuffer
 	Attenuation attenuation = {};
 	DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
 };
+class PointLight;
+extern std::vector<PointLight*> g_pointLights;
 class PointLight : public Component
 {
 	PointLightConstBuffer m_lightData = {};
@@ -86,6 +89,9 @@ public:
 	Attenuation GetAttenuation() const { return m_lightData.attenuation; }
 	void SetAttenuation(const Attenuation& attenuation) { m_lightData.attenuation = attenuation; }
 
-	void GetLightData(PointLightConstBuffer* outData) { m_lightData.worldMatrix = m_owner->GetWorldMatrix(); outData = &m_lightData; }
+	PointLightConstBuffer& GetLightData()
+	{
+		m_lightData.worldMatrix = XMMatrixTranspose(m_owner->GetWorldMatrix());
+		return m_lightData;
+	}
 };
-extern std::vector<PointLight*> g_pointLights;

@@ -20,6 +20,8 @@ struct VSOutput
     float4 col : COLOR0;
     float3 norm : NORMAL0;
     float2 uv : TEXCOORD0;
+    
+    float4 posWorld : TEXCOORD1;
 };
 
 VSOutput main(VSInput input)
@@ -30,8 +32,10 @@ VSOutput main(VSInput input)
     
     output.pos = mul(input.pos0, WVP);
     output.col = input.col0;
-    output.norm = input.norm0;
+    output.norm = mul(float4(input.norm0, 0.0f), world).xyz;
     output.uv = input.uv0;
+    
+    output.posWorld = mul(input.pos0, world);
     
     return output;
 }

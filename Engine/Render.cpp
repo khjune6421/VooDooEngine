@@ -702,10 +702,11 @@ void Render::EngineUpdate()
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &g_defaultAmbientLight.GetAmbientColor(), 0, 0);
 	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
 
-	for (const auto& pointLight : g_pointLights)
-	{
-		m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &g_defaultAmbientLight.GetAmbientColor(), 0, 0);
-	}
+	PointLightConstBuffer lightData = {};
+	lightData = g_pointLights[0]->GetLightData();
+
+	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
 	UpdateRenderMode();
 }
@@ -738,6 +739,7 @@ void Render::DrawShapes()
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
 
 		MatrixConstBuffer constBufferData = {};
+		// inverse world matrix
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
 		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);

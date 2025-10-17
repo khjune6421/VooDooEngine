@@ -57,7 +57,7 @@ class Render
 
 	struct MatrixConstBuffer
 	{
-		DirectX::XMMATRIX world; // world matrix
+		DirectX::XMMATRIX world; // world inverse matrix
 		DirectX::XMMATRIX view; // view matrix
 		DirectX::XMMATRIX projection; // projection matrix
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
