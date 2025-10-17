@@ -29,24 +29,7 @@ D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
-D3D11_INPUT_ELEMENT_DESC Render::s_tripleInputLayoutDesc[TRIPLE_LAYOUT_SIZE] =
-{
-	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
-	{ "POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "COLOR", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "NORMAL", 1, DXGI_FORMAT_R32G32B32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
-	{ "POSITION", 2, DXGI_FORMAT_R32G32B32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "COLOR", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "NORMAL", 2, DXGI_FORMAT_R32G32B32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-};
-pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[2] = { { Render::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE }, { Render::s_tripleInputLayoutDesc, TRIPLE_LAYOUT_SIZE } };
+pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[1] = { { Render::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE } };
 
 D3D11_SAMPLER_DESC Render::s_defaultSamplerDesc =
 {
@@ -401,14 +384,6 @@ void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entry
 			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
 	}
-	filesystem::path tripleInputLayoutPath = vertexShaderPath / L"TripleInputLayout/";
-	if (filesystem::exists(tripleInputLayoutPath) && filesystem::is_directory(tripleInputLayoutPath))
-	{
-		for (const auto& entry : filesystem::directory_iterator(tripleInputLayoutPath))
-		{
-			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel, { MatrixBuffer, LightBuffer, AnimationBuffer }, TripleInputLayout);
-		}
-	}
 
 	if (filesystem::exists(geometryShaderPath) && filesystem::is_directory(geometryShaderPath))
 	{
@@ -548,7 +523,6 @@ void Render::LoadAllTextures(const std::filesystem::path texturePath)
 			m_textureMap[g_textureIdMap[textureName]] = texture;
 		}
 	}
-	else MessageBoxW(nullptr, L"Texture directory does not exist", L"Error", MB_OK);
 }
 
 void Render::CreateRasterState()
@@ -714,15 +688,24 @@ void Render::LoadDefaultShapes(const filesystem::path folderPath)
 
 void Render::EngineUpdate()
 {
-	if (!g_camera)
+	if (!g_camera) DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	else
 	{
-		DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-		return;
-	}
-	g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height); // Feels wasteful to do this every frame
+		g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height); // Feels wasteful to do this every frame // TODO: Fix this
 
-	s_viewMatrix = g_camera->GetViewMatrix();
-	s_projectionMatrix = g_camera->GetProjectionMatrix();
+		s_viewMatrix = g_camera->GetViewMatrix();
+		s_projectionMatrix = g_camera->GetProjectionMatrix();
+	}
+
+	// Ambient Light
+	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &g_defaultAmbientLight.GetAmbientColor(), 0, 0);
+	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
+
+	PointLightConstBuffer lightData = {};
+	lightData = g_pointLights[0]->GetLightData();
+
+	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
 	UpdateRenderMode();
 }
@@ -755,6 +738,7 @@ void Render::DrawShapes()
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
 
 		MatrixConstBuffer constBufferData = {};
+		// inverse world matrix
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
 		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
@@ -763,18 +747,18 @@ void Render::DrawShapes()
 		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 
-		LightConstBuffer lightData = {};
-		lightData.localPosition = XMVector3Transform(g_lightDatas[0].first->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
+		//LightConstBuffer lightData = {};
+		//lightData.localPosition = XMVector3Transform(g_lightDatas[0].first->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
 
-		lightData.ambientColor = g_lightDatas[0].second->ambientColor;
-		lightData.diffuseColor = g_lightDatas[0].second->diffuseColor;
+		//lightData.ambientColor = g_lightDatas[0].second->ambientColor;
+		//lightData.diffuseColor = g_lightDatas[0].second->diffuseColor;
 
-		lightData.range = g_lightDatas[0].second->range;
-		lightData.intensity = g_lightDatas[0].second->intensity;
-		lightData.attenuation = g_lightDatas[0].second->attenuation;
+		//lightData.range = g_lightDatas[0].second->range;
+		//lightData.intensity = g_lightDatas[0].second->intensity;
+		//lightData.attenuation = g_lightDatas[0].second->attenuation;
 
-		m_deviceContext->UpdateSubresource(m_constBuffers[LightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
-		m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[LightBuffer].GetAddressOf());
+		//m_deviceContext->UpdateSubresource(m_constBuffers[LightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
+		//m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[LightBuffer].GetAddressOf());
 
 		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
 
@@ -852,9 +836,9 @@ Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) 
 	CreateSamplerState();
 	CreateSampleShapes();
 
-	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[0]);
-	CreateConstBuffer(sizeof(LightConstBuffer), &m_constBuffers[1]);
-	CreateConstBuffer(sizeof(AnimationConstBuffer), &m_constBuffers[2]);
+	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[MatrixBuffer]);
+	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientLightBuffer]); // Ambient light buffer
+	CreateConstBuffer(sizeof(PointLightConstBuffer), &m_constBuffers[PointLightBuffer]); // Light buffer
 
 	static const filesystem::path defaultPath(L"../Assets/Default/");
 	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");

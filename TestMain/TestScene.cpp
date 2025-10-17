@@ -19,8 +19,8 @@ TestScene::TestScene(wstring dataFile)
 	m_objects.emplace_back(move(plane));
 
 	unique_ptr<Object> lightObj = make_unique<Object>();
-	lightObj->AddComponent<Light>();
-	lightObj->SetPosition(XMVECTOR{ 0.0f, 5.0f, 0.0f, 1.0f });
+	lightObj->SetPosition(XMVECTOR{ 5.0f, 5.0f, 0.0f, 1.0f });
+	lightObj->AddComponent<PointLight>();
 	lightObj->AddComponent<Shape>(L"Sphere");
 	m_objects.emplace_back(move(lightObj));
 
@@ -29,10 +29,9 @@ TestScene::TestScene(wstring dataFile)
 	{
 		for (const auto& pos : parser.GetPositions())
 		{
-			unique_ptr<Object> tree = make_unique<Tree>();
-			tree->AddComponent<Shape>(L"Tree", L"VertexShader", L"PixelShader", L"Tree");
+			unique_ptr<Object> tree = std::make_unique<Windmill>();
 			tree->SetPosition(XMVECTOR{ pos.x, pos.y, pos.z, 1.0f });
-			tree->SetRotation(XMVECTOR{ 0.0f, 3.14f, 0.0f, 0.0f });
+			tree->SetRotation(XMVECTOR{ 0.0f, 0.0f, 0.0f, 0.0f });
 			m_objects.emplace_back(move(tree));
 		}
 	}
