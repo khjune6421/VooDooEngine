@@ -523,7 +523,6 @@ void Render::LoadAllTextures(const std::filesystem::path texturePath)
 			m_textureMap[g_textureIdMap[textureName]] = texture;
 		}
 	}
-	else MessageBoxW(nullptr, L"Texture directory does not exist", L"Error", MB_OK);
 }
 
 void Render::CreateRasterState()
