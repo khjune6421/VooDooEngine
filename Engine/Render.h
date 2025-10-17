@@ -18,8 +18,11 @@
 
 class Object;
 extern Camera* g_camera;
+
 extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
-extern std::vector<std::pair<Object*, LightData*>> g_lightDatas;
+
+extern AmbientLight g_defaultAmbientLight;
+extern std::vector<PointLight*> g_pointLights;
 
 namespace VDGM
 {
@@ -54,51 +57,27 @@ class Render
 
 	struct MatrixConstBuffer
 	{
-		DirectX::XMMATRIX world; // world matrix
+		DirectX::XMMATRIX world; // world inverse matrix
 		DirectX::XMMATRIX view; // view matrix
 		DirectX::XMMATRIX projection; // projection matrix
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
 	};
-	struct LightConstBuffer // This does not compensate for changes in object scale // it just goes into local space of original object shape
-	{
-		DirectX::XMVECTOR localPosition;
-		DirectX::XMFLOAT4 ambientColor;
-		DirectX::XMFLOAT4 diffuseColor;
-
-		float range;
-		float intensity;
-		float attenuation;
-		int isBackfaceLighting;
-	};
-	struct AnimationConstBuffer
-	{
-		int currentShapeIndex;
-		int nextShapeIndex;
-		float interpolationFactor;
-
-		float padding;
-	};
-	enum ConstBufferField
+	enum ConstBufferType
 	{
 		MatrixBuffer = 0,
-		LightBuffer = 1,
-		AnimationBuffer = 2
+		AmbientLightBuffer = 1,
+		PointLightBuffer = 2
 	};
-
-	// 0: MatrixConstBuffer, 1: LightConstBuffer 2: AnimationConstBuffer
 	comPtr<ID3D11Buffer> m_constBuffers[3] = {};
 
 	// Input layouts // well this is cursed
 	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
-	constexpr static UINT TRIPLE_LAYOUT_SIZE = 12;
-	static D3D11_INPUT_ELEMENT_DESC s_tripleInputLayoutDesc[TRIPLE_LAYOUT_SIZE];
 	enum InputLayoutType
 	{
 		DefaultInputLayout = 0,
-		TripleInputLayout = 1
 	};
-	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[2];
+	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[1];
 
 	static D3D11_SAMPLER_DESC s_defaultSamplerDesc;
 	enum SamplerType
@@ -191,7 +170,7 @@ class Render
 
 	// Shader
 	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
-	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const std::vector<UINT> constBufferIds = { MatrixBuffer, LightBuffer }, const int layoutIndex = DefaultInputLayout);
+	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const std::vector<UINT> constBufferIds = { MatrixBuffer, AmbientLightBuffer }, const int layoutIndex = DefaultInputLayout);
 	void LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 
