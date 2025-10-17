@@ -53,6 +53,8 @@ Release/
 *.tmp
 *.temp
 *~
+*.dat
+*.jpg
 
 # OS generated files
 .DS_Store
