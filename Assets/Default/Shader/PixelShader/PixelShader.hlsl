@@ -37,9 +37,15 @@ float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = _MainTex.Sample(sampler_MainTex, input.uv);
     
-    float3 vecToLight = normalize(pointLights.worldPos.xyz - input.posWorld.xyz);
-    float diffuseFactor = saturate(dot(normalize(input.norm), vecToLight));
-    float4 diffuseColor = pointLights.color * diffuseFactor;
+    float3 vecToLight = pointLights.worldPos.xyz - input.posWorld.xyz;
+    float3 norm = normalize(input.norm);
+    float diffuseFactor = saturate(dot(norm, normalize(vecToLight)));
+    
+    float distance = length(vecToLight);
+    float3 attenuate_constants = float3(pointLights.aConstant, pointLights.aLinear, pointLights.aQuadratic);
+    float attenuate = 1.0f / dot(attenuate_constants, float3(1.0f, distance, distance * distance));
+    
+    float4 diffuseColor = pointLights.color * diffuseFactor * attenuate * pointLights.color.w;
     
     return texColor * (diffuseColor + ambientColor);
 }

@@ -74,7 +74,7 @@ public:
 	PointLight
 	(
 		const DirectX::XMVECTOR& position = { 0.0f, 0.0f, 0.0f, 1.0f },
-		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
+		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 10.0f },
 		float range = 100.0f,
 		const Attenuation& attenuation = { DEFAULT_CONSTANT_ATTENUATION, DEFAULT_LINEAR_ATTENUATION, DEFAULT_QUADRATIC_ATTENUATION }
 	) : m_lightData{ position, color, range, attenuation } {}
