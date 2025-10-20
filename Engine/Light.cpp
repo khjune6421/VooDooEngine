@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DirectX;
 
-XMFLOAT4 AmbientLight::s_ambientColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+XMFLOAT4 AmbientLight::s_ambientColor = { 0.0f, 0.0f, 0.0f, 1.0f }; // The w value(1) is important // it's the only value that does not get multiplied in shader
 DirectionalLightConstBuffer DirectionalLight::s_lightData = {};
 
 void AmbientLight::AddColor() const
