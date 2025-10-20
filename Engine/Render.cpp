@@ -122,7 +122,6 @@ void Render::CreateDepthStencil()
 	}
 
 	D3D11_TEXTURE2D_DESC depthStencilDesc = {};
-
 	depthStencilDesc.Width = m_deviceInfo.displayMode.Width;
 	depthStencilDesc.Height = m_deviceInfo.displayMode.Height;
 	depthStencilDesc.ArraySize = 1;
@@ -139,7 +138,6 @@ void Render::CreateDepthStencil()
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
 	depthStencilViewDesc.Format = depthStencilDesc.Format;
 	depthStencilViewDesc.ViewDimension = (m_deviceInfo.antiAliasingLevel > 1) ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D;
-	depthStencilViewDesc.Texture2D.MipSlice = 0;
 	if (FAILED(m_device->CreateDepthStencilView(m_depthStencilBuffer.Get(), &depthStencilViewDesc, m_depthStencilView.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create depth stencil view", L"Error", MB_OK);
