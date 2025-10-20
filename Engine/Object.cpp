@@ -61,9 +61,6 @@ Object::~Object()
 	}
 	for (auto& child : m_childrens) child->m_parent = nullptr;
 	m_childrens.clear();
-
-	//for (auto& componentPair : m_components) componentPair.second->OnDetached(); // This is done automatically by IComponent's destructor
-	//m_components.clear();
 }
 
 void Object::SetPosition(const XMVECTOR& pos)

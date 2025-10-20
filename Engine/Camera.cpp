@@ -12,6 +12,7 @@ Camera::Camera(float fov, UINT screenWidth, UINT screenHeight, float nearPlane, 
 	m_aspectRatio(static_cast<float>(screenWidth) / static_cast<float>(screenHeight)),
 	m_projectionMatrix(XMMatrixPerspectiveFovLH(m_fov, m_aspectRatio, m_nearPlane, m_farPlane))
 {
+	// How should I handle multiple cameras? // send an error message?
 	g_camera = this;
 }
 

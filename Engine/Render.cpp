@@ -265,10 +265,7 @@ void Render::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.StructureByteStride = 0;
 	if (FAILED(m_device->CreateBuffer(&bufferDesc, nullptr, buffer->GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create constant buffer", L"Error", MB_OK);
@@ -584,74 +581,6 @@ void Render::CreateSamplerState()
 	}
 }
 
-void Render::CreateSampleShapes()
-{
-	if (g_meshIdMap.find(L"GreenPlane") == g_meshIdMap.end()) g_meshIdMap[L"GreenPlane"] = s_nextShapeId++;
-	Vertex plainVertices[] =
-	{
-		{ XMFLOAT3(-50.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(50.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-
-		{ XMFLOAT3(-50.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-50.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f) }
-	};
-	CreateVertexBuffer(sizeof(plainVertices), &m_shapeVertexBufferMap[g_meshIdMap[L"GreenPlane"]].first, plainVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_meshIdMap[L"GreenPlane"]].second = 6;
-
-	if (g_meshIdMap.find(L"TriHouse") == g_meshIdMap.end()) g_meshIdMap[L"TriHouse"] = s_nextShapeId++;
-	Vertex triHouseVertices[] =
-	{
-		// Triangles
-		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-
-		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-
-		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-
-		{ XMFLOAT3(0.0f, 2.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-
-		// Square
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
-
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) }
-	};
-	CreateVertexBuffer(sizeof(triHouseVertices), &m_shapeVertexBufferMap[g_meshIdMap[L"TriHouse"]].first, triHouseVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_meshIdMap[L"TriHouse"]].second = 18;
-
-	if (g_meshIdMap.find(L"WindmillWing") == g_meshIdMap.end()) g_meshIdMap[L"WindmillWing"] = s_nextShapeId++;
-	Vertex wingVertices[] =
-	{
-		{ XMFLOAT3(-1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -0.5f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -0.5f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-0.5f, 1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.5f, 1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(0.5f, -1.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) },
-		{ XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f) }
-	};
-	CreateVertexBuffer(sizeof(wingVertices), &m_shapeVertexBufferMap[g_meshIdMap[L"WindmillWing"]].first, wingVertices, sizeof(Vertex));
-	m_shapeVertexBufferMap[g_meshIdMap[L"WindmillWing"]].second = 12;
-}
-
 void Render::LoadShapeFile(const filesystem::path filePath)
 {
 	ObjFileParser shapes(filePath.c_str());
@@ -698,14 +627,15 @@ void Render::EngineUpdate()
 	}
 
 	// Ambient Light
-	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &g_defaultAmbientLight.GetAmbientColor(), 0, 0);
-	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
+	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &AmbientLight::s_ambientColor, 0, 0); // Playing with fire // this only works because s_ambientColor is static
+	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
 
-	PointLightConstBuffer lightData = {};
-	lightData = g_pointLights[0]->GetLightData();
+	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &DirectionalLight::s_lightData, 0, 0);
+	m_deviceContext->VSSetConstantBuffers(2, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
 
-	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
+	// Point Lights // later add for loop
+	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &g_pointLights[0]->GetLightData(), 0, 0);
+	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
 	UpdateRenderMode();
 }
@@ -746,19 +676,6 @@ void Render::DrawShapes()
 
 		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
-
-		//LightConstBuffer lightData = {};
-		//lightData.localPosition = XMVector3Transform(g_lightDatas[0].first->GetWorldPosition(), XMMatrixInverse(nullptr, worldMatrix));
-
-		//lightData.ambientColor = g_lightDatas[0].second->ambientColor;
-		//lightData.diffuseColor = g_lightDatas[0].second->diffuseColor;
-
-		//lightData.range = g_lightDatas[0].second->range;
-		//lightData.intensity = g_lightDatas[0].second->intensity;
-		//lightData.attenuation = g_lightDatas[0].second->attenuation;
-
-		//m_deviceContext->UpdateSubresource(m_constBuffers[LightBuffer].Get(), 0, nullptr, &lightData, 0, 0);
-		//m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[LightBuffer].GetAddressOf());
 
 		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
 
@@ -834,11 +751,12 @@ Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) 
 	// Initialize render
 	CreateRasterState();
 	CreateSamplerState();
-	CreateSampleShapes();
 
+	// Initialize constant buffers
 	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[MatrixBuffer]);
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientLightBuffer]); // Ambient light buffer
-	CreateConstBuffer(sizeof(PointLightConstBuffer), &m_constBuffers[PointLightBuffer]); // Light buffer
+	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
+	CreateConstBuffer(sizeof(PointLightConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
 
 	static const filesystem::path defaultPath(L"../Assets/Default/");
 	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");

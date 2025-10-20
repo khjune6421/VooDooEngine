@@ -7,44 +7,70 @@
 
 #include "Object.h"
 
-class AmbientLight : public Component
+class Light : public Component
 {
-	static DirectX::XMFLOAT4 s_ambientColor;
-	DirectX::XMFLOAT4 m_color = { 0.0f, 0.0f, 0.0f, 1.0f };
+protected:
+	DirectX::XMFLOAT3 m_color = { 0.0f, 0.0f, 0.0f };
+	float m_intensity = 1.0f;
 
 public:
-	AmbientLight(const DirectX::XMFLOAT4& color = { 0.25f, 0.25f, 0.25f, 1.0f }) : m_color(color) {}
+	Light(const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f }, const float intensity = 1.0f)
+		: m_color(color), m_intensity(intensity) {}
 
-	void OnAttached(class Object* owner) override
-	{
-		Component::OnAttached(owner);
-		s_ambientColor.x += m_color.x * m_color.w;
-		s_ambientColor.y += m_color.y * m_color.w;
-		s_ambientColor.z += m_color.z * m_color.w;
-	}
-	void OnDetached() override
-	{
-		Component::OnDetached();
-		s_ambientColor.x -= m_color.x * m_color.w;
-		s_ambientColor.y -= m_color.y * m_color.w;
-		s_ambientColor.z -= m_color.z * m_color.w;
-	}
+	virtual DirectX::XMFLOAT3 GetColor() const { return m_color; }
+	virtual void SetColor(const DirectX::XMFLOAT3& color) { m_color = color; }
 
+	virtual float GetIntensity() const { return m_intensity; }
+	virtual void SetIntensity(float intensity) { m_intensity = intensity; }
+};
 
-	DirectX::XMFLOAT4 GetColor() const { return m_color; }
-	void SetColor(const DirectX::XMFLOAT4& color)
-	{ 
-		s_ambientColor.x -= m_color.x * m_color.w;
-		s_ambientColor.y -= m_color.y * m_color.w;
-		s_ambientColor.z -= m_color.z * m_color.w;
+class AmbientLight : public Light
+{
+	void AddColor() const;
+	void RemoveColor() const;
 
-		m_color = color; 
-		s_ambientColor.x += m_color.x * m_color.w;
-		s_ambientColor.y += m_color.y * m_color.w;
-		s_ambientColor.z += m_color.z * m_color.w;
-	}
+	friend class Render;
+	static DirectX::XMFLOAT4 s_ambientColor;
+
+public:
+	AmbientLight
+	(
+		const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f },
+		const float intensity = 1.0f
+	) : Light(color, intensity) { AddColor(); }
+
+	void OnAttached(class Object* owner) override { Component::OnAttached(owner); AddColor(); }
+	void OnDetached() override { Component::OnDetached(); RemoveColor(); }
+
+	void SetColor(const DirectX::XMFLOAT3& color) override { RemoveColor(); m_color = color; AddColor(); }
+	void SetIntensity(float intensity) override { RemoveColor(); m_intensity = intensity; AddColor(); };
 
 	static const DirectX::XMFLOAT4& GetAmbientColor() { return s_ambientColor; }
+};
+
+struct DirectionalLightConstBuffer
+{
+	DirectX::XMVECTOR direction = { 0.0f, -1.0f, 0.0f, 0.0f };
+	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
+};
+class DirectionalLight : public Light
+{
+	friend class Render;
+	static DirectionalLightConstBuffer s_lightData;
+
+	void UpdateColor() { s_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 1.0f }; }
+
+public:
+	DirectionalLight
+	(
+		const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f },
+		const float intensity = 1.0f,
+		const DirectX::XMVECTOR & direction = { 1.0f, -1.0f, 0.0f, 0.0f }
+	) : Light(color, intensity) { UpdateColor(); s_lightData.direction = DirectX::XMVector3Normalize(direction); }
+
+	void SetColor(const DirectX::XMFLOAT3& color) override { m_color = color; UpdateColor(); }
+	void SetIntensity(float intensity) override { m_intensity = intensity; UpdateColor(); }
+	void SetDirection(const DirectX::XMVECTOR& direction) { s_lightData.direction = DirectX::XMVector3Normalize(direction); }
 };
 
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
@@ -60,29 +86,31 @@ constexpr int MAX_POINT_LIGHTS = 4;
 struct PointLightConstBuffer
 {
 	DirectX::XMVECTOR position = { 0.0f, 0.0f, 0.0f, 1.0f };
-	DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
 	float range = 100.0f;
 	Attenuation attenuation = {};
 };
 class PointLight;
 extern std::vector<PointLight*> g_pointLights;
-class PointLight : public Component
+class PointLight : public Light
 {
 	PointLightConstBuffer m_lightData = {};
+
+	void UpdateColor() { m_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 1.0f }; }
 
 public:
 	PointLight
 	(
-		const DirectX::XMVECTOR& position = { 0.0f, 0.0f, 0.0f, 1.0f },
-		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 5.0f },
-		float range = 100.0f,
-		const Attenuation& attenuation = { DEFAULT_CONSTANT_ATTENUATION, DEFAULT_LINEAR_ATTENUATION, DEFAULT_QUADRATIC_ATTENUATION }
-	) : m_lightData{ position, color, range, attenuation } {}
+		const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f },
+		const float intensity = 1.0f,
+		const float range = 100.0f,
+		const Attenuation & attenuation = { DEFAULT_CONSTANT_ATTENUATION, DEFAULT_LINEAR_ATTENUATION, DEFAULT_QUADRATIC_ATTENUATION }
+	) : Light(color, intensity) { UpdateColor(); m_lightData.range = range; m_lightData.attenuation = attenuation; }
 
 	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_pointLights.push_back(this); }
 
-	DirectX::XMFLOAT4 GetColor() const { return m_lightData.color; }
-	void SetColor(const DirectX::XMFLOAT4& color) { m_lightData.color = color; }
+	void SetColor(const DirectX::XMFLOAT3& color) override { m_color = color; UpdateColor(); }
+	void SetIntensity(float intensity) override { m_intensity = intensity; UpdateColor(); }
 
 	float GetRange() const { return m_lightData.range; }
 	void SetRange(float range) { m_lightData.range = range; }

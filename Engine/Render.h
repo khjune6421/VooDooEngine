@@ -20,8 +20,6 @@ class Object;
 extern Camera* g_camera;
 
 extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
-
-extern AmbientLight g_defaultAmbientLight;
 extern std::vector<PointLight*> g_pointLights;
 
 namespace VDGM
@@ -64,36 +62,34 @@ class Render
 	};
 	enum ConstBufferType
 	{
-		MatrixBuffer = 0,
-		AmbientLightBuffer = 1,
-		PointLightBuffer = 2
+		MatrixBuffer,
+		AmbientLightBuffer,
+		DirectionalLightBuffer,
+		PointLightBuffer,
+
+		ConstBufferCount
 	};
-	comPtr<ID3D11Buffer> m_constBuffers[3] = {};
+	comPtr<ID3D11Buffer> m_constBuffers[ConstBufferCount] = {};
 
 	// Input layouts // well this is cursed
 	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
 	enum InputLayoutType
 	{
-		DefaultInputLayout = 0,
+		DefaultInputLayout,
+
+		InputLayoutCount
 	};
-	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[1];
+	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[InputLayoutCount];
 
 	static D3D11_SAMPLER_DESC s_defaultSamplerDesc;
 	enum SamplerType
 	{
-		DefaultSampler = 0
-	};
-	comPtr<ID3D11SamplerState> m_samplers[1] = {};
+		DefaultSampler,
 
-	// Render
-	enum class RasterState
-	{
-		Wireframe_CullNone = 0,
-		Wireframe_CullBack = 1,
-		Solid_CullNone = 2,
-		Solid_CullBack = 3
+		SamplerCount
 	};
+	comPtr<ID3D11SamplerState> m_samplers[SamplerCount] = {};
 
 	// Variables
 	HWND m_hWnd = nullptr;
@@ -122,9 +118,9 @@ class Render
 	static UINT s_vertexShaderId;
 	enum VertexShaderType
 	{
-		VertexShader = 0,
-		ConstBuffers = 1,
-		InputLayout = 2
+		VertexShader,
+		ConstBuffers,
+		InputLayout
 	};
 	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, std::vector<UINT>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 
@@ -138,8 +134,16 @@ class Render
 	std::unordered_map<UINT, comPtr<ID3D11ShaderResourceView>> m_textureMap;
 
 	// Render
-	// 0: Wireframe CullNone, 1: Wireframe CullBack, 2: Solid CullNone, 3: Solid CullBack
-	comPtr<ID3D11RasterizerState> g_rasterState[4] = { nullptr, nullptr, nullptr, nullptr };
+	enum RasterState
+	{
+		Wireframe_CullNone,
+		Wireframe_CullBack,
+		Solid_CullNone,
+		Solid_CullBack,
+
+		RasterStateCount
+	};
+	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
 	RasterState m_currentRasterState = RasterState::Solid_CullNone;
 
 
@@ -180,7 +184,6 @@ class Render
 	void CreateRasterState();
 	void CreateSamplerState();
 
-	void CreateSampleShapes();
 	void LoadShapeFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
