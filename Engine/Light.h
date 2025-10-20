@@ -76,8 +76,8 @@ public:
 };
 
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
-constexpr float DEFAULT_LINEAR_ATTENUATION = 0.09f;
-constexpr float DEFAULT_QUADRATIC_ATTENUATION = 0.032f;
+constexpr float DEFAULT_LINEAR_ATTENUATION = 0.1f;
+constexpr float DEFAULT_QUADRATIC_ATTENUATION = 0.05f;
 struct Attenuation
 {
 	float constant = DEFAULT_CONSTANT_ATTENUATION;
