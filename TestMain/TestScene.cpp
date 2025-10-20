@@ -16,14 +16,14 @@ TestScene::TestScene(wstring dataFile)
 	m_windmill->SetScale(XMFLOAT3{ 1.5f, 1.5f, 1.5f });
 
 	unique_ptr<Object> plane = make_unique<Object>();
-	plane->AddComponent<Shape>(L"Plane", L"VertexShader", L"PixelShader", L"Brick");
+	plane->AddComponent<Shape>(L"PlaneX10", L"VertexShader", L"PixelShader", L"Brick");
 	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 
 	unique_ptr<Object> lightObj = make_unique<Object>();
 	lightObj->SetPosition(XMVECTOR{ 5.0f, 5.0f, 0.0f, 1.0f });
 	//lightObj->AddComponent<AmbientLight>(XMFLOAT3{ 1.0f, 1.0f, 1.0f }, 0.1f);
-	//lightObj->AddComponent<DirectionalLight>(XMFLOAT3{ 1.0f, 1.0f, 1.0f }, 0.1f, XMVECTOR{ -1.0f, -1.0f, 1.0f, 0.0f });
+	lightObj->AddComponent<DirectionalLight>(XMFLOAT3{ 1.0f, 1.0f, 1.0f }, 0.5f, XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
 	lightObj->AddComponent<Shape>(L"Sphere");
 	m_objects.emplace_back(move(lightObj));
 
@@ -32,9 +32,10 @@ TestScene::TestScene(wstring dataFile)
 	{
 		for (const auto& pos : parser.GetPositions())
 		{
-			unique_ptr<Object> tree = std::make_unique<Windmill>();
+			unique_ptr<Object> tree = make_unique<Tree>();
+			tree->AddComponent<Shape>(L"Tree", L"VertexShader", L"PixelShader", L"Tree");
 			tree->SetPosition(XMVECTOR{ pos.x, pos.y, pos.z, 1.0f });
-			tree->SetRotation(XMVECTOR{ 0.0f, 0.0f, 0.0f, 0.0f });
+			tree->SetRotation(XMVECTOR{ 0.0f, 3.14f, 0.0f, 0.0f });
 			m_objects.emplace_back(move(tree));
 		}
 	}

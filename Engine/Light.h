@@ -65,11 +65,13 @@ public:
 	(
 		const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f },
 		const float intensity = 1.0f,
-		const DirectX::XMVECTOR & direction = { 1.0f, -1.0f, 0.0f, 0.0f }
+		const DirectX::XMVECTOR& direction = { 1.0f, -1.0f, 0.0f, 0.0f }
 	) : Light(color, intensity) { UpdateColor(); s_lightData.direction = DirectX::XMVector3Normalize(direction); }
 
 	void SetColor(const DirectX::XMFLOAT3& color) override { m_color = color; UpdateColor(); }
 	void SetIntensity(float intensity) override { m_intensity = intensity; UpdateColor(); }
+
+	DirectX::XMVECTOR GetDirection() const { return s_lightData.direction; }
 	void SetDirection(const DirectX::XMVECTOR& direction) { s_lightData.direction = DirectX::XMVector3Normalize(direction); }
 };
 

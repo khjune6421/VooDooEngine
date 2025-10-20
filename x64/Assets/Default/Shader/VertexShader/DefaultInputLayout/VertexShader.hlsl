@@ -6,6 +6,17 @@ cbuffer TestConstBuffer : register(b0)
     matrix WVP;
 }
 
+cbuffer AmbientLightConstBuffer : register(b1)
+{
+    float4 ambientColor;
+}
+
+cbuffer DirectionalLightConstBuffer : register(b2) // Just one directional light
+{
+    float4 dirLightDirection;
+    float4 dirLightColor;
+}
+
 struct VSInput
 {
     float4 pos0 : POSITION0;
@@ -21,7 +32,8 @@ struct VSOutput
     float3 norm : NORMAL0;
     float2 uv : TEXCOORD0;
     
-    float4 posWorld : TEXCOORD1;
+    float4 light : TEXCOORD1;
+    float4 posWorld : WORLDPOS0;
 };
 
 VSOutput main(VSInput input)
@@ -32,9 +44,11 @@ VSOutput main(VSInput input)
     
     output.pos = mul(input.pos0, WVP);
     output.col = input.col0;
-    output.norm = mul(float4(input.norm0, 0.0f), world).xyz;
+    output.norm = normalize(mul(float4(input.norm0, 0.0f), world).xyz);
     output.uv = input.uv0;
     
+    float4 diffuseColor = dirLightColor * saturate(dot(output.norm, -dirLightDirection.xyz));
+    output.light = ambientColor + diffuseColor;
     output.posWorld = mul(input.pos0, world);
     
     return output;
