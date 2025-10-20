@@ -144,7 +144,7 @@ void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this 
 
 	float pitch = asinf(clamp(-dirY, -1.0f, 1.0f));
 	float yaw = atan2f(dirX, dirZ);
-	float roll = 0.0f;
+	float roll = 0.0f; // No roll
 
 	m_rotation = XMVectorSet(pitch, yaw, roll, 0.0f);
 	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);

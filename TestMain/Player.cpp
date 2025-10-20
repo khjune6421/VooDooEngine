@@ -4,7 +4,7 @@ using namespace DirectX;
 
 Player::Player()
 {
-	AddComponent<Shape>(L"Player");
+	AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Monkey");
 }
 
 void Player::Update(float deltaTime)
