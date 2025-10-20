@@ -97,12 +97,12 @@ public:
 		return componentPtr;
 	}
 	template<typename T>
-	const T* GetComponent() const
+	T* GetComponent() const
 	{
 		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
 		auto it = m_components.find(std::type_index(typeid(T)));
-		if (it != m_components.end()) return static_cast<const T*>(it->second.get());
+		if (it != m_components.end()) return static_cast<T*>(it->second.get());
 
 		return nullptr;
 	}

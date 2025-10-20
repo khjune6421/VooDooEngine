@@ -56,10 +56,25 @@ void TestScene::Update(float deltaTime)
 	if (GetAsyncKeyState(VK_F6) & 0x0001)
 	{
 		m_backgroundColor = XMFLOAT4{ m_morningColor.x, m_morningColor.y, m_morningColor.z, 1.0f };
-		if (m_lightObj)
-		{
-			auto ambientLight = m_lightObj->GetComponent<AmbientLight>();
-			auto directionalLight = m_lightObj->GetComponent<DirectionalLight>();
-		}
+		auto ambientLight = m_lightObj->GetComponent<AmbientLight>();
+		ambientLight->SetColor(m_morningColor);
+		auto directionalLight = m_lightObj->GetComponent<DirectionalLight>();
+		directionalLight->SetColor(m_morningColor);
+	}
+	if (GetAsyncKeyState(VK_F7) & 0x0001)
+	{
+		m_backgroundColor = XMFLOAT4{ m_noonColor.x, m_noonColor.y, m_noonColor.z, 1.0f };
+		auto ambientLight = m_lightObj->GetComponent<AmbientLight>();
+		ambientLight->SetColor(m_noonColor);
+		auto directionalLight = m_lightObj->GetComponent<DirectionalLight>();
+		directionalLight->SetColor(m_noonColor);
+	}
+	if (GetAsyncKeyState(VK_F8) & 0x0001)
+	{
+		m_backgroundColor = XMFLOAT4{ m_nightColor.x, m_nightColor.y, m_nightColor.z, 1.0f };
+		auto ambientLight = m_lightObj->GetComponent<AmbientLight>();
+		ambientLight->SetColor(m_nightColor);
+		auto directionalLight = m_lightObj->GetComponent<DirectionalLight>();
+		directionalLight->SetColor(m_nightColor);
 	}
 }
