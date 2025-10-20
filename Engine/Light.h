@@ -51,14 +51,14 @@ public:
 struct DirectionalLightConstBuffer
 {
 	DirectX::XMVECTOR direction = { 0.0f, -1.0f, 0.0f, 0.0f };
-	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
 class DirectionalLight : public Light
 {
 	friend class Render;
 	static DirectionalLightConstBuffer s_lightData;
 
-	void UpdateColor() { s_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 1.0f }; }
+	void UpdateColor() { s_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f }; }
 
 public:
 	DirectionalLight
@@ -86,7 +86,7 @@ constexpr int MAX_POINT_LIGHTS = 4;
 struct PointLightConstBuffer
 {
 	DirectX::XMVECTOR position = { 0.0f, 0.0f, 0.0f, 1.0f };
-	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 0.0f };
 	float range = 100.0f;
 	Attenuation attenuation = {};
 };
@@ -96,7 +96,7 @@ class PointLight : public Light
 {
 	PointLightConstBuffer m_lightData = {};
 
-	void UpdateColor() { m_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 1.0f }; }
+	void UpdateColor() { m_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f }; }
 
 public:
 	PointLight
