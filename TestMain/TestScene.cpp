@@ -23,7 +23,7 @@ TestScene::TestScene(wstring dataFile)
 	unique_ptr<Object> lightObj = make_unique<Object>();
 	lightObj->SetPosition(XMVECTOR{ 5.0f, 5.0f, 0.0f, 1.0f });
 	//lightObj->AddComponent<AmbientLight>(XMFLOAT3{ 1.0f, 1.0f, 1.0f }, 0.1f);
-	lightObj->AddComponent<DirectionalLight>(XMFLOAT3{ 1.0f, 1.0f, 1.0f }, 0.5f, XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
+	lightObj->AddComponent<DirectionalLight>(XMFLOAT3{ 1.0f, 1.0f, 1.0f }, 0.25f, XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
 	lightObj->AddComponent<Shape>(L"Sphere");
 	m_objects.emplace_back(move(lightObj));
 

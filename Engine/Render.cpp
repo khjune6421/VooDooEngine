@@ -246,9 +246,7 @@ void Render::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, c
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.CPUAccessFlags = 0;
 	bufferDesc.StructureByteStride = stride;
 
 	D3D11_SUBRESOURCE_DATA subresourceData = {};
@@ -369,11 +367,11 @@ void Render::DisplayDeviceInfo()
 
 void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
 {
-	filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
-	filesystem::path geometryShaderPath = shaderPath / L"GeometryShader/";
-	filesystem::path pixelShaderPath = shaderPath / L"PixelShader/";
+	const filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
+	const filesystem::path geometryShaderPath = shaderPath / L"GeometryShader/";
+	const filesystem::path pixelShaderPath = shaderPath / L"PixelShader/";
 
-	filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
+	const filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
 	if (filesystem::exists(defaultInputLayoutPath) && filesystem::is_directory(defaultInputLayoutPath))
 	{
 		for (const auto& entry : filesystem::directory_iterator(defaultInputLayoutPath))
