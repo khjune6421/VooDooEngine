@@ -259,6 +259,7 @@ void Render::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
 	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
 	if (FAILED(m_device->CreateBuffer(&bufferDesc, nullptr, buffer->GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create constant buffer", L"Error", MB_OK);
@@ -844,7 +845,7 @@ void Render::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, fl
 		comPtr<ID3D11DepthStencilState> currentDepthState;
 		m_deviceContext->OMGetDepthStencilState(&currentDepthState, nullptr);
 
-		// This fuckes up the depth testing // considering a different way to draw text
+		// This fuckes up depth testing // considering a different way to draw text
 		m_SpriteBatchMap[fontName]->Begin();
 		m_SpriteFontMap[fontName]->DrawString(m_SpriteBatchMap[fontName].get(), buffer, position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
 		m_SpriteBatchMap[fontName]->End();
