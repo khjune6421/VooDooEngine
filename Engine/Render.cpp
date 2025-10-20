@@ -60,7 +60,6 @@ void Render::CreateDeviceSwapChain()
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	swapChainDesc.SampleDesc.Count = m_deviceInfo.antiAliasingLevel;
-	swapChainDesc.SampleDesc.Quality = 0;
 
 	if
 		(
@@ -126,15 +125,11 @@ void Render::CreateDepthStencil()
 
 	depthStencilDesc.Width = m_deviceInfo.displayMode.Width;
 	depthStencilDesc.Height = m_deviceInfo.displayMode.Height;
-	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
+	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	depthStencilDesc.SampleDesc.Count = m_deviceInfo.antiAliasingLevel;
-	depthStencilDesc.SampleDesc.Quality = 0; // Dont tuch this
-	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthStencilDesc.CPUAccessFlags = 0;
-	depthStencilDesc.MiscFlags = 0;
 	if (FAILED(m_device->CreateTexture2D(&depthStencilDesc, nullptr, m_depthStencilBuffer.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create depth stencil texture", L"Error", MB_OK);
