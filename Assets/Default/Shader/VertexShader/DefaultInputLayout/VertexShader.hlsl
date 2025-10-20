@@ -11,7 +11,7 @@ cbuffer AmbientLightConstBuffer : register(b1)
     float4 ambientColor;
 }
 
-cbuffer DirectionalLightConstBuffer : register(b2) // Just one directional light for now
+cbuffer DirectionalLightConstBuffer : register(b2) // Just one directional light
 {
     float4 dirLightDirection;
     float4 dirLightColor;
