@@ -852,13 +852,11 @@ void Render::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, fl
 	}
 }
 
-constexpr XMFLOAT4 CLEAR_COLOR = { 0.5f, 0.5f, 0.5f, 1.0f };
-
 void Render::SceneRender()
 {
 	EngineUpdate();
 
-	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, CLEAR_COLOR, 1.0f, 0);
+	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
 	DrawObjects();
 
