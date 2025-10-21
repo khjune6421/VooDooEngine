@@ -12,8 +12,15 @@ TestScene::TestScene(wstring dataFile)
 	m_camera->AddComponent<Camera>();
 
 	m_player->AddChild(m_camera.get());
-	m_player->SetPosition(XMVECTOR{ 0.0f, 1.0f, 0.0f, 1.0f });
-	m_player->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 1.0f, 1.0f }, 3.0f);
+	m_player->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
+
+	m_torch = make_unique<Object>();
+	m_torch->AddComponent<Shape>(L"Sphere");
+	m_torch->SetScale(XMFLOAT3{ 0.1f, 0.1f, 0.1f });
+	m_torch->SetPosition(XMVECTOR{ 1.0f, 2.5f, 0.0f, 1.0f });
+	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 5.0f);
+	m_player->AddChild(m_torch.get());
+
 	m_windmill->SetPosition(XMVECTOR{ 5.0f, 0.0f, 5.0f, 1.0f });
 	m_windmill->SetScale(XMFLOAT3{ 1.5f, 1.5f, 1.5f });
 
@@ -35,7 +42,7 @@ TestScene::TestScene(wstring dataFile)
 		for (const auto& pos : parser.GetPositions())
 		{
 			unique_ptr<Object> tree = make_unique<Tree>();
-			tree->AddComponent<Shape>(L"Tree", L"VertexShader", L"PixelShader", L"Tree");
+			tree->AddComponent<Shape>(L"Tree", L"VertexShader", L"PixelShader", L"Lilypads");
 			tree->SetPosition(XMVECTOR{ pos.x, pos.y, pos.z, 1.0f });
 			tree->SetRotation(XMVECTOR{ 0.0f, 3.14f, 0.0f, 0.0f });
 			m_objects.emplace_back(move(tree));

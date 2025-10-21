@@ -17,6 +17,7 @@ class TestScene : public Scene
 	std::unique_ptr<Object> m_camera = std::make_unique<Object>();
 
 	std::unique_ptr<Object> m_lightObj = nullptr;
+	std::unique_ptr<Object> m_torch = nullptr;
 
 public:
 	TestScene(std::wstring dataFile);
