@@ -46,7 +46,7 @@ float4 main(PSInput input) : SV_TARGET
     float attenuate = spot / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
     
     float diffuseFactor = saturate(dot(input.norm, vecToLight));
-    float4 diffuseColor = pointLights.color * diffuseFactor * attenuate; // This can be optimized further
+    float4 diffuseColor = pointLights.color * diffuseFactor * attenuate; // This could be optimized further
     
     return texColor * (diffuseColor + input.light);
 }
