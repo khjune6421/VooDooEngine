@@ -17,8 +17,9 @@ TestScene::TestScene()
 	m_torch = make_unique<Object>();
 	m_torch->AddComponent<Shape>(L"Sphere");
 	m_torch->SetScale(XMFLOAT3{ 0.1f, 0.1f, 0.1f });
-	m_torch->SetPosition(XMVECTOR{ 1.0f, 2.5f, 0.0f, 1.0f });
-	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 3.0f, 30.0f);
+	m_torch->SetPosition(XMVECTOR{ 1.0f, 2.5f, -1.0f, 1.0f });
+	m_torch->LookAt(XMVECTOR{ 1.0f, 2.0f, 1.0f, 1.0f });
+	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 5.0f, 30.0f);
 	m_player->AddChild(m_torch.get());
 
 	m_windmill->SetPosition(XMVECTOR{ 5.0f, 0.0f, 5.0f, 1.0f });
@@ -43,7 +44,7 @@ TestScene::TestScene()
 		unique_ptr<Object> tree = make_unique<Tree>();
 		tree->AddComponent<Shape>(L"Tree", L"VertexShader", L"PixelShader", L"Lilypads");
 		tree->SetPosition(XMVECTOR{ x, 0.0f, z, 1.0f });
-		tree->SetRotation(XMVECTOR{ 0.0f, 3.14f, 0.0f, 0.0f });
+		tree->SetRotation(XMVECTOR{ 0.0f, XM_PI, 0.0f, 0.0f });
 		m_objects.emplace_back(move(tree));
 	}
 }
