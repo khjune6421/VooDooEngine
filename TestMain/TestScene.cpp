@@ -89,4 +89,7 @@ void TestScene::Update(float deltaTime)
 
 	if (GetAsyncKeyState('Z') & 0x8000) m_windmill->Scale(XMFLOAT3{ 1.0f, 1.0f + deltaTime, 1.0f });
 	if (GetAsyncKeyState('X') & 0x8000) m_windmill->Scale(XMFLOAT3{ 1.0f, 1.0f - deltaTime, 1.0f });
+
+	if (GetAsyncKeyState('C') & 0x8000) m_player->Scale(XMFLOAT3{ 1.0f, 1.0f + deltaTime, 1.0f });
+	if (GetAsyncKeyState('V') & 0x8000) m_player->Scale(XMFLOAT3{ 1.0f, 1.0f - deltaTime, 1.0f });
 }

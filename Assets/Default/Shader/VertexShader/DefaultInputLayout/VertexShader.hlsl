@@ -44,8 +44,8 @@ VSOutput main(VSInput input)
     
     output.pos = mul(input.pos0, WVP);
     output.col = input.col0;
-    output.norm = normalize(mul(float4(input.norm0, 0.0f), world).xyz);
-    //output.norm = normalize(mul(float4(input.norm0, 0.0f), view).xyz); // Inverse world matrix
+    //output.norm = normalize(mul(float4(input.norm0, 0.0f), world).xyz);
+    output.norm = normalize(mul(float4(input.norm0, 0.0f), view).xyz); // Inverse world matrix
     output.uv = input.uv0;
     
     float4 diffuseColor = dirLightColor * saturate(dot(output.norm, -dirLightDirection.xyz));

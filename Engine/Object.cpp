@@ -227,7 +227,7 @@ XMFLOAT3 Object::GetWorldScale() const
 	return scl;
 }
 
-XMMATRIX Object::GetWorldMatrix() const
+XMMATRIX Object::GetWorldMatrix() const // TODO: upgrade to get scale excluded world matrix
 {
 	if (m_isDirty)
 	{
