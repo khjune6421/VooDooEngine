@@ -13,7 +13,7 @@ namespace VDGM
 		auto it = g_sceneFactory.find(sceneName);
 		if (it != g_sceneFactory.end())
 		{
-			g_currentScene = nullptr;
+			g_currentScene.reset();
 			g_currentScene = it->second();
 		}
 		else MessageBoxW(nullptr, (L"Scene " + sceneName + L" not found").c_str(), L"Error", MB_OK);

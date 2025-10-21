@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DirectX;
 
-TestScene::TestScene(wstring dataFile)
+TestScene::TestScene()
 {
 	m_backgroundColor = XMFLOAT4{ m_morningColor.x, m_morningColor.y, m_morningColor.z, 1.0f };
 
@@ -34,23 +34,17 @@ TestScene::TestScene(wstring dataFile)
 	m_lightObj->AddComponent<AmbientLight>(m_morningColor, 0.25f);
 	m_lightObj->AddComponent<DirectionalLight>(m_morningColor, 0.75f, XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
 	m_lightObj->AddComponent<Shape>(L"Sphere");
-	//m_objects.emplace_back(move(m_lightObj));
 
-	ObjectPositionParser parser;
-	if (parser.LoadPositions(dataFile))
+	const int treeCount = 1000;
+	for (int i = 0; i < treeCount; ++i)
 	{
-		for (const auto& pos : parser.GetPositions())
-		{
-			unique_ptr<Object> tree = make_unique<Tree>();
-			tree->AddComponent<Shape>(L"Tree", L"VertexShader", L"PixelShader", L"Lilypads");
-			tree->SetPosition(XMVECTOR{ pos.x, pos.y, pos.z, 1.0f });
-			tree->SetRotation(XMVECTOR{ 0.0f, 3.14f, 0.0f, 0.0f });
-			m_objects.emplace_back(move(tree));
-		}
-	}
-	else
-	{
-		MessageBoxW(nullptr, L"Failed to load object positions", L"Error", MB_OK);
+		float x = static_cast<float>((rand() % 2000) - 1000) / 10.0f;
+		float z = static_cast<float>((rand() % 2000) - 1000) / 10.0f;
+		unique_ptr<Object> tree = make_unique<Tree>();
+		tree->AddComponent<Shape>(L"Tree", L"VertexShader", L"PixelShader", L"Lilypads");
+		tree->SetPosition(XMVECTOR{ x, 0.0f, z, 1.0f });
+		tree->SetRotation(XMVECTOR{ 0.0f, 3.14f, 0.0f, 0.0f });
+		m_objects.emplace_back(move(tree));
 	}
 }
 

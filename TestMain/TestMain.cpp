@@ -6,7 +6,7 @@ using namespace std;
 
 unordered_map<wstring, function<unique_ptr<Scene>()>> VDGM::g_sceneFactory =
 {
-	{ L"TestScene", []() { return make_unique<TestScene>(L"../Assets/Default/ObjectPos/Trees.dat"); } }
+	{ L"TestScene", []() { return make_unique<TestScene>(); } }
 };
 
 #ifdef _DEBUG
@@ -28,7 +28,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//VDW::CreateWindowAndRenderer(L"VooDoo Class4", L"VooDoo Engine2", 1280, 720, 0, 720, L"../Assets/Imposter/");
 
 	// Create and set the test scene
-	VDGM::g_currentScene = make_unique<TestScene>(L"../Assets/Default/ObjectPos/Trees.dat");
+	VDGM::g_currentScene = make_unique<TestScene>();
 
 	while (VDGM::GameLoop()) if (GetAsyncKeyState(VK_TAB) & 0x0001) VDGM::ChangeScene(L"TestScene");
 

@@ -9,6 +9,11 @@ protected:
 
 public:
 	Scene() = default;
+	virtual ~Scene() = default;
+	Scene(const Scene& other) = default;
+	Scene& operator=(const Scene& other) = default;
+	Scene(Scene&& other) noexcept = default;
+	Scene& operator=(Scene&& other) noexcept = default;
 
 	DirectX::XMFLOAT4 m_backgroundColor = { 0.5f, 0.5f, 0.5f, 1.0f };
 

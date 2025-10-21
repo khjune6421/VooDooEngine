@@ -35,7 +35,7 @@ void main(point VS_OUTPUT input[1], inout LineStream<GS_OUTPUT> outputStream)
     outputStream.Append(output);
     
     // End point
-    float4 normalEndPos = worldPos + float4(worldNormal * 1.0f, 0.0f);
+    float4 normalEndPos = worldPos + float4(worldNormal, 0.0f);
     output.position = mul(normalEndPos, mul(view, projection));
     output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
     outputStream.Append(output);

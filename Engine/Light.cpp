@@ -21,3 +21,12 @@ void AmbientLight::RemoveColor() const
 }
 
 vector<PointLight*> g_pointLights;
+
+void PointLight::OnDetached()
+{
+	if (!g_pointLights.empty())
+	{
+		auto it = remove(g_pointLights.begin(), g_pointLights.end(), this);
+		g_pointLights.erase(it, g_pointLights.end());
+	}
+}

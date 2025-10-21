@@ -26,3 +26,9 @@ Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pi
 #endif
 	m_renderData.textureId = g_textureIdMap[texture];
 }
+
+void Shape::OnDetached()
+{
+	auto it = remove_if(g_renderShapes.begin(), g_renderShapes.end(), [this](const pair<Object*, ShapeData*>& pair) { return pair.second == &m_renderData; });
+	g_renderShapes.erase(it, g_renderShapes.end());
+}

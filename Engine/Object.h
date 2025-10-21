@@ -46,7 +46,7 @@ protected:
 
 public:
 	Object() = default;
-	virtual ~Object();
+	~Object();
 	Object(const Object& other) = default;
 	Object& operator=(const Object& other) = default;
 	Object(Object&& other) noexcept = default;

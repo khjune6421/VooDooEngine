@@ -20,7 +20,7 @@ class TestScene : public Scene
 	std::unique_ptr<Object> m_torch = nullptr;
 
 public:
-	TestScene(std::wstring dataFile);
+	TestScene();
 
 	void Update(float deltaTime) override;
 };

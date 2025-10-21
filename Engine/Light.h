@@ -37,7 +37,7 @@ public:
 	(
 		const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f },
 		const float intensity = 1.0f
-	) : Light(color, intensity) { AddColor(); }
+	) : Light(color, intensity) {}
 
 	void OnAttached(class Object* owner) override { Component::OnAttached(owner); AddColor(); }
 	void OnDetached() override { Component::OnDetached(); RemoveColor(); }
@@ -55,6 +55,8 @@ struct DirectionalLightConstBuffer
 };
 class DirectionalLight : public Light
 {
+	DirectX::XMVECTOR m_direction = { 0.0f, -1.0f, 0.0f, 0.0f };
+
 	friend class Render;
 	static DirectionalLightConstBuffer s_lightData;
 
@@ -66,13 +68,16 @@ public:
 		const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f },
 		const float intensity = 1.0f,
 		const DirectX::XMVECTOR& direction = { 1.0f, -1.0f, 0.0f, 0.0f }
-	) : Light(color, intensity) { UpdateColor(); s_lightData.direction = DirectX::XMVector3Normalize(direction); }
+	) : Light(color, intensity) { m_direction = DirectX::XMVector3Normalize(direction); }
+
+	void OnAttached(class Object* owner) override { Component::OnAttached(owner); UpdateColor(); s_lightData.direction = m_direction; }
+	void OnDetached() override { s_lightData = {}; }
 
 	void SetColor(const DirectX::XMFLOAT3& color) override { m_color = color; UpdateColor(); }
 	void SetIntensity(float intensity) override { m_intensity = intensity; UpdateColor(); }
 
-	DirectX::XMVECTOR GetDirection() const { return s_lightData.direction; }
-	void SetDirection(const DirectX::XMVECTOR& direction) { s_lightData.direction = DirectX::XMVector3Normalize(direction); }
+	DirectX::XMVECTOR GetDirection() const { return m_direction; }
+	void SetDirection(const DirectX::XMVECTOR& direction) { m_direction = DirectX::XMVector3Normalize(direction); s_lightData.direction = m_direction; }
 };
 
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
@@ -110,6 +115,7 @@ public:
 	) : Light(color, intensity) { UpdateColor(); m_lightData.range = range; m_lightData.attenuation = attenuation; }
 
 	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_pointLights.push_back(this); }
+	void OnDetached() override;
 
 	void SetColor(const DirectX::XMFLOAT3& color) override { m_color = color; UpdateColor(); }
 	void SetIntensity(float intensity) override { m_intensity = intensity; UpdateColor(); }
