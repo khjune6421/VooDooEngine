@@ -80,7 +80,7 @@ public:
 	void SetDirection(const DirectX::XMVECTOR& direction) { m_direction = DirectX::XMVector3Normalize(direction); s_lightData.direction = m_direction; }
 };
 
-constexpr int MAX_POINT_LIGHTS = 4;
+constexpr int MAX_POINT_LIGHTS = 2;
 
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
 constexpr float DEFAULT_LINEAR_ATTENUATION = 0.01f;
@@ -98,6 +98,10 @@ struct PointLightConstBuffer // Is also a SpotLightConstBuffer
 	float constant = DEFAULT_CONSTANT_ATTENUATION;
 	float linear = DEFAULT_LINEAR_ATTENUATION;
 	float quadratic = DEFAULT_QUADRATIC_ATTENUATION;
+};
+struct PointLightArrayConstBuffer
+{
+	PointLightConstBuffer pointLights[MAX_POINT_LIGHTS] = {};
 };
 class PointLight;
 extern std::vector<PointLight*> g_pointLights;

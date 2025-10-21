@@ -626,7 +626,12 @@ void Render::EngineUpdate()
 	m_deviceContext->VSSetConstantBuffers(2, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
 
 	// Point Lights // later add for loop
-	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &g_pointLights[0]->GetLightData(), 0, 0);
+
+	PointLightArrayConstBuffer pointLightBufferData = {};
+	pointLightBufferData.pointLights[0] = g_pointLights[0]->GetLightData();
+	pointLightBufferData.pointLights[1] = g_pointLights[1]->GetLightData();
+
+	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
 	UpdateRenderMode();
@@ -698,7 +703,7 @@ void Render::DrawNormalLines()
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
 		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
-		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
+		constBufferData.WVP = XMMatrixTranspose(worldMatrix * XMMatrixInverse(nullptr, object->m_scaleMatrix) * XMMatrixInverse(nullptr, object->m_scaleMatrix));
 
 		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
@@ -747,7 +752,7 @@ Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) 
 	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[MatrixBuffer]);
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientLightBuffer]); // Ambient light buffer
 	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
-	CreateConstBuffer(sizeof(PointLightConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
+	CreateConstBuffer(sizeof(PointLightArrayConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
 
 	static const filesystem::path defaultPath(L"../Assets/Default/");
 	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");

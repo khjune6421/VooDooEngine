@@ -34,6 +34,7 @@ TestScene::TestScene()
 	m_lightObj->SetPosition(XMVECTOR{ 5.0f, 5.0f, 0.0f, 1.0f });
 	m_lightObj->AddComponent<AmbientLight>(m_morningColor, 0.25f);
 	m_lightObj->AddComponent<DirectionalLight>(m_morningColor, 0.75f, XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
+	m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 0.0f, 1.0f, 1.0f }, 5.0f, 60.0f);
 	m_lightObj->AddComponent<Shape>(L"Sphere");
 
 	const int treeCount = 1000;
@@ -54,6 +55,7 @@ void TestScene::Update(float deltaTime)
 	for (const auto& object : m_objects) object->Update(deltaTime);
 	m_player->Update(deltaTime);
 	m_windmill->Update(deltaTime);
+	m_lightObj->LookAt(m_player->GetWorldPosition());
 
 	if (GetAsyncKeyState(VK_F6) & 0x0001)
 	{
@@ -84,4 +86,7 @@ void TestScene::Update(float deltaTime)
 	if (GetAsyncKeyState('S') & 0x8000) m_torch->Rotate(XMVECTOR{ 1.0f * deltaTime, 0.0f, 0.0f, 0.0f });
 	if (GetAsyncKeyState('A') & 0x8000) m_torch->Rotate(XMVECTOR{ 0.0f, -1.0f * deltaTime, 0.0f, 0.0f });
 	if (GetAsyncKeyState('D') & 0x8000) m_torch->Rotate(XMVECTOR{ 0.0f, 1.0f * deltaTime, 0.0f, 0.0f });
+
+	if (GetAsyncKeyState('Z') & 0x8000) m_windmill->Scale(XMFLOAT3{ 1.0f, 1.0f + deltaTime, 1.0f });
+	if (GetAsyncKeyState('X') & 0x8000) m_windmill->Scale(XMFLOAT3{ 1.0f, 1.0f - deltaTime, 1.0f });
 }
