@@ -660,9 +660,8 @@ void Render::DrawShapes()
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
 
 		MatrixConstBuffer constBufferData = {};
-		// inverse world matrix
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
-		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
+		constBufferData.view = XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix));
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
 		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
 

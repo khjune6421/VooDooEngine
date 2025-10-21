@@ -23,7 +23,7 @@ TestScene::TestScene()
 	m_player->AddChild(m_torch.get());
 
 	m_windmill->SetPosition(XMVECTOR{ 5.0f, 0.0f, 5.0f, 1.0f });
-	m_windmill->SetScale(XMFLOAT3{ 1.5f, 1.5f, 1.5f });
+	m_windmill->SetScale(XMFLOAT3{ 1.5f, 0.05f, 1.5f });
 
 	unique_ptr<Object> plane = make_unique<Object>();
 	plane->AddComponent<Shape>(L"PlaneX10", L"VertexShader", L"PixelShader", L"Brick");
