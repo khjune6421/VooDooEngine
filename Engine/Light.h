@@ -80,22 +80,24 @@ public:
 	void SetDirection(const DirectX::XMVECTOR& direction) { m_direction = DirectX::XMVector3Normalize(direction); s_lightData.direction = m_direction; }
 };
 
-constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
-constexpr float DEFAULT_LINEAR_ATTENUATION = 0.1f;
-constexpr float DEFAULT_QUADRATIC_ATTENUATION = 0.05f;
-struct Attenuation
-{
-	float constant = DEFAULT_CONSTANT_ATTENUATION;
-	float linear = DEFAULT_LINEAR_ATTENUATION;
-	float quadratic = DEFAULT_QUADRATIC_ATTENUATION;
-};
 constexpr int MAX_POINT_LIGHTS = 4;
-struct PointLightConstBuffer
+
+constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
+constexpr float DEFAULT_LINEAR_ATTENUATION = 0.01f;
+constexpr float DEFAULT_QUADRATIC_ATTENUATION = 0.005f;
+struct PointLightConstBuffer // Is also a SpotLightConstBuffer
 {
 	DirectX::XMVECTOR position = { 0.0f, 0.0f, 0.0f, 1.0f };
 	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	// For SpotLight
+	DirectX::XMFLOAT4 directionAndAngle = { 0.0f, 0.0f, 1.0f, 0.0f }; // w is the angle // it's not radian or digree // Im not sure what it is // set to 0 for PointLight
+
 	float range = 100.0f;
-	Attenuation attenuation = {};
+
+	float constant = DEFAULT_CONSTANT_ATTENUATION;
+	float linear = DEFAULT_LINEAR_ATTENUATION;
+	float quadratic = DEFAULT_QUADRATIC_ATTENUATION;
 };
 class PointLight;
 extern std::vector<PointLight*> g_pointLights;
@@ -110,9 +112,20 @@ public:
 	(
 		const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f },
 		const float intensity = 1.0f,
+		const float spotAngle = 0.0f,
 		const float range = 100.0f,
-		const Attenuation & attenuation = { DEFAULT_CONSTANT_ATTENUATION, DEFAULT_LINEAR_ATTENUATION, DEFAULT_QUADRATIC_ATTENUATION }
-	) : Light(color, intensity) { UpdateColor(); m_lightData.range = range; m_lightData.attenuation = attenuation; }
+		const float constantAttenuation = DEFAULT_CONSTANT_ATTENUATION,
+		const float linearAttenuation = DEFAULT_LINEAR_ATTENUATION,
+		const float quadraticAttenuation = DEFAULT_QUADRATIC_ATTENUATION
+	) : Light(color, intensity)
+	{
+		UpdateColor();
+		m_lightData.directionAndAngle = DirectX::XMFLOAT4{ 0.0f, 0.0f, 1.0f, spotAngle };
+		m_lightData.range = range;
+		m_lightData.constant = constantAttenuation;
+		m_lightData.linear = linearAttenuation;
+		m_lightData.quadratic = quadraticAttenuation;
+	}
 
 	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_pointLights.push_back(this); }
 	void OnDetached() override;
@@ -123,8 +136,12 @@ public:
 	float GetRange() const { return m_lightData.range; }
 	void SetRange(float range) { m_lightData.range = range; }
 
-	Attenuation GetAttenuation() const { return m_lightData.attenuation; }
-	void SetAttenuation(const Attenuation& attenuation) { m_lightData.attenuation = attenuation; }
+	float GetConstantAttenuation() const { return m_lightData.constant; }
+	float GetLinearAttenuation() const { return m_lightData.linear; }
+	float GetQuadraticAttenuation() const { return m_lightData.quadratic; }
+	void SetConstantAttenuation(float constant) { m_lightData.constant = constant; }
+	void SetLinearAttenuation(float linear) { m_lightData.linear = linear; }
+	void SetQuadraticAttenuation(float quadratic) { m_lightData.quadratic = quadratic; }
 
-	PointLightConstBuffer& GetLightData() { m_lightData.position = m_owner->GetWorldPosition(); return m_lightData; }
+	PointLightConstBuffer& GetLightData();
 };

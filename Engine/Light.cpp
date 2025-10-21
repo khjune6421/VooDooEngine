@@ -30,3 +30,15 @@ void PointLight::OnDetached()
 		g_pointLights.erase(it, g_pointLights.end());
 	}
 }
+
+PointLightConstBuffer& PointLight::GetLightData()
+{
+	m_lightData.position = m_owner->GetWorldPosition();
+	XMVECTOR dir = m_owner->GetWorldDirection(Directions::Forward);
+	
+	m_lightData.directionAndAngle.x = XMVectorGetX(dir);
+	m_lightData.directionAndAngle.y = XMVectorGetY(dir);
+	m_lightData.directionAndAngle.z = XMVectorGetZ(dir);
+
+	return m_lightData;
+}

@@ -18,7 +18,7 @@ TestScene::TestScene()
 	m_torch->AddComponent<Shape>(L"Sphere");
 	m_torch->SetScale(XMFLOAT3{ 0.1f, 0.1f, 0.1f });
 	m_torch->SetPosition(XMVECTOR{ 1.0f, 2.5f, 0.0f, 1.0f });
-	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 5.0f);
+	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 3.0f, 30.0f);
 	m_player->AddChild(m_torch.get());
 
 	m_windmill->SetPosition(XMVECTOR{ 5.0f, 0.0f, 5.0f, 1.0f });

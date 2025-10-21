@@ -5,6 +5,9 @@ struct PointLight
 {
     float4 worldPos;
     float4 color; // w is intensity
+    
+    float4 directionAndAngle; // Not used for spotlight
+    
     float range;
     
     // Attenuation factors
@@ -34,12 +37,15 @@ float4 main(PSInput input) : SV_TARGET
     float4 texColor = _MainTex.Sample(sampler_MainTex, input.uv);
     
     float3 vecToLight = pointLights.worldPos.xyz - input.posWorld.xyz;
-    float diffuseFactor = saturate(dot(input.norm, normalize(vecToLight)));
     
     float distance = length(vecToLight);
-    float3 attenuateConstants = float3(pointLights.aConstant, pointLights.aLinear, pointLights.aQuadratic);
-    float attenuate = 1.0f / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
+    vecToLight = normalize(vecToLight);
     
+    float spot = pow(max(dot(-vecToLight, pointLights.directionAndAngle.xyz), 1e-5), pointLights.directionAndAngle.w);
+    float3 attenuateConstants = float3(pointLights.aConstant, pointLights.aLinear, pointLights.aQuadratic);
+    float attenuate = spot / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
+    
+    float diffuseFactor = saturate(dot(input.norm, vecToLight));
     float4 diffuseColor = pointLights.color * diffuseFactor * attenuate; // This can be optimized further
     
     return texColor * (diffuseColor + input.light);
