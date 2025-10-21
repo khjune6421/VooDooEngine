@@ -32,7 +32,7 @@ struct VSOutput
     float3 norm : NORMAL0;
     float2 uv : TEXCOORD0;
     
-    float4 light : TEXCOORD1;
+    float4 light : COLOR1;
     float4 posWorld : WORLDPOS0;
 };
 
