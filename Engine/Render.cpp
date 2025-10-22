@@ -360,16 +360,15 @@ void Render::DisplayDeviceInfo()
 	}
 }
 
-void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
+void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel)
 {
 	const filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
 	const filesystem::path geometryShaderPath = shaderPath / L"GeometryShader/";
 	const filesystem::path pixelShaderPath = shaderPath / L"PixelShader/";
 
-	const filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
-	if (filesystem::exists(defaultInputLayoutPath) && filesystem::is_directory(defaultInputLayoutPath))
+	if (filesystem::exists(vertexShaderPath) && filesystem::is_directory(vertexShaderPath))
 	{
-		for (const auto& entry : filesystem::directory_iterator(defaultInputLayoutPath))
+		for (const auto& entry : filesystem::directory_iterator(vertexShaderPath))
 		{
 			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
@@ -677,6 +676,12 @@ void Render::DrawShapes()
 		}
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
+
+		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
+		{
+			ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, nullSRV);
+		}
 	}
 }
 

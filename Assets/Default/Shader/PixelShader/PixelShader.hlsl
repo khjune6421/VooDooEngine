@@ -41,8 +41,8 @@ struct PSInput
 float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
-    
     float3 normalMapSample = normalMap.Sample(mainTexSampler, input.uv).xyz * 2.0f - 1.0f;
+    
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
     float3 worldNormal = normalize(mul(normalMapSample, TBN));
     

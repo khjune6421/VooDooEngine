@@ -43,9 +43,7 @@ TestScene::TestScene()
 		float x = static_cast<float>((rand() % 2000) - 1000) / 10.0f;
 		float z = static_cast<float>((rand() % 2000) - 1000) / 10.0f;
 		unique_ptr<Object> tree = make_unique<Tree>();
-		tree->AddComponent<Shape>(L"Tree", L"VertexShader", L"PixelShader", vector<wstring>{ L"Lilypads" });
 		tree->SetPosition(XMVECTOR{ x, 0.0f, z, 1.0f });
-		tree->SetRotation(XMVECTOR{ 0.0f, XM_PI, 0.0f, 0.0f });
 		m_objects.emplace_back(move(tree));
 	}
 }
