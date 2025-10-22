@@ -72,6 +72,7 @@ float4 main(PSInput input) : SV_TARGET
         input.light += diffuseColor;
     }
     
-    float4 fogColor = lerp(texColor * input.light, fog, fogFactor);
-    return fogColor;
+    float4 returnColor = lerp(texColor * input.light, fog, fogFactor);
+    
+    return returnColor;
 }
