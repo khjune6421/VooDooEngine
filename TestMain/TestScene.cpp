@@ -15,7 +15,7 @@ TestScene::TestScene()
 	m_player->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 
 	m_torch = make_unique<Object>();
-	m_torch->AddComponent<Shape>(L"Sphere");
+	m_torch->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", vector<wstring>{ L"Eye", L"NoNormal" });
 	m_torch->SetScale(XMFLOAT3{ 0.1f, 0.1f, 0.1f });
 	m_torch->SetPosition(XMVECTOR{ 1.0f, 2.5f, -1.0f, 1.0f });
 	m_torch->LookAt(XMVECTOR{ 1.0f, 2.0f, 1.0f, 1.0f });
@@ -35,7 +35,7 @@ TestScene::TestScene()
 	m_lightObj->AddComponent<AmbientLight>(m_morningColor, 0.25f);
 	m_lightObj->AddComponent<DirectionalLight>(m_morningColor, 0.75f, XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
 	m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 0.0f, 1.0f, 1.0f }, 5.0f, 60.0f);
-	m_lightObj->AddComponent<Shape>(L"Sphere");
+	m_lightObj->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", vector<wstring>{ L"Eye", L"NoNormal" });
 
 	const int treeCount = 1000;
 	for (int i = 0; i < treeCount; ++i)
