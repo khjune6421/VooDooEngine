@@ -49,7 +49,7 @@ float4 main(PSInput input) : SV_TARGET
     float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
     float distanceFromCamera = length(cameraPos.xyz - input.posWorld.xyz);
     float fogFactor = saturate(distanceFromCamera / ambientFog.w);
-    float4 fog = float4(ambientFog.xyz, 1.0f);
+    float4 fogColor = float4(ambientFog.xyz, 1.0f);
     
     float3 normalMapSample = normalMap.Sample(mainTexSampler, input.uv).xyz * 2.0f - 1.0f;
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
@@ -72,7 +72,7 @@ float4 main(PSInput input) : SV_TARGET
         input.light += diffuseColor;
     }
     
-    float4 returnColor = lerp(texColor * input.light, fog, fogFactor);
+    float4 returnColor = lerp(texColor * input.light, fogColor, fogFactor);
     
     return returnColor;
 }
