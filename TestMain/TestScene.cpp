@@ -11,7 +11,7 @@ TestScene::TestScene()
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 	m_camera->AddComponent<Camera>();
 
-	m_player->AddChild(m_camera.get());
+	//m_player->AddChild(m_camera.get());
 	m_player->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 
 	m_torch = make_unique<Object>();
@@ -90,6 +90,6 @@ void TestScene::Update(float deltaTime)
 	if (GetAsyncKeyState('Z') & 0x8000) m_windmill->Scale(XMFLOAT3{ 1.0f, 1.0f + deltaTime, 1.0f });
 	if (GetAsyncKeyState('X') & 0x8000) m_windmill->Scale(XMFLOAT3{ 1.0f, 1.0f - deltaTime, 1.0f });
 
-	if (GetAsyncKeyState('C') & 0x8000) m_player->Scale(XMFLOAT3{ 1.0f, 1.0f + deltaTime, 1.0f });
-	if (GetAsyncKeyState('V') & 0x8000) m_player->Scale(XMFLOAT3{ 1.0f, 1.0f - deltaTime, 1.0f });
+	if (GetAsyncKeyState('C') & 0x8000) m_player->Scale(XMFLOAT3{ 1.0f + deltaTime, 1.0f, 1.0f });
+	if (GetAsyncKeyState('V') & 0x8000) m_player->Scale(XMFLOAT3{ 1.0f - deltaTime, 1.0f, 1.0f });
 }

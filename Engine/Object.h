@@ -25,7 +25,9 @@ class Object
 	DirectX::XMMATRIX m_positionMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_rotationMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_scaleMatrix = DirectX::XMMatrixIdentity();
+
 	mutable DirectX::XMMATRIX m_worldMatrix = DirectX::XMMatrixIdentity();
+	mutable DirectX::XMMATRIX m_inverseScaleMatrix = DirectX::XMMatrixIdentity(); // For normal
 
 	DirectX::XMVECTOR QuaternionToEuler(const DirectX::XMVECTOR& quat) const;
 

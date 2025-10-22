@@ -666,7 +666,7 @@ void Render::DrawShapes()
 
 		MatrixConstBuffer constBufferData = {};
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
-		constBufferData.view = XMMatrixTranspose(worldMatrix * XMMatrixInverse(nullptr, object->m_scaleMatrix) * XMMatrixInverse(nullptr, object->m_scaleMatrix)); // Not perfect
+		constBufferData.view = XMMatrixTranspose(object->m_inverseScaleMatrix * worldMatrix);
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
 		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
 
@@ -703,7 +703,7 @@ void Render::DrawNormalLines()
 		constBufferData.world = XMMatrixTranspose(worldMatrix);
 		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
 		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
-		constBufferData.WVP = XMMatrixTranspose(worldMatrix * XMMatrixInverse(nullptr, object->m_scaleMatrix) * XMMatrixInverse(nullptr, object->m_scaleMatrix));
+		constBufferData.WVP = XMMatrixTranspose(object->m_inverseScaleMatrix * worldMatrix);
 
 		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());

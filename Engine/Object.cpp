@@ -233,10 +233,15 @@ XMMATRIX Object::GetWorldMatrix() const // TODO: upgrade to get scale excluded w
 	{
 		m_worldMatrix = m_scaleMatrix * m_rotationMatrix * m_positionMatrix;
 
+		XMMATRIX inverseScaleMatrix = XMMatrixInverse(nullptr, m_scaleMatrix);
+		m_inverseScaleMatrix = inverseScaleMatrix * inverseScaleMatrix;
+
 		if (m_parent)
 		{
 			if (m_parent->m_isDirty) m_worldMatrix *= m_parent->GetWorldMatrix();
 			else m_worldMatrix *= m_parent->m_worldMatrix;
+
+			m_inverseScaleMatrix *= m_parent->m_inverseScaleMatrix;
 		}
 
 		m_isDirty = false;
