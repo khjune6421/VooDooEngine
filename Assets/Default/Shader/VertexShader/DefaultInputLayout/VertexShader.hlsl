@@ -24,18 +24,23 @@ struct VSInput
     float4 pos0 : POSITION0;
     float4 col0 : COLOR0;
     float3 norm0 : NORMAL0;
+    float3 tangent0 : TANGENT0;
     float2 uv0 : TEXCOORD0;
 };
 
 struct VSOutput
 {
     float4 pos : SV_POSITION0;
-    float4 col : COLOR0;
-    float3 norm : NORMAL0;
-    float2 uv : TEXCOORD0;
-    
-    float4 light : COLOR1;
     float4 posWorld : WORLDPOS0;
+    
+    float4 col : COLOR0;
+    float4 light : COLOR1;
+    
+    float3 norm : NORMAL0;
+    float3 tangent : TANGENT0;
+    float3 bitangent : BITANGENT0;
+    
+    float2 uv : TEXCOORD0;
 };
 
 VSOutput main(VSInput input)
@@ -45,13 +50,17 @@ VSOutput main(VSInput input)
     input.pos0.w = 1.0f;
     
     output.pos = mul(input.pos0, WVP);
-    output.col = input.col0;
-    output.norm = normalize(mul(float4(input.norm0, 0.0f), normalMatrix).xyz); // Inverse scale matrix
-    output.uv = input.uv0;
+    output.posWorld = mul(input.pos0, world);
     
+    output.col = input.col0;
     float4 diffuseColor = dirLightColor * saturate(dot(output.norm, -dirLightDirection.xyz));
     output.light = ambientColor + diffuseColor;
-    output.posWorld = mul(input.pos0, world);
+    
+    output.norm = normalize(mul(float4(input.norm0, 0.0f), normalMatrix).xyz); // Inverse scale matrix
+    output.tangent = normalize(mul(float4(input.tangent0, 0.0f), normalMatrix).xyz);
+    output.bitangent = normalize(cross(output.norm, output.tangent));
+    
+    output.uv = input.uv0;
     
     return output;
 }

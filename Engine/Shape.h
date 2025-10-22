@@ -18,7 +18,6 @@ struct ShapeData
 	UINT vertexShaderId = 0;
 	UINT pixelShaderId = 0;
 
-	//UINT textureId = 0;
 	std::vector<UINT> textureIds = {};
 };
 
@@ -29,7 +28,13 @@ class Shape : public Component
 	ShapeData m_renderData = {};
 
 public:
-	Shape(const std::wstring& mesh, const std::wstring& vertexShader = L"VertexShader", const std::wstring& pixelShader = L"PixelShader", const std::wstring& texture = L"NoTexture");
+	Shape
+	(
+		const std::wstring& mesh,
+		const std::wstring& vertexShader = L"VertexShader",
+		const std::wstring& pixelShader = L"PixelShader",
+		const std::vector<std::wstring>& textures = { L"NoTexture" }
+	);
 
 	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_renderShapes.emplace_back(owner, &m_renderData); }
 	void OnDetached() override;

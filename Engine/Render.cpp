@@ -27,6 +27,7 @@ D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[1] = { { Render::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE } };
@@ -649,9 +650,6 @@ void Render::DrawShapes()
 {
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-#ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(shapeData->meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData->meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
-#endif
 		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetPrimitiveTopology(shapeData->topology);
@@ -673,7 +671,10 @@ void Render::DrawShapes()
 
 		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
 
-		m_deviceContext->PSSetShaderResources(0, 1, m_textureMap[shapeData->textureIds[0]].GetAddressOf());
+		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
+		{
+			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, m_textureMap[shapeData->textureIds[i]].GetAddressOf());
+		}
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
 	}
@@ -683,9 +684,6 @@ void Render::DrawNormalLines()
 {
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-#ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(shapeData->meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData->meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
-#endif
 		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);

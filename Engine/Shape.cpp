@@ -4,7 +4,7 @@ using namespace std;
 
 vector<pair<Object*, ShapeData*>> g_renderShapes;
 
-Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader, const wstring& texture)
+Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader, const vector<wstring>& textures)
 {
 #ifdef _DEBUG
 	if (g_meshIdMap.find(mesh) == g_meshIdMap.end()) MessageBoxW(nullptr, (L"Shape name not found: " + mesh).c_str(), L"Error", MB_OK);
@@ -21,10 +21,13 @@ Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pi
 #endif
 	m_renderData.pixelShaderId = g_pixelShaderIdMap[pixelShader];
 
+	for (const auto& texture : textures)
+	{
 #ifdef _DEBUG
-	if (g_textureIdMap.find(texture) == g_textureIdMap.end()) MessageBoxW(nullptr, (L"Texture not found: " + texture).c_str(), L"Error", MB_OK);
+		if (g_textureIdMap.find(texture) == g_textureIdMap.end()) MessageBoxW(nullptr, (L"Texture not found: " + texture).c_str(), L"Error", MB_OK);
 #endif
-	m_renderData.textureIds.push_back(g_textureIdMap[texture]);
+		m_renderData.textureIds.push_back(g_textureIdMap[texture]);
+	}
 }
 
 void Shape::OnDetached()

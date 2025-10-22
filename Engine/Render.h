@@ -74,7 +74,7 @@ class Render
 	comPtr<ID3D11Buffer> m_constBuffers[ConstBufferCount] = {};
 
 	// Input layouts // well this is cursed
-	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
+	constexpr static UINT DEFAULT_LAYOUT_SIZE = 5;
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
 	enum InputLayoutType
 	{
