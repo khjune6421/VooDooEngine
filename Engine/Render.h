@@ -144,15 +144,13 @@ class Render
 	// Render
 	enum RasterState
 	{
-		Wireframe_CullNone,
-		Wireframe_CullBack,
-		Solid_CullNone,
-		Solid_CullBack,
+		Solid,
+		Wireframe,
 
 		RasterStateCount
 	};
 	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
-	RasterState m_currentRasterState = RasterState::Solid_CullNone;
+	RasterState m_currentRasterState = RasterState::Solid;
 
 
 	// static view and projection matrix for all renders

@@ -517,8 +517,8 @@ void Render::LoadAllTextures(const std::filesystem::path texturePath)
 void Render::CreateRasterState()
 {
 	D3D11_RASTERIZER_DESC rasterDesc = {};
-	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
-	rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.MultisampleEnable = TRUE; // Base value is FALSE
 	rasterDesc.AntialiasedLineEnable = TRUE; // Base value is FALSE
@@ -528,34 +528,20 @@ void Render::CreateRasterState()
 		return;
 	}
 
-	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
 	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[1].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
 	}
 
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.CullMode = D3D11_CULL_NONE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[2].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
-		return;
-	}
-
-	rasterDesc.CullMode = D3D11_CULL_BACK;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[3].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
-		return;
-	}
-
 #ifdef _DEBUG
-	m_deviceContext->RSSetState(g_rasterState[0].Get());
-	m_currentRasterState = RasterState::Wireframe_CullNone;
+	m_deviceContext->RSSetState(g_rasterState[1].Get());
+	m_currentRasterState = RasterState::Wireframe;
 #else
-	m_deviceContext->RSSetState(g_rasterState[2].Get());
-	m_currentRasterState = RasterState::Solid_CullNone;
+	m_deviceContext->RSSetState(g_rasterState[0].Get());
+	m_currentRasterState = RasterState::Solid;
 #endif
 }
 
