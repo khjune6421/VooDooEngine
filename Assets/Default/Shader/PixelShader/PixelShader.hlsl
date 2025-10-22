@@ -18,7 +18,7 @@ struct PointLight
 
 cbuffer PointLightConstBuffer : register(b0)
 {
-    PointLight pointLights;
+    PointLight pointLights[2];
 }
 
 struct PSInput
@@ -36,17 +36,22 @@ float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = _MainTex.Sample(sampler_MainTex, input.uv);
     
-    float3 vecToLight = pointLights.worldPos.xyz - input.posWorld.xyz;
+    for (int i = 0; i < 2; i++)
+    {
+        float3 vecToLight = pointLights[i].worldPos.xyz - input.posWorld.xyz;
+        
+        float distance = length(vecToLight);
+        vecToLight = normalize(vecToLight);
+        
+        float spot = pow(max(dot(-vecToLight, pointLights[i].directionAndAngle.xyz), 1e-5), pointLights[i].directionAndAngle.w);
+        float3 attenuateConstants = float3(pointLights[i].aConstant, pointLights[i].aLinear, pointLights[i].aQuadratic);
+        float attenuate = spot / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
+        
+        float diffuseFactor = saturate(dot(input.norm, vecToLight));
+        float4 diffuseColor = pointLights[i].color * diffuseFactor * attenuate; // This could be optimized further
+        
+        input.light += diffuseColor;
+    }
     
-    float distance = length(vecToLight);
-    vecToLight = normalize(vecToLight);
-    
-    float spot = pow(max(dot(-vecToLight, pointLights.directionAndAngle.xyz), 1e-5), pointLights.directionAndAngle.w);
-    float3 attenuateConstants = float3(pointLights.aConstant, pointLights.aLinear, pointLights.aQuadratic);
-    float attenuate = spot / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
-    
-    float diffuseFactor = saturate(dot(input.norm, vecToLight));
-    float4 diffuseColor = pointLights.color * diffuseFactor * attenuate; // This can be optimized further
-    
-    return texColor * (diffuseColor + input.light);
+    return texColor * input.light;
 }
