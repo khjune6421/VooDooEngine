@@ -17,7 +17,9 @@ struct ShapeData
 	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT vertexShaderId = 0;
 	UINT pixelShaderId = 0;
-	UINT textureId = 0;
+
+	//UINT textureId = 0;
+	std::vector<UINT> textureIds = {};
 };
 
 extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;

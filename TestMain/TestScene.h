@@ -8,9 +8,25 @@
 
 class TestScene : public Scene
 {
+	DirectX::XMFLOAT3 m_dawnColor = { 0.2f, 0.2f, 0.5f };
 	DirectX::XMFLOAT3 m_morningColor = { 1.0f, 1.0f, 1.0f };
 	DirectX::XMFLOAT3 m_noonColor = { 0.5f, 0.25f, 0.25f };
 	DirectX::XMFLOAT3 m_nightColor = { 0.1f, 0.1f, 0.25f };
+	enum TimeOfDay
+	{
+		Dawn,
+		Morning,
+		Noon,
+		Night,
+
+		TimeOfDayCount
+	} m_timeOfDay = Dawn;
+	DirectX::XMFLOAT3 m_timeColors[TimeOfDayCount] =
+	{
+		m_morningColor,
+		m_noonColor,
+		m_nightColor
+	};
 
 	std::unique_ptr<Player> m_player = std::make_unique<Player>();
 	std::unique_ptr<Windmill> m_windmill = std::make_unique<Windmill>();

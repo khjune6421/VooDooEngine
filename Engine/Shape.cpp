@@ -24,7 +24,7 @@ Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pi
 #ifdef _DEBUG
 	if (g_textureIdMap.find(texture) == g_textureIdMap.end()) MessageBoxW(nullptr, (L"Texture not found: " + texture).c_str(), L"Error", MB_OK);
 #endif
-	m_renderData.textureId = g_textureIdMap[texture];
+	m_renderData.textureIds.push_back(g_textureIdMap[texture]);
 }
 
 void Shape::OnDetached()

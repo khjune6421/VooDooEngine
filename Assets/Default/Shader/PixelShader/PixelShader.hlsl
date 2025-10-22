@@ -1,5 +1,7 @@
-Texture2D _MainTex;
-SamplerState sampler_MainTex;
+SamplerState mainTexSampler : register(s0);
+
+Texture2D mainTex : register(t0);
+Texture2D normalMap : register(t1);
 
 struct PointLight
 {
@@ -34,7 +36,7 @@ struct PSInput
 
 float4 main(PSInput input) : SV_TARGET
 {
-    float4 texColor = _MainTex.Sample(sampler_MainTex, input.uv);
+    float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
     
     for (int i = 0; i < 2; i++)
     {
@@ -48,7 +50,7 @@ float4 main(PSInput input) : SV_TARGET
         float attenuate = spot / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
         
         float diffuseFactor = saturate(dot(input.norm, vecToLight));
-        float4 diffuseColor = pointLights[i].color * diffuseFactor * attenuate; // This could be optimized further
+        float4 diffuseColor = pointLights[i].color * diffuseFactor * attenuate; // This could be optimized further // not sure
         
         input.light += diffuseColor;
     }

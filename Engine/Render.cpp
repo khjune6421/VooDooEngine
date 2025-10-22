@@ -629,6 +629,8 @@ void Render::EngineUpdate()
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
+	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
+
 	UpdateRenderMode();
 }
 
@@ -671,8 +673,7 @@ void Render::DrawShapes()
 
 		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
 
-		m_deviceContext->PSSetShaderResources(0, 1, m_textureMap[shapeData->textureId].GetAddressOf());
-		m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
+		m_deviceContext->PSSetShaderResources(0, 1, m_textureMap[shapeData->textureIds[0]].GetAddressOf());
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
 	}
