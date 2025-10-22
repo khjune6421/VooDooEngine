@@ -59,6 +59,8 @@ class Render
 		DirectX::XMMATRIX view; // view matrix
 		DirectX::XMMATRIX projection; // projection matrix
 		DirectX::XMMATRIX WVP; // world-view-projection matrix
+
+		DirectX::XMMATRIX normalMatrix; // inverse transpose scale matrix for normal transformation
 	};
 	enum ConstBufferType
 	{
