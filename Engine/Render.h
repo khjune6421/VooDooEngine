@@ -48,7 +48,7 @@ class Render
 
 		bool isFullscreen = false;
 		bool isVSync = false;
-		DWORD antiAliasingLevel = 8;
+		DWORD antiAliasingLevel = 4;
 
 		std::vector<HardwareInfo> hardwareInfos = {};
 	};

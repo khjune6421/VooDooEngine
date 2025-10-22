@@ -38,7 +38,7 @@ D3D11_SAMPLER_DESC Render::s_defaultSamplerDesc =
 	D3D11_TEXTURE_ADDRESS_WRAP,
 	D3D11_TEXTURE_ADDRESS_WRAP,
 	0.0f,
-	4,
+	8,
 	D3D11_COMPARISON_NEVER,
 	{ 1, 1, 1, 1 },
 	0.0f,
@@ -519,11 +519,6 @@ void Render::CreateRasterState()
 	D3D11_RASTERIZER_DESC rasterDesc = {};
 	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
 	rasterDesc.CullMode = D3D11_CULL_NONE;
-	rasterDesc.FrontCounterClockwise = FALSE;
-	rasterDesc.DepthBias = 0;
-	rasterDesc.DepthBiasClamp = 0.0f;
-	rasterDesc.SlopeScaledDepthBias = 0.0f;
-	rasterDesc.DepthClipEnable = TRUE;
 	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.MultisampleEnable = TRUE; // Base value is FALSE
 	rasterDesc.AntialiasedLineEnable = TRUE; // Base value is FALSE
