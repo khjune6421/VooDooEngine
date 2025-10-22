@@ -7,7 +7,7 @@ Windmill::Windmill()
 {
 	AddComponent<Shape>(L"Windmill", L"VertexShader", L"PixelShader", vector<wstring>{ L"Building", L"BuildingNormal" });
 
-	m_Wing->AddComponent<Shape>(L"WindmillWings", L"VertexShader", L"PixelShader", vector<wstring>{ L"Wood", L"WoodNormal" });
+	m_Wing->AddComponent<Shape>(L"WindmillWings", L"VertexShader", L"PixelShader", vector<wstring>{ L"Wood", L"NoNormal" });
 	m_Wing->SetPosition(XMVECTOR{ 0.0f, 1.0f, -0.75f, 1.0f });
 	m_Wing->SetScale(XMFLOAT3{ 0.75f, 0.75f, 0.75f });
 	AddChild(m_Wing.get());
