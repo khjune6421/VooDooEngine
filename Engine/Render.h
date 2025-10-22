@@ -62,10 +62,16 @@ class Render
 
 		DirectX::XMMATRIX normalMatrix; // inverse transpose scale matrix for normal transformation
 	};
+	struct AmbientFogConstBuffer
+	{
+		DirectX::XMVECTOR cameraPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
+		DirectX::XMFLOAT4 colorAndRange = { 0.5f, 0.5f, 0.5f, 50.0f }; // w is range
+	};
 	enum ConstBufferType
 	{
 		MatrixBuffer,
 		AmbientLightBuffer,
+		AmbientFogBuffer,
 		DirectionalLightBuffer,
 		PointLightBuffer,
 

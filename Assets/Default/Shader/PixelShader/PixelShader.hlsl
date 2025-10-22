@@ -18,7 +18,13 @@ struct PointLight
     float aQuadratic;
 };
 
-cbuffer PointLightConstBuffer : register(b0)
+cbuffer AmbientFogConstBuffer : register(b0)
+{
+    float4 cameraPos;
+    float4 ambientFog; // w value is range
+}
+
+cbuffer PointLightConstBuffer : register(b1)
 {
     PointLight pointLights[2];
 }
@@ -41,8 +47,11 @@ struct PSInput
 float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
-    float3 normalMapSample = normalMap.Sample(mainTexSampler, input.uv).xyz * 2.0f - 1.0f;
+    float distanceFromCamera = length(cameraPos.xyz - input.posWorld.xyz);
+    float fogFactor = saturate(distanceFromCamera / ambientFog.w);
+    float4 fog = float4(ambientFog.xyz, 1.0f);
     
+    float3 normalMapSample = normalMap.Sample(mainTexSampler, input.uv).xyz * 2.0f - 1.0f;
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
     float3 worldNormal = normalize(mul(normalMapSample, TBN));
     
@@ -63,5 +72,6 @@ float4 main(PSInput input) : SV_TARGET
         input.light += diffuseColor;
     }
     
-    return texColor * input.light;
+    float4 fogColor = lerp(texColor * input.light, fog, fogFactor);
+    return fogColor;
 }

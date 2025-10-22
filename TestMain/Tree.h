@@ -11,7 +11,7 @@ public:
 	{
 		AddComponent<Shape>(L"TreeTrunk", L"VertexShader", L"PixelShader", std::vector<std::wstring>{ L"Bark", L"BarkNormal" });
 		m_leaves = std::make_unique<Object>();
-		m_leaves->AddComponent<Shape>(L"TreeLeaves", L"VertexShader", L"PixelShader", std::vector<std::wstring>{ L"Leaves", L"LeavesNormal" });
+		m_leaves->AddComponent<Shape>(L"Leaves", L"VertexShader", L"PixelShader", std::vector<std::wstring>{ L"Leaves", L"LeavesNormal" });
 		AddChild(m_leaves.get());
 	}
 	void Update(float deltaTime) override;

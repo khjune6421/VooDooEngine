@@ -36,6 +36,7 @@ public:
 
 	void SetScreen(float fov = -1.0f, UINT screenWidth = 0, UINT screenHeight = 0, float nearPlane = -1.0f, float farPlane = -1.0f);
 
+	DirectX::XMVECTOR m_cameraPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() const { return m_projectionMatrix; }
 };
