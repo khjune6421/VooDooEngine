@@ -666,7 +666,7 @@ void Render::DrawShapes()
 
 		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
 		{
-			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, m_textureMap[shapeData->textureIds[i]].GetAddressOf());
+			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, m_textureMap[shapeData->textureIds[i]].GetAddressOf()); // This can be optimized
 		}
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
