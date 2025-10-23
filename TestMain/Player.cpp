@@ -5,7 +5,7 @@ using namespace std;
 
 Player::Player()
 {
-	AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", vector<wstring>{ L"Monkey", L"NoNormal" });
+	AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", vector<wstring>{ L"Lilypads", L"LilypadsNormal" });
 }
 
 void Player::Update(float deltaTime)

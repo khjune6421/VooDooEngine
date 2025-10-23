@@ -10,7 +10,7 @@ cbuffer TestConstBuffer : register(b0)
 
 cbuffer AmbientLightConstBuffer : register(b1)
 {
-    float4 ambientColor;
+    float4 ambientLight;
 }
 
 cbuffer DirectionalLightConstBuffer : register(b2) // Just one directional light
@@ -54,7 +54,7 @@ VSOutput main(VSInput input)
     
     output.col = input.col0;
     float4 diffuseColor = dirLightColor * saturate(dot(output.norm, -dirLightDirection.xyz));
-    output.light = ambientColor + diffuseColor;
+    output.light = ambientLight + diffuseColor;
     
     output.norm = normalize(mul(float4(input.norm0, 0.0f), normalMatrix).xyz); // Inverse scale matrix
     output.tangent = normalize(mul(float4(input.tangent0, 0.0f), normalMatrix).xyz);
