@@ -150,7 +150,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjectPositionParser.cpp" />
     <ClCompile Include="ObjFileParser.cpp" />
-    <ClCompile Include="Render.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="WindowManager.cpp" />
@@ -164,7 +164,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectPositionParser.h" />
     <ClInclude Include="ObjFileParser.h" />
-    <ClInclude Include="Render.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="UtilityHeaders.h" />

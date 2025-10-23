@@ -33,7 +33,7 @@ class DirectionalLight : public Light
 {
 	DirectX::XMVECTOR m_direction = { 0.0f, -1.0f, 0.0f, 0.0f };
 
-	friend class Render;
+	friend class Renderer;
 	static DirectionalLightConstBuffer s_lightData;
 
 	void UpdateColor() { s_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f }; }

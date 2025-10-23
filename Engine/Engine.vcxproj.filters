@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Render.cpp">
+    <ClCompile Include="Renderer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="WindowManager.cpp">
@@ -63,7 +63,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Render.h">
+    <ClInclude Include="Renderer.h">
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="WindowManager.h">

@@ -30,7 +30,7 @@ namespace VDGM
 	extern std::unique_ptr<Scene> g_currentScene;
 }
 
-class Render
+class Renderer
 {
 	// Device
 	struct HardwareInfo
@@ -192,7 +192,7 @@ class Render
 	void LoadShapeFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
-	void EngineUpdate();
+	void Update();
 
 	void DrawObjects();
 	// Draw shapes // does not have animation
@@ -204,19 +204,19 @@ class Render
 	void UpdateRenderMode();
 
 public:
-	Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath = nullptr);
-	~Render();
-	Render(const Render& other) = default;
-	Render& operator=(const Render& other) = default;
-	Render(Render&& other) noexcept = default;
-	Render& operator=(Render&& other) noexcept = default;
+	Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath = nullptr);
+	~Renderer();
+	Renderer(const Renderer& other) = default;
+	Renderer& operator=(const Renderer& other) = default;
+	Renderer(Renderer&& other) noexcept = default;
+	Renderer& operator=(Renderer&& other) noexcept = default;
 
 	void Resize(UINT width, UINT height);
 	void SetViewport(float topLeftX = 0.0f, float topLeftY = 0.0f);
 
 	void DrawText(const wchar_t* text, DirectX::XMFLOAT2 position, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), float scale = 1.0f, const wchar_t* fontName = L"Gugi");
 
-	void SceneRender();
+	void Render();
 
 	void ToggleNormalLines() { m_drawNormalLines = !m_drawNormalLines; }
 	void ChangeState();

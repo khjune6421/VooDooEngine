@@ -1,4 +1,4 @@
-#include "Render.h"
+#include "Renderer.h"
 
 #include "ObjFileParser.h"
 
@@ -7,22 +7,22 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
-UINT Render::s_nextShapeId = 0;
+UINT Renderer::s_nextShapeId = 0;
 unordered_map<wstring, UINT> g_meshIdMap;
 
-UINT Render::s_vertexShaderId = 0;
+UINT Renderer::s_vertexShaderId = 0;
 unordered_map<wstring, UINT> g_vertexShaderIdMap;
 
-UINT Render::s_geometryShaderId = 0;
+UINT Renderer::s_geometryShaderId = 0;
 unordered_map<wstring, UINT> g_geometryShaderIdMap;
 
-UINT Render::s_pixelShaderId = 0;
+UINT Renderer::s_pixelShaderId = 0;
 unordered_map<wstring, UINT> g_pixelShaderIdMap;
 
-UINT Render::s_textureId = 0;
+UINT Renderer::s_textureId = 0;
 unordered_map<wstring, UINT> g_textureIdMap;
 
-D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
+D3D11_INPUT_ELEMENT_DESC Renderer::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 {
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -30,9 +30,9 @@ D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
-pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[1] = { { Render::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE } };
+pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Renderer::s_layoutDescs[1] = { { Renderer::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE } };
 
-D3D11_SAMPLER_DESC Render::s_defaultSamplerDesc =
+D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
 {
 	D3D11_FILTER_MIN_MAG_MIP_LINEAR,
 	D3D11_TEXTURE_ADDRESS_WRAP,
@@ -46,10 +46,10 @@ D3D11_SAMPLER_DESC Render::s_defaultSamplerDesc =
 	D3D11_FLOAT32_MAX
 };
 
-XMMATRIX Render::s_viewMatrix = XMMatrixIdentity();
-XMMATRIX Render::s_projectionMatrix = XMMatrixIdentity();
+XMMATRIX Renderer::s_viewMatrix = XMMatrixIdentity();
+XMMATRIX Renderer::s_projectionMatrix = XMMatrixIdentity();
 
-void Render::CreateDeviceSwapChain()
+void Renderer::CreateDeviceSwapChain()
 {
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 
@@ -89,7 +89,7 @@ void Render::CreateDeviceSwapChain()
 	}
 }
 
-void Render::CreateRenderTarget()
+void Renderer::CreateRenderTarget()
 {
 	comPtr<ID3D11Texture2D> backBuffer;
 
@@ -106,7 +106,7 @@ void Render::CreateRenderTarget()
 	}
 }
 
-void Render::CreateDepthStencil()
+void Renderer::CreateDepthStencil()
 {
 	m_depthStencilView.Reset();
 	m_depthStencilBuffer.Reset();
@@ -147,7 +147,7 @@ void Render::CreateDepthStencil()
 	}
 }
 
-void Render::SetScissorRect(LONG width, LONG height)
+void Renderer::SetScissorRect(LONG width, LONG height)
 {
 	D3D11_RECT scissorRect = {};
 	scissorRect.left = 0;
@@ -157,7 +157,7 @@ void Render::SetScissorRect(LONG width, LONG height)
 	m_deviceContext->RSSetScissorRects(1, &scissorRect);
 }
 
-void Render::LoadFonts()
+void Renderer::LoadFonts()
 {
 	wstring fontPath = L"../Assets/Default/Fonts/";
 	if (!filesystem::exists(fontPath))
@@ -176,7 +176,7 @@ void Render::LoadFonts()
 	}
 }
 
-void Render::GetHardwareInfo()
+void Renderer::GetHardwareInfo()
 {
 	comPtr<IDXGIAdapter1> padapter;
 	comPtr<IDXGIFactory1> pfactory;
@@ -215,7 +215,7 @@ void Render::GetHardwareInfo()
 	}
 }
 
-void Render::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, UINT8 stencil)
+void Renderer::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, UINT8 stencil)
 {
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView.Get(), reinterpret_cast<const float*>(&color));
 
@@ -227,7 +227,7 @@ void Render::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, UI
 	}
 }
 
-void Render::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout)
+void Renderer::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout)
 {
 	if (FAILED(m_device->CreateInputLayout(layoutDesc, numElements, shaderCode->GetBufferPointer(), shaderCode->GetBufferSize(), inputLayout->GetAddressOf())))
 	{
@@ -236,7 +236,7 @@ void Render::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT 
 	}
 }
 
-void Render::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride)
+void Renderer::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
@@ -253,7 +253,7 @@ void Render::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, c
 	}
 }
 
-void Render::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
+void Renderer::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
@@ -266,7 +266,7 @@ void Render::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
 	}
 }
 
-void Render::ShowFPS()
+void Renderer::ShowFPS()
 {
 	static UINT frameCount = 0;
 	static float elapsedTime = 0.0f;
@@ -287,7 +287,7 @@ void Render::ShowFPS()
 	DrawText(fpsText.c_str(), XMFLOAT2(static_cast<float>(m_deviceInfo.displayMode.Width / 2), 20.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
-void Render::DisplayDeviceInfo()
+void Renderer::DisplayDeviceInfo()
 {
 	constexpr float offset = 20.0f;
 	UINT posIndex = 1;
@@ -360,7 +360,7 @@ void Render::DisplayDeviceInfo()
 	}
 }
 
-void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel)
+void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel)
 {
 	const filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
 	const filesystem::path geometryShaderPath = shaderPath / L"GeometryShader/";
@@ -391,7 +391,7 @@ void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entry
 	}
 }
 
-void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const vector<UINT> constBufferIds, const int layoutIndex)
+void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const vector<UINT> constBufferIds, const int layoutIndex)
 {
 	comPtr<ID3DBlob> VSCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -425,7 +425,7 @@ void Render::LoadVertexShader(const wchar_t* file, const char* entryPoint, const
 	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_tuple(vertexShader, constBufferIds, inputLayout);
 }
 
-void Render::LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
+void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
 {
 	comPtr<ID3DBlob> GSCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -456,7 +456,7 @@ void Render::LoadGeometryShader(const wchar_t* file, const char* entryPoint, con
 	m_geometryShaderMap[g_geometryShaderIdMap[shaderName]] = geometryShader;
 }
 
-void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
+void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
 {
 	comPtr<ID3DBlob> PSCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -488,7 +488,7 @@ void Render::LoadPixelShader(const wchar_t* file, const char* entryPoint, const 
 	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
 }
 
-void Render::LoadAllTextures(const std::filesystem::path texturePath)
+void Renderer::LoadAllTextures(const std::filesystem::path texturePath)
 {
 	if (filesystem::exists(texturePath) && filesystem::is_directory(texturePath))
 	{
@@ -514,7 +514,7 @@ void Render::LoadAllTextures(const std::filesystem::path texturePath)
 	}
 }
 
-void Render::CreateRasterState()
+void Renderer::CreateRasterState()
 {
 	D3D11_RASTERIZER_DESC rasterDesc = {};
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
@@ -545,7 +545,7 @@ void Render::CreateRasterState()
 #endif
 }
 
-void Render::CreateSamplerState()
+void Renderer::CreateSamplerState()
 {
 	if (FAILED(m_device->CreateSamplerState(&s_defaultSamplerDesc, m_samplers[0].GetAddressOf())))
 	{
@@ -554,7 +554,7 @@ void Render::CreateSamplerState()
 	}
 }
 
-void Render::LoadShapeFile(const filesystem::path filePath)
+void Renderer::LoadShapeFile(const filesystem::path filePath)
 {
 	ObjFileParser shapes(filePath.c_str());
 
@@ -577,7 +577,7 @@ void Render::LoadShapeFile(const filesystem::path filePath)
 	m_shapeVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
 }
 
-void Render::LoadDefaultShapes(const filesystem::path folderPath)
+void Renderer::LoadDefaultShapes(const filesystem::path folderPath)
 {
 	if (filesystem::exists(folderPath) && filesystem::is_directory(folderPath))
 	{
@@ -588,7 +588,7 @@ void Render::LoadDefaultShapes(const filesystem::path folderPath)
 	}
 }
 
-void Render::EngineUpdate()
+void Renderer::Update()
 {
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
@@ -632,14 +632,14 @@ constexpr UINT stride = sizeof(Vertex);
 constexpr UINT offset = 0;
 
 // TODO: CreateDepthStencilState
-void Render::DrawObjects()
+void Renderer::DrawObjects()
 {
 	DrawShapes();
 
 	if (m_drawNormalLines) DrawNormalLines();
 }
 
-void Render::DrawShapes() // Only triangle topology
+void Renderer::DrawShapes() // Only triangle topology
 {
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const auto& [object, shapeData] : g_renderShapes)
@@ -679,7 +679,7 @@ void Render::DrawShapes() // Only triangle topology
 	}
 }
 
-void Render::DrawNormalLines()
+void Renderer::DrawNormalLines()
 {
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
@@ -712,12 +712,12 @@ void Render::DrawNormalLines()
 	}
 }
 
-void Render::UpdateRenderMode()
+void Renderer::UpdateRenderMode()
 {
 	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
 }
 
-Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) : m_hWnd(hWnd)
+Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) : m_hWnd(hWnd)
 {
 	// Initialize device
 	GetHardwareInfo();
@@ -764,7 +764,7 @@ Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) 
 	}
 }
 
-Render::~Render() // Not sure all this is necessary // teorically the comPtr should handle it
+Renderer::~Renderer() // Not sure all this is necessary // teorically the comPtr should handle it
 {
 	// Clear device
 	m_SpriteFontMap.clear();
@@ -793,7 +793,7 @@ Render::~Render() // Not sure all this is necessary // teorically the comPtr sho
 	for (auto& state : g_rasterState) state.Reset();
 }
 
-void Render::Resize(UINT width, UINT height)
+void Renderer::Resize(UINT width, UINT height)
 {
 	if (width == 0 || height == 0) return;
 
@@ -818,7 +818,7 @@ void Render::Resize(UINT width, UINT height)
 
 constexpr UINT VEWPORT_NUM = 1;
 
-void Render::SetViewport(float topLeftX, float topLeftY)
+void Renderer::SetViewport(float topLeftX, float topLeftY)
 {
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX = -topLeftX;
@@ -831,7 +831,7 @@ void Render::SetViewport(float topLeftX, float topLeftY)
 	m_deviceContext->RSSetViewports(VEWPORT_NUM, &viewport);
 }
 
-void Render::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)
+void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)
 {
 	wchar_t buffer[256] = {};
 	wcsncpy_s(buffer, text, _TRUNCATE);
@@ -852,9 +852,9 @@ void Render::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, fl
 	}
 }
 
-void Render::SceneRender()
+void Renderer::Render()
 {
-	EngineUpdate();
+	Update();
 
 	DrawObjects();
 
@@ -867,12 +867,12 @@ void Render::SceneRender()
 	m_swapChain->Present(m_deviceInfo.isVSync, 0);
 }
 
-void Render::ChangeState()
+void Renderer::ChangeState()
 {
 	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % RasterStateCount);
 }
 
-void Render::ScreenPointToWorld(POINT screenPos) const
+void Renderer::ScreenPointToWorld(POINT screenPos) const
 {
 	D3D11_VIEWPORT vp;
 	UINT numViewports = VEWPORT_NUM;

@@ -50,6 +50,6 @@ namespace VDGM
 	void Render()
 	{
 		// This too
-		for (auto& render : VDW::g_renders) render->SceneRender();
+		for (auto& render : VDW::g_renders) render->Render();
 	}
 }

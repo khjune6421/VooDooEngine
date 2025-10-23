@@ -18,7 +18,7 @@ enum class Directions
 
 class Object
 {
-	friend class Render;
+	friend class Renderer;
 	UINT m_id = 0; // For debug purpose
 
 	// Not sure if these should be private or protected
