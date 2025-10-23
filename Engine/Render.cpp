@@ -641,11 +641,11 @@ void Render::DrawObjects()
 
 void Render::DrawShapes()
 {
+	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
 		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		m_deviceContext->IASetPrimitiveTopology(shapeData->topology);
 
 		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[shapeData->vertexShaderId]).Get(), nullptr, 0);
 		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData->pixelShaderId].Get(), nullptr, 0);

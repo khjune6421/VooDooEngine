@@ -14,7 +14,6 @@ extern std::unordered_map<std::wstring, UINT> g_textureIdMap;
 struct ShapeData
 {
 	UINT meshId = 0;
-	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT vertexShaderId = 0;
 	UINT pixelShaderId = 0;
 
