@@ -26,7 +26,7 @@ public:
 	(
 		float fov = DirectX::XM_PIDIV4,
 		UINT screenWidth = 1920, UINT screenHeight = 1080,
-		float nearPlane = 0.1f, float farPlane = 50.0f
+		float nearPlane = 0.1f, float farPlane = 100.0f
 	);
 	~Camera() { if (g_camera == this) g_camera = nullptr; }
 	Camera(const Camera& other) = default;

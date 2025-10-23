@@ -590,6 +590,8 @@ void Render::LoadDefaultShapes(const filesystem::path folderPath)
 
 void Render::EngineUpdate()
 {
+	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
+
 	AmbientFogConstBuffer fogData = {};
 	if (!g_camera) DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	else
@@ -854,8 +856,6 @@ void Render::SceneRender()
 {
 	EngineUpdate();
 
-	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
-
 	DrawObjects();
 
 	ShowFPS();
@@ -864,7 +864,7 @@ void Render::SceneRender()
 	DisplayDeviceInfo();
 #endif
 
-	Present();
+	m_swapChain->Present(m_deviceInfo.isVSync, 0);
 }
 
 void Render::ChangeState()

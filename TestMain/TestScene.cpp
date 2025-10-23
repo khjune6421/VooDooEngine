@@ -29,7 +29,7 @@ TestScene::TestScene()
 	m_windmill->SetScale(XMFLOAT3{ 1.5f, 1.5f, 1.5f });
 
 	unique_ptr<Object> plane = make_unique<Object>();
-	plane->AddComponent<Shape>(L"PlaneX10", L"VertexShader", L"PixelShader", vector<wstring>{ L"Brick", L"BrickNormal" });
+	plane->AddComponent<Shape>(L"PlaneX10", L"VertexShader", L"PixelShader", vector<wstring>{ L"Plain", L"PlainNormal" });
 	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 

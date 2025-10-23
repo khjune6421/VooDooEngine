@@ -168,7 +168,6 @@ class Render
 	void GetHardwareInfo();
 
 	void ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth = 1.0f, UINT8 stencil = 0);
-	void Present() { m_swapChain->Present(m_deviceInfo.isVSync, 0); }
 
 	void CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout);
 
