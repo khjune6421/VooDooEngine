@@ -869,7 +869,7 @@ void Render::SceneRender()
 
 void Render::ChangeState()
 {
-	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % 4);
+	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % RasterStateCount);
 }
 
 void Render::ScreenPointToWorld(POINT screenPos) const
