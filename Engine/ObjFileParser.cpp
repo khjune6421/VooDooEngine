@@ -3,6 +3,60 @@
 using namespace std;
 using namespace DirectX;
 
+void ObjFileParser::CalculateTangents(vector<Vertex>& vertices) // How the hell does this even work
+{
+	for (size_t i = 0; i < vertices.size(); i += 3)
+	{
+		if (i + 2 >= vertices.size()) break;
+
+		Vertex& v0 = vertices[i];
+		Vertex& v1 = vertices[i + 1];
+		Vertex& v2 = vertices[i + 2];
+
+		XMFLOAT3 edge1 =
+		{
+			v1.position.x - v0.position.x,
+			v1.position.y - v0.position.y,
+			v1.position.z - v0.position.z
+		};
+
+		XMFLOAT3 edge2 =
+		{
+			v2.position.x - v0.position.x,
+			v2.position.y - v0.position.y,
+			v2.position.z - v0.position.z
+		};
+
+		XMFLOAT2 deltaUV1 =
+		{
+			v1.uv.x - v0.uv.x,
+			v1.uv.y - v0.uv.y
+		};
+
+		XMFLOAT2 deltaUV2 =
+		{
+			v2.uv.x - v0.uv.x,
+			v2.uv.y - v0.uv.y
+		};
+
+		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+
+		XMFLOAT3 tangent =
+		{
+			r * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
+			r * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
+			r * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z)
+		};
+
+		XMVECTOR tangentVec = XMLoadFloat3(&tangent);
+		tangentVec = XMVector3Normalize(tangentVec);
+
+		XMStoreFloat3(&v0.tangent, tangentVec);
+		XMStoreFloat3(&v1.tangent, tangentVec);
+		XMStoreFloat3(&v2.tangent, tangentVec);
+	}
+}
+
 // Starting to realize why people just use json
 ObjFileParser::ObjFileParser(const wstring& filename)
 {
@@ -87,4 +141,6 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 			}
 		}
 	}
+
+	for (auto& shape : m_shapes) CalculateTangents(shape.vertices);
 }

@@ -24,30 +24,6 @@ public:
 	virtual void SetIntensity(float intensity) { m_intensity = intensity; }
 };
 
-class AmbientLight : public Light
-{
-	void AddColor() const;
-	void RemoveColor() const;
-
-	friend class Render;
-	static DirectX::XMFLOAT4 s_ambientColor;
-
-public:
-	AmbientLight
-	(
-		const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f },
-		const float intensity = 1.0f
-	) : Light(color, intensity) {}
-
-	void OnAttached(class Object* owner) override { Component::OnAttached(owner); AddColor(); }
-	void OnDetached() override { Component::OnDetached(); RemoveColor(); }
-
-	void SetColor(const DirectX::XMFLOAT3& color) override { RemoveColor(); m_color = color; AddColor(); }
-	void SetIntensity(float intensity) override { RemoveColor(); m_intensity = intensity; AddColor(); };
-
-	static const DirectX::XMFLOAT4& GetAmbientColor() { return s_ambientColor; }
-};
-
 struct DirectionalLightConstBuffer
 {
 	DirectX::XMVECTOR direction = { 0.0f, -1.0f, 0.0f, 0.0f };

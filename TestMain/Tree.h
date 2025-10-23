@@ -4,11 +4,15 @@
 
 class Tree : public Object
 {
-	bool m_isDead = false;
-	bool m_isAttached = false;
-
-	DirectX::XMVECTOR m_fallAngle = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	std::unique_ptr<Object> m_leaves = nullptr;
 
 public:
+	Tree() : Object()
+	{
+		AddComponent<Shape>(L"TreeTrunk", L"VertexShader", L"PixelShader", std::vector<std::wstring>{ L"Bark", L"BarkNormal" });
+		m_leaves = std::make_unique<Object>();
+		m_leaves->AddComponent<Shape>(L"Leaves", L"VertexShader", L"PixelShader", std::vector<std::wstring>{ L"Leaves", L"LeavesNormal" });
+		AddChild(m_leaves.get());
+	}
 	void Update(float deltaTime) override;
 };

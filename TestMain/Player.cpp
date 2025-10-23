@@ -1,10 +1,11 @@
 #include "Player.h"
 
 using namespace DirectX;
+using namespace std;
 
 Player::Player()
 {
-	AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Monkey");
+	AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", vector<wstring>{ L"Monkey", L"NoNormal" });
 }
 
 void Player::Update(float deltaTime)

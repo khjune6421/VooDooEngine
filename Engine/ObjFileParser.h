@@ -15,11 +15,14 @@ struct Vertex
 #endif
 	};
 	DirectX::XMFLOAT3 normal = { 0.0f, 1.0f, 0.0f };
+	DirectX::XMFLOAT3 tangent = { 1.0f, 0.0f, 0.0f };
 	DirectX::XMFLOAT2 uv = { 0.0f, 0.0f };
 };
 
 class ObjFileParser
 {
+	static void CalculateTangents(std::vector<Vertex>& vertices);
+
 public:
 	ObjFileParser(const std::wstring& filename);
 

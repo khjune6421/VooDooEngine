@@ -27,6 +27,7 @@ D3D11_INPUT_ELEMENT_DESC Render::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Render::s_layoutDescs[1] = { { Render::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE } };
@@ -359,16 +360,15 @@ void Render::DisplayDeviceInfo()
 	}
 }
 
-void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel) // TODO: Refactor this later for better error handling and flexibility
+void Render::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel)
 {
 	const filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
 	const filesystem::path geometryShaderPath = shaderPath / L"GeometryShader/";
 	const filesystem::path pixelShaderPath = shaderPath / L"PixelShader/";
 
-	const filesystem::path defaultInputLayoutPath = vertexShaderPath / L"DefaultInputLayout/";
-	if (filesystem::exists(defaultInputLayoutPath) && filesystem::is_directory(defaultInputLayoutPath))
+	if (filesystem::exists(vertexShaderPath) && filesystem::is_directory(vertexShaderPath))
 	{
-		for (const auto& entry : filesystem::directory_iterator(defaultInputLayoutPath))
+		for (const auto& entry : filesystem::directory_iterator(vertexShaderPath))
 		{
 			if (entry.path().extension() == L".hlsl") LoadVertexShader(entry.path().c_str(), entryPoint, shaderModel);
 		}
@@ -517,8 +517,8 @@ void Render::LoadAllTextures(const std::filesystem::path texturePath)
 void Render::CreateRasterState()
 {
 	D3D11_RASTERIZER_DESC rasterDesc = {};
-	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
-	rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.MultisampleEnable = TRUE; // Base value is FALSE
 	rasterDesc.AntialiasedLineEnable = TRUE; // Base value is FALSE
@@ -528,34 +528,20 @@ void Render::CreateRasterState()
 		return;
 	}
 
-	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
 	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[1].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
 	}
 
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.CullMode = D3D11_CULL_NONE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[2].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
-		return;
-	}
-
-	rasterDesc.CullMode = D3D11_CULL_BACK;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[3].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
-		return;
-	}
-
 #ifdef _DEBUG
-	m_deviceContext->RSSetState(g_rasterState[0].Get());
-	m_currentRasterState = RasterState::Wireframe_CullNone;
+	m_deviceContext->RSSetState(g_rasterState[1].Get());
+	m_currentRasterState = RasterState::Wireframe;
 #else
-	m_deviceContext->RSSetState(g_rasterState[2].Get());
-	m_currentRasterState = RasterState::Solid_CullNone;
+	m_deviceContext->RSSetState(g_rasterState[0].Get());
+	m_currentRasterState = RasterState::Solid;
 #endif
 }
 
@@ -604,30 +590,38 @@ void Render::LoadDefaultShapes(const filesystem::path folderPath)
 
 void Render::EngineUpdate()
 {
+	AmbientFogConstBuffer fogData = {};
 	if (!g_camera) DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	else
 	{
 		g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height); // Feels wasteful to do this every frame // TODO: Fix this
 
 		s_viewMatrix = g_camera->GetViewMatrix();
+		fogData.cameraPosition = g_camera->m_cameraPosition;
 		s_projectionMatrix = g_camera->GetProjectionMatrix();
 	}
 
 	// Ambient Light
-	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &AmbientLight::s_ambientColor, 0, 0); // Playing with fire // this only works because s_ambientColor is static
+	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0); // Playing with fire // this only works because s_ambientColor is static
 	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
 
+	// Directional Light
 	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &DirectionalLight::s_lightData, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(2, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
 
-	// Point Lights // later add for loop
+	// Ambient Fog
+	fogData.colorAndRange = VDGM::g_currentScene->m_ambientFog;
+	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &fogData, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
+	// Point Lights // later add for loop
 	PointLightArrayConstBuffer pointLightBufferData = {};
 	pointLightBufferData.pointLights[0] = g_pointLights[0]->GetLightData();
 	pointLightBufferData.pointLights[1] = g_pointLights[1]->GetLightData();
-
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
+
+	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
 
 	UpdateRenderMode();
 }
@@ -647,9 +641,6 @@ void Render::DrawShapes()
 {
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-#ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(shapeData->meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData->meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
-#endif
 		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetPrimitiveTopology(shapeData->topology);
@@ -671,10 +662,18 @@ void Render::DrawShapes()
 
 		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
 
-		m_deviceContext->PSSetShaderResources(0, 1, m_textureMap[shapeData->textureId].GetAddressOf());
-		m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
+		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
+		{
+			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, m_textureMap[shapeData->textureIds[i]].GetAddressOf());
+		}
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
+
+		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
+		{
+			ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, nullSRV);
+		}
 	}
 }
 
@@ -682,9 +681,6 @@ void Render::DrawNormalLines()
 {
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-#ifdef _DEBUG
-		if (m_shapeVertexBufferMap.find(shapeData->meshId) == m_shapeVertexBufferMap.end()) { MessageBoxW(nullptr, (L"Shape ID " + to_wstring(shapeData->meshId) + L" not found in vertex buffer map").c_str(), L"Error", MB_OK); continue; }
-#endif
 		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
@@ -748,6 +744,7 @@ Render::Render(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) 
 	// Initialize constant buffers
 	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[MatrixBuffer]);
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientLightBuffer]); // Ambient light buffer
+	CreateConstBuffer(sizeof(AmbientFogConstBuffer), &m_constBuffers[AmbientFogBuffer]); // Ambient fog buffer
 	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
 	CreateConstBuffer(sizeof(PointLightArrayConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
 
@@ -872,7 +869,7 @@ void Render::SceneRender()
 
 void Render::ChangeState()
 {
-	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % 4);
+	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % RasterStateCount);
 }
 
 void Render::ScreenPointToWorld(POINT screenPos) const

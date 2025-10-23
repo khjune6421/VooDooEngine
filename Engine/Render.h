@@ -62,10 +62,16 @@ class Render
 
 		DirectX::XMMATRIX normalMatrix; // inverse transpose scale matrix for normal transformation
 	};
+	struct AmbientFogConstBuffer
+	{
+		DirectX::XMVECTOR cameraPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
+		DirectX::XMFLOAT4 colorAndRange = { 0.5f, 0.5f, 0.5f, 50.0f }; // w is range
+	};
 	enum ConstBufferType
 	{
 		MatrixBuffer,
 		AmbientLightBuffer,
+		AmbientFogBuffer,
 		DirectionalLightBuffer,
 		PointLightBuffer,
 
@@ -74,7 +80,7 @@ class Render
 	comPtr<ID3D11Buffer> m_constBuffers[ConstBufferCount] = {};
 
 	// Input layouts // well this is cursed
-	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
+	constexpr static UINT DEFAULT_LAYOUT_SIZE = 5;
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
 	enum InputLayoutType
 	{
@@ -138,15 +144,13 @@ class Render
 	// Render
 	enum RasterState
 	{
-		Wireframe_CullNone,
-		Wireframe_CullBack,
-		Solid_CullNone,
-		Solid_CullBack,
+		Solid,
+		Wireframe,
 
 		RasterStateCount
 	};
 	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
-	RasterState m_currentRasterState = RasterState::Solid_CullNone;
+	RasterState m_currentRasterState = RasterState::Solid;
 
 
 	// static view and projection matrix for all renders
