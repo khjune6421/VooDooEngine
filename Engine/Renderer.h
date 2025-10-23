@@ -192,7 +192,7 @@ class Renderer
 	void LoadShapeFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
-	void Update();
+	void UpdateRenderer();
 
 	void DrawObjects();
 	// Draw shapes // does not have animation

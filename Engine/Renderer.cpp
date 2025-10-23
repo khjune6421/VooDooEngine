@@ -588,7 +588,7 @@ void Renderer::LoadDefaultShapes(const filesystem::path folderPath)
 	}
 }
 
-void Renderer::Update()
+void Renderer::UpdateRenderer()
 {
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
@@ -671,9 +671,9 @@ void Renderer::DrawShapes() // Only triangle topology
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
 
+		ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
 		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
 		{
-			ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
 			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, nullSRV);
 		}
 	}
@@ -834,7 +834,7 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 
 void Renderer::Render()
 {
-	Update();
+	UpdateRenderer();
 
 	DrawObjects();
 
