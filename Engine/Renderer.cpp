@@ -764,33 +764,13 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	}
 }
 
-Renderer::~Renderer() // Not sure all this is necessary // teorically the comPtr should handle it
+Renderer::~Renderer()
 {
-	// Clear device
-	m_SpriteFontMap.clear();
-	m_SpriteBatchMap.clear();
-	m_device.Reset();
-
-	// Microsoft doesn't recommend this
-	if (m_deviceContext)
+	if (m_deviceContext) // Microsoft does recommend this!
 	{
 		m_deviceContext->ClearState();
 		m_deviceContext->Flush();
 	}
-	m_deviceContext.Reset();
-	m_swapChain.Reset();
-	m_renderTargetView.Reset();
-	m_depthStencilBuffer.Reset();
-	m_depthStencilView.Reset();
-	m_deviceInfo.hardwareInfos.clear();
-
-	m_vertexShaderMap.clear();
-	m_pixelShaderMap.clear();
-	m_shapeVertexBufferMap.clear();
-	m_pixelShaderMap.clear();
-
-	// Clear render
-	for (auto& state : g_rasterState) state.Reset();
 }
 
 void Renderer::Resize(UINT width, UINT height)
