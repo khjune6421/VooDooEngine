@@ -119,7 +119,7 @@ class Render
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteBatch>> m_SpriteBatchMap;
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
-	// Maps shape ID to its vertex buffer and vertex count // I might change this to vector later // not sure if it's a good idea to make this unintuitive thing more complicated
+	// Maps shape ID to its vertex buffer and vertex count
 	static UINT s_nextShapeId;
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
 

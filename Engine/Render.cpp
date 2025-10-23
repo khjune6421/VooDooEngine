@@ -639,7 +639,7 @@ void Render::DrawObjects()
 	if (m_drawNormalLines) DrawNormalLines();
 }
 
-void Render::DrawShapes()
+void Render::DrawShapes() // Only triangle topology
 {
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const auto& [object, shapeData] : g_renderShapes)

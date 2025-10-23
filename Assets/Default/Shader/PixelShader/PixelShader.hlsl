@@ -55,11 +55,14 @@ float4 main(PSInput input) : SV_TARGET
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
     float3 worldNormal = normalize(mul(normalMapSample, TBN));
     
+    [unroll]
     for (int i = 0; i < 2; i++)
     {
         float3 vecToLight = pointLights[i].worldPos.xyz - input.posWorld.xyz;
         
         float distance = length(vecToLight);
+        if (distance > pointLights[i].range) continue;
+        
         vecToLight = normalize(vecToLight);
         
         float spot = pow(max(dot(-vecToLight, pointLights[i].directionAndAngle.xyz), 1e-5), pointLights[i].directionAndAngle.w);
