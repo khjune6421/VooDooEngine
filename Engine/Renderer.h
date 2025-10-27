@@ -124,12 +124,6 @@ class Renderer
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
 
 	static UINT s_vertexShaderId;
-	enum VertexShaderType
-	{
-		VertexShader,
-		ConstBuffers,
-		InputLayout
-	};
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11VertexShader>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 
 	static UINT s_geometryShaderId;

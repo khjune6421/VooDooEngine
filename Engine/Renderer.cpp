@@ -647,8 +647,7 @@ void Renderer::DrawShapes() // Only triangle topology
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
-		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetVertexBuffers(0, 1, m_shapeVertexBufferMap[shapeData->meshId].first.GetAddressOf(), &stride, &offset);
 
 		m_deviceContext->VSSetShader((m_vertexShaderMap[shapeData->vertexShaderId]).first.Get(), nullptr, 0);
 		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData->pixelShaderId].Get(), nullptr, 0);
@@ -686,8 +685,7 @@ void Renderer::DrawNormalLines()
 {
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
-		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetVertexBuffers(0, 1, m_shapeVertexBufferMap[shapeData->meshId].first.GetAddressOf(), &stride, &offset);
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 		m_deviceContext->VSSetShader(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]].first.Get(), nullptr, 0);
