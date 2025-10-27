@@ -52,16 +52,6 @@ class Renderer
 
 		std::vector<HardwareInfo> hardwareInfos = {};
 	};
-
-	struct MatrixConstBuffer
-	{
-		DirectX::XMMATRIX world; // world matrix
-		DirectX::XMMATRIX view; // view matrix
-		DirectX::XMMATRIX projection; // projection matrix
-		DirectX::XMMATRIX WVP; // world-view-projection matrix
-
-		DirectX::XMMATRIX normalMatrix; // inverse transpose scale matrix for normal transformation
-	};
 	struct AmbientFogConstBuffer
 	{
 		DirectX::XMVECTOR cameraPosition = { 0.0f, 0.0f, 0.0f, 1.0f };

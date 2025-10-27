@@ -5,7 +5,7 @@
 namespace VDW
 {
 	extern HINSTANCE g_hInstance;
-	extern std::vector<Renderer*> g_renders;
+	extern std::vector<Renderer*> g_renderers;
 	extern std::unordered_map<HWND, Renderer*> g_windows;
 
 	LRESULT CALLBACK Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

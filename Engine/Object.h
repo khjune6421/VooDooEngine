@@ -16,6 +16,16 @@ enum class Directions
 	Down
 };
 
+struct MatrixConstBuffer
+{
+	DirectX::XMMATRIX world; // world matrix
+	DirectX::XMMATRIX view; // view matrix
+	DirectX::XMMATRIX projection; // projection matrix
+	DirectX::XMMATRIX WVP; // world-view-projection matrix
+
+	DirectX::XMMATRIX normalMatrix; // inverse transpose scale matrix for normal transformation
+};
+
 class Object
 {
 	friend class Renderer;
@@ -54,6 +64,8 @@ public:
 	Object& operator=(const Object& other) = default;
 	Object(Object&& other) noexcept = default;
 	Object& operator=(Object&& other) noexcept = default;
+
+	MatrixConstBuffer m_matrixBufferData = {};
 
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);
