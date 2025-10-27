@@ -13,7 +13,7 @@
 #include "Shape.h"
 #include "Light.h"
 
-// I usually don't use 'using' or #define macro in header files but I'll make this one an exception
+// I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
 class Object;

@@ -604,7 +604,7 @@ void Renderer::UpdateRenderer()
 	}
 
 	// Ambient Light
-	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0); // Playing with fire // this only works because s_ambientColor is static
+	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
 
 	// Directional Light
