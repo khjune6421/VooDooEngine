@@ -130,7 +130,7 @@ class Renderer
 		ConstBuffers,
 		InputLayout
 	};
-	std::unordered_map<UINT, std::tuple<comPtr<ID3D11VertexShader>, std::vector<UINT>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+	std::unordered_map<UINT, std::pair<comPtr<ID3D11VertexShader>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
 
 	static UINT s_geometryShaderId;
 	std::unordered_map<UINT, comPtr<ID3D11GeometryShader>> m_geometryShaderMap;
@@ -179,7 +179,7 @@ class Renderer
 
 	// Shader
 	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
-	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const std::vector<UINT> constBufferIds = { MatrixBuffer, AmbientLightBuffer }, const int layoutIndex = DefaultInputLayout);
+	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const int layoutIndex = DefaultInputLayout);
 	void LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 

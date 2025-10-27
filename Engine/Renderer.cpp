@@ -391,7 +391,7 @@ void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* ent
 	}
 }
 
-void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const vector<UINT> constBufferIds, const int layoutIndex)
+void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const int layoutIndex)
 {
 	comPtr<ID3DBlob> VSCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -422,7 +422,7 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
 	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
-	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_tuple(vertexShader, constBufferIds, inputLayout);
+	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_pair(vertexShader, inputLayout);
 }
 
 void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
@@ -650,7 +650,7 @@ void Renderer::DrawShapes() // Only triangle topology
 		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[shapeData->vertexShaderId]).Get(), nullptr, 0);
+		m_deviceContext->VSSetShader((m_vertexShaderMap[shapeData->vertexShaderId]).first.Get(), nullptr, 0);
 		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData->pixelShaderId].Get(), nullptr, 0);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
@@ -665,7 +665,7 @@ void Renderer::DrawShapes() // Only triangle topology
 		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 
-		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
+		m_deviceContext->IASetInputLayout(m_vertexShaderMap[shapeData->vertexShaderId].second.Get());
 
 		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
 		{
@@ -690,7 +690,7 @@ void Renderer::DrawNormalLines()
 		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]]).Get(), nullptr, 0);
+		m_deviceContext->VSSetShader(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]].first.Get(), nullptr, 0);
 		m_deviceContext->GSSetShader(m_geometryShaderMap[g_geometryShaderIdMap[L"GSShowNormal"]].Get(), nullptr, 0);
 		m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"PSShowNormal"]].Get(), nullptr, 0);
 
@@ -707,7 +707,7 @@ void Renderer::DrawNormalLines()
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 		m_deviceContext->GSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 
-		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
+		m_deviceContext->IASetInputLayout(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]].second.Get());
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
 
