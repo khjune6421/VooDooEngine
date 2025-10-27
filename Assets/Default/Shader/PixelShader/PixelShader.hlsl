@@ -2,8 +2,6 @@ SamplerState mainTexSampler : register(s0);
 
 Texture2D mainTex : register(t0);
 Texture2D normalMap : register(t1);
-Texture2D snowTex : register(t2);
-Texture2D snowMask : register(t3);
 
 struct PointLight
 {
@@ -54,9 +52,6 @@ struct PSInput
 float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
-    float4 snowColor = snowTex.Sample(mainTexSampler, input.uv);
-    float4 snowMaskValue = snowMask.Sample(mainTexSampler, input.uv);
-    texColor = texColor * (1.0f - snowMaskValue) + snowColor * snowMaskValue;
     
     float distanceFromCamera = length(cameraPos.xyz - input.posWorld.xyz);
     float fogFactor = saturate(distanceFromCamera / ambientFog.w);

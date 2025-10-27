@@ -625,9 +625,6 @@ void Renderer::UpdateRenderer()
 
 	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
 
-	m_deviceContext->PSSetShaderResources(2, 1, m_textureMap[g_textureIdMap[L"Snow"]].GetAddressOf());
-	m_deviceContext->PSSetShaderResources(3, 1, m_textureMap[g_textureIdMap[L"SnowMask"]].GetAddressOf());
-
 	UpdateRenderMode();
 }
 
