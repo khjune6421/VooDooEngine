@@ -33,7 +33,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	while (VDGM::GameLoop()) if (GetAsyncKeyState(VK_TAB) & 0x0001) VDGM::ChangeScene(L"TestScene");
 
 	VDW::g_windows.clear();
-	for (auto& render : VDW::g_renders) delete render;
+	for (auto& renderer : VDW::g_renderers) delete renderer;
 
 	return 0;
 }
