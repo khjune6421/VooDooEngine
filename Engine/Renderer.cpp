@@ -41,9 +41,7 @@ D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
 	0.0f,
 	8,
 	D3D11_COMPARISON_NEVER,
-	{ 1, 1, 1, 1 },
-	0.0f,
-	D3D11_FLOAT32_MAX
+	{ 1, 1, 1, 1 }
 };
 
 XMMATRIX Renderer::s_viewMatrix = XMMatrixIdentity();
