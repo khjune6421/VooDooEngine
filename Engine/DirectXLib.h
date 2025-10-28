@@ -18,3 +18,10 @@
 
 // DirectXTK libraries
 #pragma comment(lib, "DirectXTK.lib")
+
+// Assimp library
+#ifdef _DEBUG
+#pragma comment(lib, "assimp-vc143-mtd.lib")
+#else
+#pragma comment(lib, "assimp-vc143-mt.lib")
+#endif

@@ -14,9 +14,6 @@
     <ClCompile Include="Object.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectPositionParser.cpp">
-      <Filter>Parser</Filter>
-    </ClCompile>
     <ClCompile Include="ObjFileParser.cpp">
       <Filter>Parser</Filter>
     </ClCompile>
@@ -75,9 +72,6 @@
     </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectPositionParser.h">
-      <Filter>Parser</Filter>
     </ClInclude>
     <ClInclude Include="DirectXLib.h">
       <Filter>LibrariesAndIncludes</Filter>
