@@ -251,6 +251,43 @@ void Renderer::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer,
 	}
 }
 
+void Renderer::CreateFBXVertexBuffer(const FBXModelData& modelData, UINT modelId)
+{
+	m_fbxModelBufferMap[modelId].reserve(modelData.meshes.size());
+
+	for (const auto& mesh : modelData.meshes)
+	{
+		// Create vertex buffer
+		comPtr<ID3D11Buffer> vertexBuffer;
+		CreateVertexBuffer(
+			static_cast<UINT>(sizeof(FBXVertex) * mesh.vertices.size()),
+			&vertexBuffer,
+			mesh.vertices.data(),
+			sizeof(FBXVertex)
+		);
+
+		// Create index buffer
+		comPtr<ID3D11Buffer> indexBuffer;
+		D3D11_BUFFER_DESC indexBufferDesc = {};
+		indexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(UINT) * mesh.indices.size());
+		indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+		D3D11_SUBRESOURCE_DATA indexData = {};
+		indexData.pSysMem = mesh.indices.data();
+
+		if (FAILED(m_device->CreateBuffer(&indexBufferDesc, &indexData, indexBuffer.GetAddressOf())))
+		{
+			MessageBoxW(nullptr, L"Failed to create index buffer", L"Error", MB_OK);
+			continue;
+		}
+
+		m_fbxModelBufferMap[modelId].emplace_back(
+			vertexBuffer,
+			make_pair(indexBuffer, static_cast<UINT>(mesh.indices.size()))
+		);
+	}
+}
+
 void Renderer::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
@@ -633,6 +670,7 @@ constexpr UINT offset = 0;
 void Renderer::DrawObjects()
 {
 	DrawShapes();
+	DrawFBXModels();
 
 	if (m_drawNormalLines) DrawNormalLines();
 }
@@ -672,6 +710,59 @@ void Renderer::DrawShapes() // Only triangle topology
 		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
 		{
 			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, nullSRV);
+		}
+	}
+}
+
+void Renderer::DrawFBXModels()
+{
+	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	for (const auto& [object, fbxModel] : g_renderFBXModels)
+	{
+		if (!fbxModel->IsLoaded()) continue;
+
+		UINT modelId = fbxModel->GetModelId();
+		const FBXModelData* modelData = fbxModel->GetModelData();
+
+		// Create buffers if they don't exist
+		if (m_fbxModelBufferMap.find(modelId) == m_fbxModelBufferMap.end())
+		{
+			CreateFBXVertexBuffer(*modelData, modelId);
+		}
+
+		// Set shaders (use default for now)
+		UINT vertexShaderId = g_vertexShaderIdMap[L"VertexShader"];
+		UINT pixelShaderId = g_pixelShaderIdMap[L"PixelShader"];
+
+		m_deviceContext->VSSetShader(m_vertexShaderMap[vertexShaderId].first.Get(), nullptr, 0);
+		m_deviceContext->PSSetShader(m_pixelShaderMap[pixelShaderId].Get(), nullptr, 0);
+		m_deviceContext->IASetInputLayout(m_vertexShaderMap[vertexShaderId].second.Get());
+
+		// Render each mesh
+		for (size_t meshIndex = 0; meshIndex < modelData->meshes.size(); ++meshIndex)
+		{
+			const auto& meshBuffers = m_fbxModelBufferMap[modelId][meshIndex];
+			UINT stride = sizeof(FBXVertex);
+			UINT offset = 0;
+
+			m_deviceContext->IASetVertexBuffers(0, 1, meshBuffers.first.GetAddressOf(), &stride, &offset);
+			m_deviceContext->IASetIndexBuffer(meshBuffers.second.first.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+			// Update matrices
+			XMMATRIX worldMatrix = object->GetWorldMatrix();
+			MatrixConstBuffer constBufferData = {};
+			constBufferData.world = XMMatrixTranspose(worldMatrix);
+			constBufferData.view = XMMatrixTranspose(s_viewMatrix);
+			constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
+			constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
+			constBufferData.normalMatrix = XMMatrixTranspose(object->m_inverseScaleMatrix * worldMatrix);
+
+			m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
+			m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
+
+			// Draw the mesh
+			m_deviceContext->DrawIndexed(meshBuffers.second.second, 0, 0);
 		}
 	}
 }

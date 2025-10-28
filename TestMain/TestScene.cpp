@@ -39,7 +39,7 @@ TestScene::TestScene()
 	m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 0.0f, 1.0f, 1.0f }, 5.0f, 60.0f);
 	m_lightObj->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", vector<wstring>{ L"Eye", L"NoNormal" });
 
-	const int treeCount = 1000;
+	const int treeCount = 10;
 	for (int i = 0; i < treeCount; ++i)
 	{
 		float x = static_cast<float>((rand() % 2000) - 1000) / 10.0f;
@@ -48,6 +48,11 @@ TestScene::TestScene()
 		tree->SetPosition(XMVECTOR{ x, 0.0f, z, 1.0f });
 		m_objects.emplace_back(move(tree));
 	}
+
+	auto fbxTestModel = make_unique<Object>();
+	fbxTestModel->AddComponent<FBXModel>(L"../Assets/Default/FBX/Eye.fbx");  // Adjust path as needed
+	fbxTestModel->SetPosition(XMVECTOR{ 0.0f, 2.0f, 0.0f, 1.0f });
+	m_objects.emplace_back(move(fbxTestModel));
 }
 
 void TestScene::Update(float deltaTime)

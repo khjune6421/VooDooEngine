@@ -11,6 +11,7 @@
 
 #include "Camera.h"
 #include "Shape.h"
+#include "FBXModel.h"
 #include "Light.h"
 
 // I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
@@ -134,6 +135,7 @@ class Renderer
 	static UINT s_textureId;
 	std::unordered_map<UINT, comPtr<ID3D11ShaderResourceView>> m_textureMap;
 
+	std::unordered_map<UINT, std::vector<std::pair<Microsoft::WRL::ComPtr<ID3D11Buffer>, std::pair<Microsoft::WRL::ComPtr<ID3D11Buffer>, UINT>>>> m_fbxModelBufferMap;
 	// Render
 	enum RasterState
 	{
@@ -165,6 +167,7 @@ class Renderer
 	void CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout);
 
 	void CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride);
+	void CreateFBXVertexBuffer(const FBXModelData& modelData, UINT modelId);
 	void CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer);
 
 	void ShowFPS();
@@ -190,6 +193,7 @@ class Renderer
 	void DrawObjects();
 	// Draw shapes // does not have animation
 	void DrawShapes();
+	void DrawFBXModels();
 
 	bool m_drawNormalLines = false; // for debugging
 	void DrawNormalLines();

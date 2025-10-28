@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\packages\directxtk_desktop_win10.2025.7.10.1\include;$(SolutionDir)\packages\assimp\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\packages;$(SolutionDir)\packages\directxtk_desktop_win10.2025.7.10.1\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\packages\directxtk_desktop_win10.2025.7.10.1\include;$(SolutionDir)\packages\assimp\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\packages;$(SolutionDir)\packages\directxtk_desktop_win10.2025.7.10.1\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\packages\directxtk_desktop_win10.2025.7.10.1\include;$(SolutionDir)\packages\assimp\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\packages;$(SolutionDir)\packages\directxtk_desktop_win10.2025.7.10.1\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\packages\directxtk_desktop_win10.2025.7.10.1\include;$(SolutionDir)\packages\assimp\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)\packages;$(SolutionDir)\packages\directxtk_desktop_win10.2025.7.10.1\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -156,6 +156,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FBXFileParser.cpp" />
+    <ClCompile Include="FBXModel.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -169,6 +171,8 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DirectXLib.h" />
+    <ClInclude Include="FBXFileParser.h" />
+    <ClInclude Include="FBXModel.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Light.h" />

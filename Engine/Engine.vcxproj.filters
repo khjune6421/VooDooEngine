@@ -29,6 +29,12 @@
     <ClCompile Include="Shape.cpp">
       <Filter>Component\RenderingRelated</Filter>
     </ClCompile>
+    <ClCompile Include="FBXFileParser.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="FBXModel.cpp">
+      <Filter>Component\RenderingRelated</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">
@@ -92,6 +98,12 @@
       <Filter>Component\RenderingRelated</Filter>
     </ClInclude>
     <ClInclude Include="Shape.h">
+      <Filter>Component\RenderingRelated</Filter>
+    </ClInclude>
+    <ClInclude Include="FBXFileParser.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="FBXModel.h">
       <Filter>Component\RenderingRelated</Filter>
     </ClInclude>
   </ItemGroup>

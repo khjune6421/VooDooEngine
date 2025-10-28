@@ -11,6 +11,11 @@
 #include <DDSTextureLoader.h>
 #include <WICTextureLoader.h>
 
+// Assimp header files
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 // DirectX libraries
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")

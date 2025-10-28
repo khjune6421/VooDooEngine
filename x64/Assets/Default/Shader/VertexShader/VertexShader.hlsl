@@ -53,10 +53,10 @@ VSOutput main(VSInput input)
     output.posWorld = mul(input.pos0, world);
     
     output.col = input.col0;
+    output.norm = normalize(mul(float4(input.norm0, 0.0f), normalMatrix).xyz); // Inverse scale matrix
     float4 diffuseColor = dirLightColor * saturate(dot(output.norm, -dirLightDirection.xyz));
     output.light = ambientLight + diffuseColor;
     
-    output.norm = normalize(mul(float4(input.norm0, 0.0f), normalMatrix).xyz); // Inverse scale matrix
     output.tangent = normalize(mul(float4(input.tangent0, 0.0f), normalMatrix).xyz);
     output.bitangent = normalize(cross(output.norm, output.tangent));
     
