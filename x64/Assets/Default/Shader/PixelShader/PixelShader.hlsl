@@ -29,6 +29,11 @@ cbuffer PointLightConstBuffer : register(b1)
     PointLight pointLights[2];
 }
 
+cbuffer PointLightConstBuffer : register(b2)
+{
+    int season;
+}
+
 struct PSInput
 {
     float4 pos : SV_POSITION0;
@@ -47,6 +52,7 @@ struct PSInput
 float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
+    
     float distanceFromCamera = length(cameraPos.xyz - input.posWorld.xyz);
     float fogFactor = saturate(distanceFromCamera / ambientFog.w);
     float4 fogColor = float4(ambientFog.xyz, 1.0f);
@@ -55,11 +61,14 @@ float4 main(PSInput input) : SV_TARGET
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
     float3 worldNormal = normalize(mul(normalMapSample, TBN));
     
+    [unroll]
     for (int i = 0; i < 2; i++)
     {
         float3 vecToLight = pointLights[i].worldPos.xyz - input.posWorld.xyz;
         
         float distance = length(vecToLight);
+        if (distance > pointLights[i].range) continue;
+        
         vecToLight = normalize(vecToLight);
         
         float spot = pow(max(dot(-vecToLight, pointLights[i].directionAndAngle.xyz), 1e-5), pointLights[i].directionAndAngle.w);
