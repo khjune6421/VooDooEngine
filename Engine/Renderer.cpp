@@ -155,9 +155,8 @@ void Renderer::SetScissorRect(LONG width, LONG height)
 	m_deviceContext->RSSetScissorRects(1, &scissorRect);
 }
 
-void Renderer::LoadFonts()
+void Renderer::LoadFonts(const filesystem::path fontPath)
 {
-	wstring fontPath = L"../Assets/Default/Fonts/";
 	if (!filesystem::exists(fontPath))
 	{
 		MessageBoxW(nullptr, L"Font directory does not exist", L"Error", MB_OK);
@@ -730,8 +729,6 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	SetViewport();
 	SetScissorRect(width, height);
 
-	LoadFonts();
-
 	m_DXVersion = (m_deviceInfo.featureLevels & 0xf000) >> 12;
 	m_DXSubVersion = (m_deviceInfo.featureLevels & 0x0f00) >> 8;
 
@@ -750,6 +747,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");
 	LoadDefaultShapes(defaultPath / L"Shapes/");
 	LoadAllTextures(defaultPath / L"Texture/");
+	LoadFonts(defaultPath / L"Fonts/");
 
 	if (resourcePath) // This will override the default assets if corrisponding files are found
 	{

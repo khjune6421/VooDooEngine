@@ -157,7 +157,7 @@ class Renderer
 	void CreateRenderTarget();
 	void CreateDepthStencil();
 	void SetScissorRect(LONG width, LONG height);
-	void LoadFonts();
+	void LoadFonts(const std::filesystem::path fontPath);
 	void GetHardwareInfo();
 
 	void ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth = 1.0f, UINT8 stencil = 0);
