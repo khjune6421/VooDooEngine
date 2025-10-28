@@ -148,7 +148,6 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="ObjectPositionParser.cpp" />
     <ClCompile Include="ObjFileParser.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -162,7 +161,6 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="ObjectPositionParser.h" />
     <ClInclude Include="ObjFileParser.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
