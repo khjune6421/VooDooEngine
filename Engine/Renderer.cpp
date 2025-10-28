@@ -34,7 +34,7 @@ pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Renderer::s_layoutDescs[1] = { { Renderer:
 
 D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
 {
-	D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+	D3D11_FILTER_ANISOTROPIC,
 	D3D11_TEXTURE_ADDRESS_WRAP,
 	D3D11_TEXTURE_ADDRESS_WRAP,
 	D3D11_TEXTURE_ADDRESS_WRAP,
@@ -518,8 +518,8 @@ void Renderer::CreateRasterState()
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.ScissorEnable = TRUE;
-	rasterDesc.MultisampleEnable = TRUE; // Base value is FALSE
-	rasterDesc.AntialiasedLineEnable = TRUE; // Base value is FALSE
+	rasterDesc.MultisampleEnable = TRUE;
+	rasterDesc.AntialiasedLineEnable = TRUE;
 	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[0].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
