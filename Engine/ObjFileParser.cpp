@@ -135,7 +135,7 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 
 				if (posIdx >= 0 && posIdx < positions.size()) vertex.position = positions[posIdx];
 				if (normalIdx >= 0 && normalIdx < normals.size()) vertex.normal = normals[normalIdx];
-				if (uvIdx >= 0 && uvIdx < uvs.size()) vertex.uv = XMFLOAT2{ uvs[uvIdx].x, 1.0f - uvs[uvIdx].y }; // Flip V for DirectX
+				if (uvIdx >= 0 && uvIdx < uvs.size()) vertex.uv = XMFLOAT2{ uvs[uvIdx].x, 1.0f - uvs[uvIdx].y }; // Flip y for DirectX
 
 				currentShape->vertices.push_back(vertex);
 			}
