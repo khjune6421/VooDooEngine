@@ -35,6 +35,11 @@ public:
 		const std::vector<std::wstring>& textures = { L"NoTexture", L"NoNormal" }
 	);
 
+	void SetMesh(const std::wstring& mesh);
+	void SetVertexShader(const std::wstring& vertexShader);
+	void SetPixelShader(const std::wstring& pixelShader);
+	void SetTextures(const std::vector<std::wstring>& textures);
+
 	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_renderShapes.emplace_back(owner, &m_renderData); }
 	void OnDetached() override;
 };

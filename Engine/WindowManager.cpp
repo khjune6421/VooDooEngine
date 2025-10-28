@@ -5,7 +5,7 @@ using namespace std;
 namespace VDW
 {
 	HINSTANCE g_hInstance = nullptr;
-	vector<Renderer*> g_renders = {};
+	vector<Renderer*> g_renderers = {};
 	unordered_map<HWND, Renderer*> g_windows = {};
 
 	LRESULT CALLBACK Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -167,8 +167,8 @@ namespace VDW
 		UpdateWindow(hWnd);
 		SetCursor(LoadCursorW(nullptr, IDC_ARROW));
 
-		g_renders.push_back(new Renderer(hWnd, width, height, resourcePath));
-		g_windows[hWnd] = g_renders.back();
+		g_renderers.push_back(new Renderer(hWnd, width, height, resourcePath));
+		g_windows[hWnd] = g_renderers.back();
 		ResizeWindow(hWnd, width, height);
 
 		return hWnd;

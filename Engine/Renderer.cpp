@@ -41,9 +41,7 @@ D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
 	0.0f,
 	8,
 	D3D11_COMPARISON_NEVER,
-	{ 1, 1, 1, 1 },
-	0.0f,
-	D3D11_FLOAT32_MAX
+	{ 1, 1, 1, 1 }
 };
 
 XMMATRIX Renderer::s_viewMatrix = XMMatrixIdentity();
@@ -391,7 +389,7 @@ void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* ent
 	}
 }
 
-void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const vector<UINT> constBufferIds, const int layoutIndex)
+void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const int layoutIndex)
 {
 	comPtr<ID3DBlob> VSCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -422,7 +420,7 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
 	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
-	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_tuple(vertexShader, constBufferIds, inputLayout);
+	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_pair(vertexShader, inputLayout);
 }
 
 void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
@@ -604,7 +602,7 @@ void Renderer::UpdateRenderer()
 	}
 
 	// Ambient Light
-	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0); // Playing with fire // this only works because s_ambientColor is static
+	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
 
 	// Directional Light
@@ -625,9 +623,6 @@ void Renderer::UpdateRenderer()
 
 	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
 
-	m_deviceContext->PSSetShaderResources(2, 1, m_textureMap[g_textureIdMap[L"Snow"]].GetAddressOf());
-	m_deviceContext->PSSetShaderResources(3, 1, m_textureMap[g_textureIdMap[L"SnowMask"]].GetAddressOf());
-
 	UpdateRenderMode();
 }
 
@@ -647,10 +642,9 @@ void Renderer::DrawShapes() // Only triangle topology
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
-		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetVertexBuffers(0, 1, m_shapeVertexBufferMap[shapeData->meshId].first.GetAddressOf(), &stride, &offset);
 
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[shapeData->vertexShaderId]).Get(), nullptr, 0);
+		m_deviceContext->VSSetShader((m_vertexShaderMap[shapeData->vertexShaderId]).first.Get(), nullptr, 0);
 		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData->pixelShaderId].Get(), nullptr, 0);
 
 		XMMATRIX worldMatrix = object->GetWorldMatrix();
@@ -665,7 +659,7 @@ void Renderer::DrawShapes() // Only triangle topology
 		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 
-		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
+		m_deviceContext->IASetInputLayout(m_vertexShaderMap[shapeData->vertexShaderId].second.Get());
 
 		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
 		{
@@ -686,11 +680,10 @@ void Renderer::DrawNormalLines()
 {
 	for (const auto& [object, shapeData] : g_renderShapes)
 	{
-		ID3D11Buffer* vertexBuffer = m_shapeVertexBufferMap[shapeData->meshId].first.Get();
-		m_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		m_deviceContext->IASetVertexBuffers(0, 1, m_shapeVertexBufferMap[shapeData->meshId].first.GetAddressOf(), &stride, &offset);
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
-		m_deviceContext->VSSetShader(get<0>(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]]).Get(), nullptr, 0);
+		m_deviceContext->VSSetShader(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]].first.Get(), nullptr, 0);
 		m_deviceContext->GSSetShader(m_geometryShaderMap[g_geometryShaderIdMap[L"GSShowNormal"]].Get(), nullptr, 0);
 		m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"PSShowNormal"]].Get(), nullptr, 0);
 
@@ -707,7 +700,7 @@ void Renderer::DrawNormalLines()
 		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 		m_deviceContext->GSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
 
-		m_deviceContext->IASetInputLayout(get<2>(m_vertexShaderMap[shapeData->vertexShaderId]).Get());
+		m_deviceContext->IASetInputLayout(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]].second.Get());
 
 		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
 
