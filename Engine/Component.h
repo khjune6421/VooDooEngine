@@ -4,9 +4,6 @@ class Object;
 
 class Component
 {
-protected:
-	Object* m_owner = nullptr;
-
 public:
 	Component() = default;
 	~Component() { OnDetached(); }
@@ -14,6 +11,8 @@ public:
 	Component& operator=(const Component& other) = default;
 	Component(Component&& other) noexcept = default;
 	Component& operator=(Component&& other) noexcept = default;
+
+	Object* m_owner = nullptr;
 
 	virtual void Update(float deltaTime) {}
 	virtual void OnAttached(class Object* owner) { m_owner = owner; }

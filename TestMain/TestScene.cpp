@@ -54,8 +54,6 @@ TestScene::TestScene()
 
 void TestScene::Update(float deltaTime)
 {
-	Scene::Update(deltaTime);
-
 	m_player->Update(deltaTime);
 	m_windmill->Update(deltaTime);
 	m_lightObj->LookAt(m_player->GetWorldPosition());
@@ -76,4 +74,6 @@ void TestScene::Update(float deltaTime)
 	if (GetAsyncKeyState('S') & 0x8000) m_torch->Rotate(XMVECTOR{ 1.0f * deltaTime, 0.0f, 0.0f, 0.0f });
 	if (GetAsyncKeyState('A') & 0x8000) m_torch->Rotate(XMVECTOR{ 0.0f, -1.0f * deltaTime, 0.0f, 0.0f });
 	if (GetAsyncKeyState('D') & 0x8000) m_torch->Rotate(XMVECTOR{ 0.0f, 1.0f * deltaTime, 0.0f, 0.0f });
+
+	Scene::Update(deltaTime);
 }

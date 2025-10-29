@@ -625,86 +625,19 @@ void Renderer::UpdateRenderer()
 	UpdateRenderMode();
 }
 
-constexpr UINT stride = sizeof(Vertex);
-constexpr UINT offset = 0;
-
 // TODO: CreateDepthStencilState
 void Renderer::DrawObjects()
 {
-	DrawShapes();
-
-	if (m_drawNormalLines) DrawNormalLines();
-}
-
-void Renderer::DrawShapes() // Only triangle topology
-{
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	for (const auto& [object, shapeData] : g_renderShapes)
+	for (const auto& shape : g_renderShapes) shape->Render(this);
+
+#ifdef _DEBUG
+	if (m_drawNormalLines)
 	{
-		m_deviceContext->IASetVertexBuffers(0, 1, m_shapeVertexBufferMap[shapeData->meshId].first.GetAddressOf(), &stride, &offset);
-
-		m_deviceContext->VSSetShader((m_vertexShaderMap[shapeData->vertexShaderId]).first.Get(), nullptr, 0);
-		m_deviceContext->PSSetShader(m_pixelShaderMap[shapeData->pixelShaderId].Get(), nullptr, 0);
-
-		XMMATRIX worldMatrix = object->GetWorldMatrix();
-
-		MatrixConstBuffer constBufferData = {};
-		constBufferData.world = XMMatrixTranspose(worldMatrix);
-		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
-		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
-		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
-		constBufferData.normalMatrix = XMMatrixTranspose(object->m_inverseScaleMatrix * worldMatrix);
-
-		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
-		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
-
-		m_deviceContext->IASetInputLayout(m_vertexShaderMap[shapeData->vertexShaderId].second.Get());
-
-		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
-		{
-			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, m_textureMap[shapeData->textureIds[i]].GetAddressOf()); // This can be optimized further
-		}
-
-		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
-
-		ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
-		for (size_t i = 0; i < shapeData->textureIds.size(); ++i)
-		{
-			m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, nullSRV);
-		}
-	}
-}
-
-void Renderer::DrawNormalLines()
-{
-	for (const auto& [object, shapeData] : g_renderShapes)
-	{
-		m_deviceContext->IASetVertexBuffers(0, 1, m_shapeVertexBufferMap[shapeData->meshId].first.GetAddressOf(), &stride, &offset);
 		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-		m_deviceContext->VSSetShader(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]].first.Get(), nullptr, 0);
-		m_deviceContext->GSSetShader(m_geometryShaderMap[g_geometryShaderIdMap[L"GSShowNormal"]].Get(), nullptr, 0);
-		m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"PSShowNormal"]].Get(), nullptr, 0);
-
-		XMMATRIX worldMatrix = object->GetWorldMatrix();
-
-		MatrixConstBuffer constBufferData = {};
-		constBufferData.world = XMMatrixTranspose(worldMatrix);
-		constBufferData.view = XMMatrixTranspose(s_viewMatrix);
-		constBufferData.projection = XMMatrixTranspose(s_projectionMatrix);
-		constBufferData.WVP = XMMatrixTranspose(worldMatrix * s_viewMatrix * s_projectionMatrix);
-		constBufferData.normalMatrix = XMMatrixTranspose(object->m_inverseScaleMatrix * worldMatrix);
-
-		m_deviceContext->UpdateSubresource(m_constBuffers[MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
-		m_deviceContext->VSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
-		m_deviceContext->GSSetConstantBuffers(0, 1, m_constBuffers[MatrixBuffer].GetAddressOf());
-
-		m_deviceContext->IASetInputLayout(m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]].second.Get());
-
-		m_deviceContext->Draw(m_shapeVertexBufferMap[shapeData->meshId].second, 0);
-
-		m_deviceContext->GSSetShader(nullptr, nullptr, 0);
+		for (const auto& shape : g_renderShapes) shape->DebugRender(this);
 	}
+#endif
 }
 
 void Renderer::UpdateRenderMode()

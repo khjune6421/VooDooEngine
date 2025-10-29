@@ -11,20 +11,15 @@ extern std::unordered_map<std::wstring, UINT> g_geometryShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_pixelShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_textureIdMap;
 
-struct ShapeData
-{
-	UINT meshId = 0;
-	UINT vertexShaderId = 0;
-	UINT pixelShaderId = 0;
-
-	std::vector<UINT> textureIds = {};
-};
-
-extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
+class Renderer;
 
 class Shape : public Component
 {
-	ShapeData m_renderData = {};
+	UINT m_meshId = 0;
+	UINT m_vertexShaderId = 0;
+	UINT m_pixelShaderId = 0;
+
+	std::vector<UINT> m_textureIds = {};
 
 public:
 	Shape
@@ -35,11 +30,17 @@ public:
 		const std::vector<std::wstring>& textures = { L"NoTexture", L"NoNormal" }
 	);
 
+	void Render(Renderer* renderer) const;
+
+#ifdef _DEBUG
+	void DebugRender(Renderer* renderer) const;
+#endif
+
 	void SetMesh(const std::wstring& mesh);
 	void SetVertexShader(const std::wstring& vertexShader);
 	void SetPixelShader(const std::wstring& pixelShader);
 	void SetTextures(const std::vector<std::wstring>& textures);
 
-	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_renderShapes.emplace_back(owner, &m_renderData); }
+	void OnAttached(class Object* owner) override;
 	void OnDetached() override;
 };

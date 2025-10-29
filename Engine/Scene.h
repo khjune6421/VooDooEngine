@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Object.h"
+#include "Camera.h"
+
+extern Camera* g_camera;
+extern std::vector<Shape*> g_renderShapes;
 
 class Scene
 {
@@ -21,5 +25,6 @@ public:
 
 	virtual void Update(float deltaTime);
 
+	void SortRenderShapes();
 	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}
 };
