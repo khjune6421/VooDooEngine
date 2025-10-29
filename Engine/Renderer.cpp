@@ -1,5 +1,7 @@
 #include "Renderer.h"
 
+#include <ranges>
+
 #include "ObjFileParser.h"
 
 using namespace std;
@@ -630,6 +632,7 @@ void Renderer::DrawObjects()
 {
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const auto& shape : g_renderShapes) shape->Render(this);
+	//for (auto & g_renderShape : ranges::reverse_view(g_renderShapes)) g_renderShape->Render(this);
 
 #ifdef _DEBUG
 	if (m_drawNormalLines)
