@@ -8,17 +8,11 @@
 
 // Other header files
 #include "Scene.h"
-
-#include "Camera.h"
 #include "Light.h"
 
 // I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
-class Object;
-extern Camera* g_camera;
-
-extern std::vector<Shape*> g_renderShapes;
 extern std::vector<PointLight*> g_pointLights;
 
 namespace VDGM

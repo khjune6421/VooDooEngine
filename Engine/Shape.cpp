@@ -26,14 +26,12 @@ void Shape::Render(Renderer* renderer) const
 	renderer->m_deviceContext->VSSetShader((renderer->m_vertexShaderMap[m_vertexShaderId]).first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[m_pixelShaderId].Get(), nullptr, 0);
 
-	XMMATRIX worldMatrix = m_owner->GetWorldMatrix(); // This can be optimized
-
 	Renderer::MatrixConstBuffer constBufferData = {};
-	constBufferData.world = XMMatrixTranspose(worldMatrix);
+	constBufferData.world = XMMatrixTranspose(m_owner->m_worldMatrix);
 	constBufferData.view = XMMatrixTranspose(Renderer::s_viewMatrix);
 	constBufferData.projection = XMMatrixTranspose(Renderer::s_projectionMatrix);
-	constBufferData.WVP = XMMatrixTranspose(worldMatrix * Renderer::s_viewMatrix * Renderer::s_projectionMatrix);
-	constBufferData.normalMatrix = XMMatrixTranspose(m_owner->m_inverseScaleMatrix * worldMatrix);
+	constBufferData.WVP = XMMatrixTranspose(m_owner->m_worldMatrix * Renderer::s_viewMatrix * Renderer::s_projectionMatrix);
+	constBufferData.normalMatrix = XMMatrixTranspose(m_owner->m_inverseScaleMatrix * m_owner->m_worldMatrix);
 
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 	renderer->m_deviceContext->VSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::MatrixBuffer].GetAddressOf());
@@ -64,14 +62,12 @@ void Shape::DebugRender(Renderer* renderer) const
 	renderer->m_deviceContext->GSSetShader(renderer->m_geometryShaderMap[g_geometryShaderIdMap[L"GSShowNormal"]].Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"PSShowNormal"]].Get(), nullptr, 0);
 
-	XMMATRIX worldMatrix = m_owner->GetWorldMatrix();
-
 	Renderer::MatrixConstBuffer constBufferData = {};
-	constBufferData.world = XMMatrixTranspose(worldMatrix);
+	constBufferData.world = XMMatrixTranspose(m_owner->m_worldMatrix);
 	constBufferData.view = XMMatrixTranspose(Renderer::s_viewMatrix);
 	constBufferData.projection = XMMatrixTranspose(Renderer::s_projectionMatrix);
-	constBufferData.WVP = XMMatrixTranspose(worldMatrix * Renderer::s_viewMatrix * Renderer::s_projectionMatrix);
-	constBufferData.normalMatrix = XMMatrixTranspose(m_owner->m_inverseScaleMatrix * worldMatrix);
+	constBufferData.WVP = XMMatrixTranspose(m_owner->m_worldMatrix * Renderer::s_viewMatrix * Renderer::s_projectionMatrix);
+	constBufferData.normalMatrix = XMMatrixTranspose(m_owner->m_inverseScaleMatrix * m_owner->m_worldMatrix);
 
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
 	renderer->m_deviceContext->VSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::MatrixBuffer].GetAddressOf());
