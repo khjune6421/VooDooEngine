@@ -14,17 +14,6 @@ TestScene::TestScene()
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 	m_camera->AddComponent<Camera>();
 
-	m_player->AddChild(m_camera.get());
-	m_player->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-
-	m_torch = make_unique<Object>();
-	m_torch->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", vector<wstring>{ L"Eye", L"NoNormal" });
-	m_torch->SetScale(XMFLOAT3{ 0.1f, 0.1f, 0.1f });
-	m_torch->SetPosition(XMVECTOR{ 1.0f, 2.5f, -1.0f, 1.0f });
-	m_torch->LookAt(XMVECTOR{ 1.0f, 2.0f, 1.0f, 1.0f });
-	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 5.0f, 30.0f);
-	m_player->AddChild(m_torch.get());
-
 	m_windmill->SetPosition(XMVECTOR{ 5.0f, 0.0f, 5.0f, 1.0f });
 	m_windmill->SetScale(XMFLOAT3{ 1.5f, 1.5f, 1.5f });
 
@@ -48,11 +37,23 @@ TestScene::TestScene()
 		tree->SetPosition(XMVECTOR{ x, 0.0f, z, 1.0f });
 		m_objects.emplace_back(move(tree));
 	}
+
+	m_player = make_unique<Player>();
+
+	m_player->AddChild(m_camera.get());
+	m_player->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
+
+	m_torch = make_unique<Object>();
+	m_torch->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", vector<wstring>{ L"Eye", L"NoNormal" });
+	m_torch->SetScale(XMFLOAT3{ 0.75f, 0.75f, 0.75f });
+	m_torch->SetPosition(XMVECTOR{ 0.0f, 5.0f, 0.0f, 1.0f });
+	m_torch->LookAt(XMVECTOR{ 0.0f, 0.0f, 5.0f, 1.0f });
+	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 5.0f, 30.0f);
+	m_player->AddChild(m_torch.get());
 }
 
 void TestScene::Update(float deltaTime)
 {
-	for (const auto& object : m_objects) object->Update(deltaTime);
 	m_player->Update(deltaTime);
 	m_windmill->Update(deltaTime);
 	m_lightObj->LookAt(m_player->GetWorldPosition());
@@ -73,4 +74,6 @@ void TestScene::Update(float deltaTime)
 	if (GetAsyncKeyState('S') & 0x8000) m_torch->Rotate(XMVECTOR{ 1.0f * deltaTime, 0.0f, 0.0f, 0.0f });
 	if (GetAsyncKeyState('A') & 0x8000) m_torch->Rotate(XMVECTOR{ 0.0f, -1.0f * deltaTime, 0.0f, 0.0f });
 	if (GetAsyncKeyState('D') & 0x8000) m_torch->Rotate(XMVECTOR{ 0.0f, 1.0f * deltaTime, 0.0f, 0.0f });
+
+	Scene::Update(deltaTime);
 }

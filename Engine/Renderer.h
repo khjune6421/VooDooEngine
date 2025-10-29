@@ -8,18 +8,11 @@
 
 // Other header files
 #include "Scene.h"
-
-#include "Camera.h"
-#include "Shape.h"
 #include "Light.h"
 
 // I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
-class Object;
-extern Camera* g_camera;
-
-extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
 extern std::vector<PointLight*> g_pointLights;
 
 namespace VDGM
@@ -32,6 +25,11 @@ namespace VDGM
 
 class Renderer
 {
+	friend void Shape::Render(Renderer* renderer) const;
+#ifdef _DEBUG
+	friend void Shape::DebugRender(Renderer* renderer) const;
+#endif
+
 	// Device
 	struct HardwareInfo
 	{
@@ -188,11 +186,8 @@ class Renderer
 	void UpdateRenderer();
 
 	void DrawObjects();
-	// Draw shapes // does not have animation
-	void DrawShapes();
 
 	bool m_drawNormalLines = false; // for debugging
-	void DrawNormalLines();
 
 	void UpdateRenderMode();
 
