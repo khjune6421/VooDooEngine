@@ -519,7 +519,7 @@ void Renderer::CreateRasterState()
 	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.MultisampleEnable = TRUE;
 	rasterDesc.AntialiasedLineEnable = TRUE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[0].GetAddressOf())))
+	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Solid].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
@@ -527,7 +527,7 @@ void Renderer::CreateRasterState()
 
 	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
 	rasterDesc.CullMode = D3D11_CULL_NONE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[1].GetAddressOf())))
+	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Wireframe].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
