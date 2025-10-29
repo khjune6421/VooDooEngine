@@ -32,6 +32,10 @@ public:
 
 	void Render(Renderer* renderer) const;
 
+#ifdef _DEBUG
+	void DebugRender(Renderer* renderer) const;
+#endif
+
 	void SetMesh(const std::wstring& mesh);
 	void SetVertexShader(const std::wstring& vertexShader);
 	void SetPixelShader(const std::wstring& pixelShader);

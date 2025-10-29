@@ -20,6 +20,9 @@ enum class Directions
 class Object
 {
 	friend void Shape::Render(Renderer* renderer) const;
+#ifdef _DEBUG
+	friend void Shape::DebugRender(Renderer* renderer) const;
+#endif
 
 	UINT m_id = 0; // For debug purpose
 

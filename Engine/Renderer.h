@@ -32,6 +32,9 @@ namespace VDGM
 class Renderer
 {
 	friend void Shape::Render(Renderer* renderer) const;
+#ifdef _DEBUG
+	friend void Shape::DebugRender(Renderer* renderer) const;
+#endif
 
 	// Device
 	struct HardwareInfo
@@ -189,11 +192,8 @@ class Renderer
 	void UpdateRenderer();
 
 	void DrawObjects();
-	// Draw shapes // does not have animation
-	void DrawShapes();
 
 	bool m_drawNormalLines = false; // for debugging
-	void DrawNormalLines();
 
 	void UpdateRenderMode();
 
