@@ -10,7 +10,6 @@
 #include "Scene.h"
 
 #include "Camera.h"
-#include "Shape.h"
 #include "Light.h"
 
 // I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
@@ -19,7 +18,7 @@
 class Object;
 extern Camera* g_camera;
 
-extern std::vector<std::pair<Object*, ShapeData*>> g_renderShapes;
+extern std::vector<Shape*> g_renderShapes;
 extern std::vector<PointLight*> g_pointLights;
 
 namespace VDGM
@@ -32,6 +31,8 @@ namespace VDGM
 
 class Renderer
 {
+	friend void Shape::Render(Renderer* renderer) const;
+
 	// Device
 	struct HardwareInfo
 	{

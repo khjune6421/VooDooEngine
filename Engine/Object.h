@@ -4,6 +4,7 @@
 #include "UtilityHeaders.h"
 
 #include "Component.h"
+#include "Shape.h"
 
 
 enum class Directions
@@ -18,7 +19,8 @@ enum class Directions
 
 class Object
 {
-	friend class Renderer;
+	friend void Shape::Render(Renderer* renderer) const;
+
 	UINT m_id = 0; // For debug purpose
 
 	// Not sure if these should be private or protected
