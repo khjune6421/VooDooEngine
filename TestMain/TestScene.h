@@ -28,7 +28,7 @@ class TestScene : public Scene
 		m_nightColor
 	};
 
-	std::unique_ptr<Player> m_player = std::make_unique<Player>();
+	std::unique_ptr<Player> m_player = nullptr;
 	std::unique_ptr<Windmill> m_windmill = std::make_unique<Windmill>();
 	std::unique_ptr<Object> m_camera = std::make_unique<Object>();
 

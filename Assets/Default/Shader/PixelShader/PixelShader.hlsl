@@ -52,7 +52,7 @@ struct PSInput
 float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
-    clip(texColor.a - 0.1f);
+    clip(texColor.a - 1e-5f);
     
     float distanceFromCamera = length(cameraPos.xyz - input.posWorld.xyz);
     float fogFactor = saturate(distanceFromCamera / ambientFog.w);
@@ -72,7 +72,7 @@ float4 main(PSInput input) : SV_TARGET
         
         vecToLight = normalize(vecToLight);
         
-        float spot = pow(max(dot(-vecToLight, pointLights[i].directionAndAngle.xyz), 1e-5), pointLights[i].directionAndAngle.w);
+        float spot = pow(max(dot(-vecToLight, pointLights[i].directionAndAngle.xyz), 1e-5f), pointLights[i].directionAndAngle.w);
         float3 attenuateConstants = float3(pointLights[i].aConstant, pointLights[i].aLinear, pointLights[i].aQuadratic);
         float attenuate = spot / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
         

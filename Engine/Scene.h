@@ -19,7 +19,7 @@ public:
 	DirectX::XMFLOAT4 m_ambientLight = { 0.25f, 0.25f, 0.25f, 1.0f }; // The w value(1) is important // it's the only value that does not get multiplied in shader
 	DirectX::XMFLOAT4 m_ambientFog = { 0.5f, 0.5f, 0.5f, 100.0f }; // w value is range
 
-	virtual void Update(float deltaTime) = 0;
+	virtual void Update(float deltaTime);
 
 	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}
 };
