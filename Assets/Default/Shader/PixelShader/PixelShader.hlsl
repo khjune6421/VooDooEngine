@@ -34,7 +34,6 @@ struct PSInput
     float4 pos : SV_POSITION0;
     float4 posWorld : WORLDPOS0;
     
-    float4 col : COLOR0;
     float4 light : COLOR1;
     
     float3 norm : NORMAL0;

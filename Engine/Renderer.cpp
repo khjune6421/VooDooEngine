@@ -25,12 +25,10 @@ unordered_map<wstring, UINT> g_textureIdMap;
 D3D11_INPUT_ELEMENT_DESC Renderer::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 {
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
-pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Renderer::s_layoutDescs[1] = { { Renderer::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE } };
 
 D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
 {
@@ -224,15 +222,6 @@ void Renderer::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, 
 	}
 }
 
-void Renderer::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout)
-{
-	if (FAILED(m_device->CreateInputLayout(layoutDesc, numElements, shaderCode->GetBufferPointer(), shaderCode->GetBufferSize(), inputLayout->GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create input layout", L"Error", MB_OK);
-		return;
-	}
-}
-
 void Renderer::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
@@ -388,7 +377,7 @@ void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* ent
 	}
 }
 
-void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const int layoutIndex)
+void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
 {
 	comPtr<ID3DBlob> VSCode;
 	comPtr<ID3DBlob> errorBlob;
@@ -412,7 +401,11 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 	}
 
 	comPtr<ID3D11InputLayout> inputLayout;
-	CreateInputLayout(s_layoutDescs[layoutIndex].first, s_layoutDescs[layoutIndex].second, VSCode, &inputLayout);
+	if (FAILED(m_device->CreateInputLayout(s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE, VSCode->GetBufferPointer(), VSCode->GetBufferSize(), &inputLayout)))
+	{
+		MessageBoxW(nullptr, L"Failed to create input layout", L"Error", MB_OK);
+		return;
+	}
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
 	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
