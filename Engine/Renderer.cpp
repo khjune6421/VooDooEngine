@@ -542,6 +542,52 @@ void Renderer::CreateSamplerState()
 	}
 }
 
+void Renderer::CreateBlendState()
+{
+	// No Blend
+	D3D11_BLEND_DESC noBlendDesc = {};
+	noBlendDesc.RenderTarget[0].BlendEnable = FALSE;
+	noBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(m_device->CreateBlendState(&noBlendDesc, m_blendStates[NoBlend].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create no blend state", L"Error", MB_OK);
+		return;
+	}
+
+	// Alpha Blend
+	D3D11_BLEND_DESC alphaBlendDesc = {};
+	alphaBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	alphaBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	alphaBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	alphaBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	alphaBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	alphaBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	alphaBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	alphaBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(m_device->CreateBlendState(&alphaBlendDesc, m_blendStates[AlphaBlend].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create alpha blend state", L"Error", MB_OK);
+		return;
+	}
+
+	// Alpha-to-Coverage
+	D3D11_BLEND_DESC alphaToCoverageDesc = {};
+	alphaToCoverageDesc.AlphaToCoverageEnable = TRUE;
+	alphaToCoverageDesc.IndependentBlendEnable = FALSE;
+	alphaToCoverageDesc.RenderTarget[0].BlendEnable = FALSE;
+	alphaToCoverageDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(m_device->CreateBlendState(&alphaToCoverageDesc, m_blendStates[AlphaToCoverage].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create alpha-to-coverage blend state", L"Error", MB_OK);
+		return;
+	}
+
+	m_deviceContext->OMSetBlendState(m_blendStates[NoBlend].Get(), nullptr, 0xffffffff);
+}
+
 void Renderer::LoadShapeFile(const filesystem::path filePath)
 {
 	ObjFileParser shapes(filePath.c_str());
@@ -644,6 +690,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	// Initialize render
 	CreateRasterState();
 	CreateSamplerState();
+	CreateBlendState();
 
 	// Initialize constant buffers
 	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[MatrixBuffer]);
