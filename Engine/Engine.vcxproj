@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Collider.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -156,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Collider.h" />
     <ClInclude Include="DirectXLib.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Component.h" />

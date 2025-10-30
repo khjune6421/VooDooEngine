@@ -627,22 +627,6 @@ void Renderer::UpdateRenderer()
 	UpdateRenderMode();
 }
 
-// TODO: CreateDepthStencilState
-void Renderer::DrawObjects()
-{
-	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	for (const auto& shape : g_renderShapes) shape->Render(this);
-	//for (auto & g_renderShape : ranges::reverse_view(g_renderShapes)) g_renderShape->Render(this); // Reverse order
-
-#ifdef _DEBUG
-	if (m_drawNormalLines)
-	{
-		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-		for (const auto& shape : g_renderShapes) shape->DebugRender(this);
-	}
-#endif
-}
-
 void Renderer::UpdateRenderMode()
 {
 	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
@@ -766,7 +750,7 @@ void Renderer::Render()
 {
 	UpdateRenderer();
 
-	DrawObjects();
+	VDGM::g_currentScene->Render(this);
 
 	ShowFPS();
 

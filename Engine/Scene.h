@@ -24,6 +24,7 @@ public:
 	DirectX::XMFLOAT4 m_ambientFog = { 0.5f, 0.5f, 0.5f, 100.0f }; // w value is range
 
 	virtual void Update(float deltaTime);
+	virtual void Render(Renderer* renderer) const;
 
 	void SortRenderShapes();
 	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}

@@ -25,6 +25,7 @@ namespace VDGM
 
 class Renderer
 {
+	friend void Scene::Render(Renderer* renderer) const;
 	friend void Shape::Render(Renderer* renderer) const;
 #ifdef _DEBUG
 	friend void Shape::DebugRender(Renderer* renderer) const;
@@ -184,8 +185,6 @@ class Renderer
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();
-
-	void DrawObjects();
 
 	bool m_drawNormalLines = false; // for debugging
 
