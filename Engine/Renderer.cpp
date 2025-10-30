@@ -615,7 +615,7 @@ void Renderer::UpdateRenderer()
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &fogData, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
-	// Point Lights // later add for loop
+	// Point Lights // TODO: make it for loop
 	PointLightArrayConstBuffer pointLightBufferData = {};
 	pointLightBufferData.pointLights[0] = g_pointLights[0]->GetLightData();
 	pointLightBufferData.pointLights[1] = g_pointLights[1]->GetLightData();
@@ -632,7 +632,7 @@ void Renderer::DrawObjects()
 {
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const auto& shape : g_renderShapes) shape->Render(this);
-	//for (auto & g_renderShape : ranges::reverse_view(g_renderShapes)) g_renderShape->Render(this);
+	//for (auto & g_renderShape : ranges::reverse_view(g_renderShapes)) g_renderShape->Render(this); // Reverse order
 
 #ifdef _DEBUG
 	if (m_drawNormalLines)
