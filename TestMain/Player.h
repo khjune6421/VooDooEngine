@@ -7,7 +7,7 @@ class Player : public Object
 	float m_moveSpeed = 10.0f;
 
 public:
-	Player();
+	Player(Scene* scene) : Object(scene) {}
 
 	void Update(float deltaTime) override;
 };

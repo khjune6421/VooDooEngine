@@ -4,10 +4,10 @@
 
 class Windmill : public Object
 {
-	std::unique_ptr<Object> m_Wing = std::make_unique<Object>();
+	std::unique_ptr<Object> m_Wing = nullptr;
 
 public:
-	Windmill();
+	Windmill(Scene* scene);
 
 	void Update(float deltaTime) override;
 };

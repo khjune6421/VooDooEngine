@@ -6,8 +6,6 @@
 using namespace std;
 using namespace DirectX;
 
-vector<Shape*> g_renderShapes;
-
 Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader, const vector<wstring>& textures)
 {
 	SetMesh(mesh);
@@ -123,12 +121,12 @@ void Shape::SetTextures(const std::vector<std::wstring>& textures)
 void Shape::OnAttached(Object* owner)
 {
 	Component::OnAttached(owner);
-	g_renderShapes.emplace_back(this);
+	owner->m_scene->m_renderShapes.emplace_back(this);
 }
 
 void Shape::OnDetached()
 {
-	auto it = find(g_renderShapes.begin(), g_renderShapes.end(), this);
-	if (it != g_renderShapes.end()) g_renderShapes.erase(it);
+	auto it = find(m_owner->m_scene->m_renderShapes.begin(), m_owner->m_scene->m_renderShapes.end(), this);
+	if (it != m_owner->m_scene->m_renderShapes.end()) m_owner->m_scene->m_renderShapes.erase(it);
 	Component::OnDetached();
 }

@@ -17,13 +17,13 @@ enum class Directions
 	Down
 };
 
+class Scene;
+
 class Object
 {
-	friend void Shape::Render(Renderer* renderer) const;
-#ifdef _DEBUG
-	friend void Shape::DebugRender(Renderer* renderer) const;
-#endif
+	friend class Shape;
 
+	Scene* m_scene = nullptr;
 	UINT m_id = 0; // For debug purpose
 
 	// Not sure if these should be private or protected
@@ -53,12 +53,14 @@ protected:
 	std::vector<Object*> m_childrens;
 
 public:
-	Object() = default;
+	Object(Scene* scene) : m_scene(scene) { static UINT nextId = 1; m_id = nextId++; }
 	~Object();
 	Object(const Object& other) = default;
 	Object& operator=(const Object& other) = default;
 	Object(Object&& other) noexcept = default;
 	Object& operator=(Object&& other) noexcept = default;
+
+	Scene* GetScene() const { return m_scene; }
 
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);

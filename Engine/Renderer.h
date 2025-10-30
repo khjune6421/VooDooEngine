@@ -25,11 +25,8 @@ namespace VDGM
 
 class Renderer
 {
+	friend class Shape;
 	friend void Scene::Render(Renderer* renderer) const;
-	friend void Shape::Render(Renderer* renderer) const;
-#ifdef _DEBUG
-	friend void Shape::DebugRender(Renderer* renderer) const;
-#endif
 
 	// Device
 	struct HardwareInfo

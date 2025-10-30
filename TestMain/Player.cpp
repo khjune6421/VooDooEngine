@@ -3,11 +3,6 @@
 using namespace DirectX;
 using namespace std;
 
-Player::Player()
-{
-	AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", vector<wstring>{ L"Lilypads", L"LilypadsNormal" });
-}
-
 void Player::Update(float deltaTime)
 {
 	if (GetAsyncKeyState(VK_UP) & 0x8000) MoveDirection(Directions::Forward, m_moveSpeed * deltaTime);

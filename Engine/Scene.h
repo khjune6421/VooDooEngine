@@ -8,6 +8,9 @@ extern std::vector<Shape*> g_renderShapes;
 
 class Scene
 {
+	friend class Shape;
+	std::vector<Shape*> m_renderShapes;
+
 protected:
 	std::vector<std::unique_ptr<Object>> m_objects;
 
