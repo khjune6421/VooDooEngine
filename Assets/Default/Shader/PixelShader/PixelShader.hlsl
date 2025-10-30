@@ -29,11 +29,6 @@ cbuffer PointLightConstBuffer : register(b1)
     PointLight pointLights[2];
 }
 
-cbuffer PointLightConstBuffer : register(b2)
-{
-    int season;
-}
-
 struct PSInput
 {
     float4 pos : SV_POSITION0;
