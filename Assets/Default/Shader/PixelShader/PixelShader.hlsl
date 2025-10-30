@@ -52,7 +52,7 @@ struct PSInput
 float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
-    clip(texColor.a - 1e-5f);
+    //clip(texColor.a - 1e-5f);
     
     float distanceFromCamera = length(cameraPos.xyz - input.posWorld.xyz);
     float fogFactor = saturate(distanceFromCamera / ambientFog.w);

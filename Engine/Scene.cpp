@@ -23,6 +23,7 @@ void Scene::CheckCollisions()
 void Scene::Update(float deltaTime)
 {
 	for (const auto& object : m_objects) object->Update(deltaTime);
+
 	CheckCollisions();
 
 	SortRenderShapes();
@@ -31,8 +32,9 @@ void Scene::Update(float deltaTime)
 void Scene::Render(Renderer* renderer) const
 {
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	renderer->m_deviceContext->OMSetBlendState(renderer->m_blendStates[Renderer::AlphaToCoverage].Get(), nullptr, 0xffffffff); // It just works
 	for (const auto& shape : m_renderShapes) shape->Render(renderer);
-	//for (const auto& renderShape : ranges::reverse_view(m_renderShapes)) renderShape->Render(renderer); // Reverse order
 
 #ifdef _DEBUG
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);

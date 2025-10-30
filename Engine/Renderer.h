@@ -94,6 +94,16 @@ class Renderer
 	};
 	comPtr<ID3D11SamplerState> m_samplers[SamplerCount] = {};
 
+	enum BlendState
+	{
+		NoBlend,
+		AlphaBlend,
+		AlphaToCoverage,
+
+		BlendStateCount
+	};
+	comPtr<ID3D11BlendState> m_blendStates[BlendStateCount] = {};
+
 	// Variables
 	HWND m_hWnd = nullptr;
 
@@ -177,6 +187,7 @@ class Renderer
 	// Render
 	void CreateRasterState();
 	void CreateSamplerState();
+	void CreateBlendState();
 
 	void LoadShapeFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
