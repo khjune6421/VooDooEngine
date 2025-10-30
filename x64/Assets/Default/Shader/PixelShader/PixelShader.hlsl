@@ -29,17 +29,11 @@ cbuffer PointLightConstBuffer : register(b1)
     PointLight pointLights[2];
 }
 
-cbuffer PointLightConstBuffer : register(b2)
-{
-    int season;
-}
-
 struct PSInput
 {
     float4 pos : SV_POSITION0;
     float4 posWorld : WORLDPOS0;
     
-    float4 col : COLOR0;
     float4 light : COLOR1;
     
     float3 norm : NORMAL0;
@@ -52,6 +46,7 @@ struct PSInput
 float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
+    //clip(texColor.a - 1e-5f);
     
     float distanceFromCamera = length(cameraPos.xyz - input.posWorld.xyz);
     float fogFactor = saturate(distanceFromCamera / ambientFog.w);
@@ -71,7 +66,7 @@ float4 main(PSInput input) : SV_TARGET
         
         vecToLight = normalize(vecToLight);
         
-        float spot = pow(max(dot(-vecToLight, pointLights[i].directionAndAngle.xyz), 1e-5), pointLights[i].directionAndAngle.w);
+        float spot = pow(max(dot(-vecToLight, pointLights[i].directionAndAngle.xyz), 1e-5f), pointLights[i].directionAndAngle.w);
         float3 attenuateConstants = float3(pointLights[i].aConstant, pointLights[i].aLinear, pointLights[i].aQuadratic);
         float attenuate = spot / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
         
@@ -80,6 +75,7 @@ float4 main(PSInput input) : SV_TARGET
         
         input.light += diffuseColor;
     }
+    //input.light.a = 0.0f; // Funny effect // could be useful
     
     float4 returnColor = lerp(texColor * input.light, fogColor, fogFactor);
     
