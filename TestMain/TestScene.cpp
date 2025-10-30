@@ -17,12 +17,12 @@ TestScene::TestScene()
 	m_windmill->SetPosition(XMVECTOR{ 5.0f, 0.0f, 5.0f, 1.0f });
 	m_windmill->SetScale(XMFLOAT3{ 1.5f, 1.5f, 1.5f });
 
-	unique_ptr<Object> plane = make_unique<Object>();
+	unique_ptr<Object> plane = make_unique<Object>(this);
 	plane->AddComponent<Shape>(L"PlaneX10", L"VertexShader", L"PixelShader", vector<wstring>{ L"Plain", L"PlainNormal" });
 	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 
-	m_lightObj = make_unique<Object>();
+	m_lightObj = make_unique<Object>(this);
 	m_lightObj->SetPosition(XMVECTOR{ 5.0f, 5.0f, 0.0f, 1.0f });
 	m_lightObj->AddComponent<DirectionalLight>(m_morningColor, 0.75f, XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
 	m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 0.0f, 1.0f, 1.0f }, 5.0f, 60.0f);
@@ -33,17 +33,18 @@ TestScene::TestScene()
 	{
 		float x = static_cast<float>((rand() % 2000) - 1000) / 10.0f;
 		float z = static_cast<float>((rand() % 2000) - 1000) / 10.0f;
-		unique_ptr<Object> tree = make_unique<Tree>();
+		unique_ptr<Object> tree = make_unique<Tree>(this);
 		tree->SetPosition(XMVECTOR{ x, 0.0f, z, 1.0f });
 		m_objects.emplace_back(move(tree));
 	}
 
-	m_player = make_unique<Player>();
+	m_player = make_unique<Player>(this);
+	m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", vector<wstring>{ L"Lilypads", L"LilypadsNormal" });
 
 	m_player->AddChild(m_camera.get());
 	m_player->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
 
-	m_torch = make_unique<Object>();
+	m_torch = make_unique<Object>(this);
 	m_torch->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", vector<wstring>{ L"Eye", L"NoNormal" });
 	m_torch->SetScale(XMFLOAT3{ 0.75f, 0.75f, 0.75f });
 	m_torch->SetPosition(XMVECTOR{ 0.0f, 5.0f, 0.0f, 1.0f });

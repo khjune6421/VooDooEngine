@@ -165,7 +165,7 @@ void Object::LerpRotation(const XMVECTOR& start, const XMVECTOR& target, float t
 
 	if (!m_isDirty) SetDirty();
 }
-XMVECTOR Object::GetWorldRotation() const
+XMVECTOR Object::GetWorldRotation() const // This has bug
 {
 	if (m_isDirty) GetWorldMatrix();
 

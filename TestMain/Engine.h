@@ -6,3 +6,4 @@
 #include "Scene.h"
 #include "WindowManager.h"
 #include "GameManager.h"
+#include "Collider.h"

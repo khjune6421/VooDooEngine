@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <wrl/client.h>
 #include <memory>
 #include <unordered_map>

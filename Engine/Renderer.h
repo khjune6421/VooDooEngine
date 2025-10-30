@@ -25,10 +25,8 @@ namespace VDGM
 
 class Renderer
 {
-	friend void Shape::Render(Renderer* renderer) const;
-#ifdef _DEBUG
-	friend void Shape::DebugRender(Renderer* renderer) const;
-#endif
+	friend class Shape;
+	friend void Scene::Render(Renderer* renderer) const;
 
 	// Device
 	struct HardwareInfo
@@ -77,15 +75,8 @@ class Renderer
 	comPtr<ID3D11Buffer> m_constBuffers[ConstBufferCount] = {};
 
 	// Input layouts // well this is cursed
-	constexpr static UINT DEFAULT_LAYOUT_SIZE = 5;
+	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
 	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
-	enum InputLayoutType
-	{
-		DefaultInputLayout,
-
-		InputLayoutCount
-	};
-	static std::pair<D3D11_INPUT_ELEMENT_DESC*, UINT> s_layoutDescs[InputLayoutCount];
 
 	static D3D11_SAMPLER_DESC s_defaultSamplerDesc;
 	enum SamplerType
@@ -95,6 +86,16 @@ class Renderer
 		SamplerCount
 	};
 	comPtr<ID3D11SamplerState> m_samplers[SamplerCount] = {};
+
+	enum BlendState
+	{
+		NoBlend,
+		AlphaBlend,
+		AlphaToCoverage,
+
+		BlendStateCount
+	};
+	comPtr<ID3D11BlendState> m_blendStates[BlendStateCount] = {};
 
 	// Variables
 	HWND m_hWnd = nullptr;
@@ -160,8 +161,6 @@ class Renderer
 
 	void ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth = 1.0f, UINT8 stencil = 0);
 
-	void CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout);
-
 	void CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride);
 	void CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer);
 
@@ -170,7 +169,7 @@ class Renderer
 
 	// Shader
 	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
-	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const int layoutIndex = DefaultInputLayout);
+	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 	void LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 	void LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 
@@ -179,13 +178,12 @@ class Renderer
 	// Render
 	void CreateRasterState();
 	void CreateSamplerState();
+	void CreateBlendState();
 
 	void LoadShapeFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();
-
-	void DrawObjects();
 
 	bool m_drawNormalLines = false; // for debugging
 

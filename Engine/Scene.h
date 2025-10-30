@@ -4,10 +4,16 @@
 #include "Camera.h"
 
 extern Camera* g_camera;
-extern std::vector<Shape*> g_renderShapes;
 
 class Scene
 {
+	friend class Shape;
+	std::vector<Shape*> m_renderShapes;
+
+	friend class Collider;
+	std::unordered_map<UINT, std::pair<std::vector<Collider*>, std::vector<Collider*>>> m_collidersMap;
+	void CheckCollisions();
+
 protected:
 	std::vector<std::unique_ptr<Object>> m_objects;
 
@@ -24,6 +30,7 @@ public:
 	DirectX::XMFLOAT4 m_ambientFog = { 0.5f, 0.5f, 0.5f, 100.0f }; // w value is range
 
 	virtual void Update(float deltaTime);
+	virtual void Render(Renderer* renderer) const;
 
 	void SortRenderShapes();
 	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}

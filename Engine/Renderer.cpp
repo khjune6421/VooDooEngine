@@ -1,7 +1,5 @@
 #include "Renderer.h"
 
-#include <ranges>
-
 #include "ObjFileParser.h"
 
 using namespace std;
@@ -27,12 +25,10 @@ unordered_map<wstring, UINT> g_textureIdMap;
 D3D11_INPUT_ELEMENT_DESC Renderer::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
 {
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
-pair<D3D11_INPUT_ELEMENT_DESC*, UINT> Renderer::s_layoutDescs[1] = { { Renderer::s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE } };
 
 D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
 {
@@ -226,15 +222,6 @@ void Renderer::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, 
 	}
 }
 
-void Renderer::CreateInputLayout(const D3D11_INPUT_ELEMENT_DESC* layoutDesc, UINT numElements, comPtr<ID3DBlob> shaderCode, _Out_ comPtr<ID3D11InputLayout>* inputLayout)
-{
-	if (FAILED(m_device->CreateInputLayout(layoutDesc, numElements, shaderCode->GetBufferPointer(), shaderCode->GetBufferSize(), inputLayout->GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create input layout", L"Error", MB_OK);
-		return;
-	}
-}
-
 void Renderer::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
@@ -390,15 +377,12 @@ void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* ent
 	}
 }
 
-void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel, const int layoutIndex)
+void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
 {
 	comPtr<ID3DBlob> VSCode;
 	comPtr<ID3DBlob> errorBlob;
 
-	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
-#ifdef _DEBUG
-	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
+	constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("vs_" + string(shaderModel)).c_str(), compileFlags, 0, VSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -417,7 +401,11 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 	}
 
 	comPtr<ID3D11InputLayout> inputLayout;
-	CreateInputLayout(s_layoutDescs[layoutIndex].first, s_layoutDescs[layoutIndex].second, VSCode, &inputLayout);
+	if (FAILED(m_device->CreateInputLayout(s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE, VSCode->GetBufferPointer(), VSCode->GetBufferSize(), &inputLayout)))
+	{
+		MessageBoxW(nullptr, L"Failed to create input layout", L"Error", MB_OK);
+		return;
+	}
 
 	wstring shaderName = filesystem::path(file).stem().wstring();
 	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
@@ -429,10 +417,7 @@ void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, c
 	comPtr<ID3DBlob> GSCode;
 	comPtr<ID3DBlob> errorBlob;
 
-	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
-#ifdef _DEBUG
-	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
+	constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("gs_" + string(shaderModel)).c_str(), compileFlags, 0, GSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -460,10 +445,7 @@ void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, cons
 	comPtr<ID3DBlob> PSCode;
 	comPtr<ID3DBlob> errorBlob;
 
-	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
-#ifdef _DEBUG
-	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
+	constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("ps_" + string(shaderModel)).c_str(), compileFlags, 0, PSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -553,6 +535,52 @@ void Renderer::CreateSamplerState()
 	}
 }
 
+void Renderer::CreateBlendState()
+{
+	// No blend
+	D3D11_BLEND_DESC noBlendDesc = {};
+	noBlendDesc.RenderTarget[0].BlendEnable = FALSE;
+	noBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(m_device->CreateBlendState(&noBlendDesc, m_blendStates[NoBlend].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create no blend state", L"Error", MB_OK);
+		return;
+	}
+
+	// Alpha blend
+	D3D11_BLEND_DESC alphaBlendDesc = {};
+	alphaBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	alphaBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	alphaBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	alphaBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	alphaBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	alphaBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	alphaBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	alphaBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(m_device->CreateBlendState(&alphaBlendDesc, m_blendStates[AlphaBlend].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create alpha blend state", L"Error", MB_OK);
+		return;
+	}
+
+	// Alpha to coverage
+	D3D11_BLEND_DESC alphaToCoverageDesc = {};
+	alphaToCoverageDesc.AlphaToCoverageEnable = TRUE;
+	alphaToCoverageDesc.IndependentBlendEnable = FALSE;
+	alphaToCoverageDesc.RenderTarget[0].BlendEnable = FALSE;
+	alphaToCoverageDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(m_device->CreateBlendState(&alphaToCoverageDesc, m_blendStates[AlphaToCoverage].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create alpha-to-coverage blend state", L"Error", MB_OK);
+		return;
+	}
+
+	m_deviceContext->OMSetBlendState(m_blendStates[NoBlend].Get(), nullptr, 0xffffffff);
+}
+
 void Renderer::LoadShapeFile(const filesystem::path filePath)
 {
 	ObjFileParser shapes(filePath.c_str());
@@ -627,22 +655,6 @@ void Renderer::UpdateRenderer()
 	UpdateRenderMode();
 }
 
-// TODO: CreateDepthStencilState
-void Renderer::DrawObjects()
-{
-	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	for (const auto& shape : g_renderShapes) shape->Render(this);
-	//for (auto & g_renderShape : ranges::reverse_view(g_renderShapes)) g_renderShape->Render(this); // Reverse order
-
-#ifdef _DEBUG
-	if (m_drawNormalLines)
-	{
-		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-		for (const auto& shape : g_renderShapes) shape->DebugRender(this);
-	}
-#endif
-}
-
 void Renderer::UpdateRenderMode()
 {
 	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
@@ -671,6 +683,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	// Initialize render
 	CreateRasterState();
 	CreateSamplerState();
+	CreateBlendState();
 
 	// Initialize constant buffers
 	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[MatrixBuffer]);
@@ -766,7 +779,7 @@ void Renderer::Render()
 {
 	UpdateRenderer();
 
-	DrawObjects();
+	VDGM::g_currentScene->Render(this);
 
 	ShowFPS();
 

@@ -17,12 +17,12 @@ enum class Directions
 	Down
 };
 
+class Scene;
+
 class Object
 {
-	friend void Shape::Render(Renderer* renderer) const;
-#ifdef _DEBUG
-	friend void Shape::DebugRender(Renderer* renderer) const;
-#endif
+	friend class Shape;
+	friend class Collider;
 
 	UINT m_id = 0; // For debug purpose
 
@@ -43,6 +43,8 @@ class Object
 	std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components;
 
 protected:
+	Scene* m_scene = nullptr;
+
 	DirectX::XMVECTOR m_position = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	DirectX::XMVECTOR m_rotation = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	DirectX::XMFLOAT3 m_scale = { 1.0f, 1.0f, 1.0f };
@@ -53,12 +55,14 @@ protected:
 	std::vector<Object*> m_childrens;
 
 public:
-	Object() = default;
+	Object(Scene* scene) : m_scene(scene) { static UINT nextId = 1; m_id = nextId++; }
 	~Object();
 	Object(const Object& other) = default;
 	Object& operator=(const Object& other) = default;
 	Object(Object&& other) noexcept = default;
 	Object& operator=(Object&& other) noexcept = default;
+
+	Scene* GetScene() const { return m_scene; }
 
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);
