@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UtilityHeaders.h"
+#include "DirectXLib.h"
 
 #include "Component.h"
 
@@ -11,6 +12,8 @@ class Collider : public Component
 	std::vector<UINT> m_collideFrom = {};
 
 	bool m_isColliding = false;
+	bool m_isCollided = false;
+	DirectX::XMVECTOR m_collidedPosition = DirectX::XMVectorZero();
 
 public:
 	Collider
@@ -24,6 +27,8 @@ public:
 
 	void CheckCollision(Collider* other);
 	bool IsColliding() const { return m_isColliding; }
+	bool IsCollided() { bool wasCollided = m_isCollided; m_isCollided = false; return wasCollided; }
+	DirectX::XMVECTOR GetCollidedPosition() const { return m_collidedPosition; }
 
 	void GetRadius(float& radius) const { radius = m_radius; }
 	void SetRadius(float radius) { m_radius = radius; }

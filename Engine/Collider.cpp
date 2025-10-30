@@ -6,16 +6,6 @@
 using namespace std;
 using namespace DirectX;
 
-//void Collider::CheckCollision(const Collider* other) const
-//{
-//	XMVECTOR posA = m_owner->GetWorldPosition();
-//	XMVECTOR posB = other->m_owner->GetWorldPosition();
-//	XMVECTOR delta = XMVectorSubtract(posA, posB);
-//	float distance = XMVectorGetX(XMVector3Length(delta));
-//
-//	return distance <= (m_radius + other->m_radius);
-//}
-
 void Collider::CheckCollision(Collider* other)
 {
 	XMVECTOR posA = m_owner->GetWorldPosition();
@@ -23,8 +13,26 @@ void Collider::CheckCollision(Collider* other)
 	XMVECTOR delta = XMVectorSubtract(posA, posB);
 	float distance = XMVectorGetX(XMVector3Length(delta));
 
-	m_isColliding = distance <= (m_radius + other->m_radius);
-	other->m_isColliding = m_isColliding;
+	if (distance <= (m_radius + other->m_radius))
+	{
+		if (!m_isColliding)
+		{
+			m_isCollided = true;
+			m_isColliding = true;
+			m_collidedPosition = posB;
+		}
+		if (!other->m_isColliding)
+		{
+			other->m_isCollided = true;
+			other->m_isColliding = true;
+			other->m_collidedPosition = posA;
+		}
+	}
+	else
+	{
+		m_isColliding = false;
+		other->m_isColliding = false;
+	}
 }
 
 void Collider::OnAttached(Object* owner)
