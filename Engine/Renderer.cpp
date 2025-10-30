@@ -544,7 +544,7 @@ void Renderer::CreateSamplerState()
 
 void Renderer::CreateBlendState()
 {
-	// No Blend
+	// No blend
 	D3D11_BLEND_DESC noBlendDesc = {};
 	noBlendDesc.RenderTarget[0].BlendEnable = FALSE;
 	noBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
@@ -555,7 +555,7 @@ void Renderer::CreateBlendState()
 		return;
 	}
 
-	// Alpha Blend
+	// Alpha blend
 	D3D11_BLEND_DESC alphaBlendDesc = {};
 	alphaBlendDesc.RenderTarget[0].BlendEnable = TRUE;
 	alphaBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
@@ -572,7 +572,7 @@ void Renderer::CreateBlendState()
 		return;
 	}
 
-	// Alpha-to-Coverage
+	// Alpha to coverage
 	D3D11_BLEND_DESC alphaToCoverageDesc = {};
 	alphaToCoverageDesc.AlphaToCoverageEnable = TRUE;
 	alphaToCoverageDesc.IndependentBlendEnable = FALSE;
