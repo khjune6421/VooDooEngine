@@ -24,7 +24,6 @@ class Object
 	friend class Shape;
 	friend class Collider;
 
-	Scene* m_scene = nullptr;
 	UINT m_id = 0; // For debug purpose
 
 	// Not sure if these should be private or protected
@@ -44,6 +43,8 @@ class Object
 	std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components;
 
 protected:
+	Scene* m_scene = nullptr;
+
 	DirectX::XMVECTOR m_position = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	DirectX::XMVECTOR m_rotation = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	DirectX::XMFLOAT3 m_scale = { 1.0f, 1.0f, 1.0f };
