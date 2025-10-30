@@ -121,6 +121,7 @@ void Shape::SetTextures(const std::vector<std::wstring>& textures)
 void Shape::OnAttached(Object* owner)
 {
 	Component::OnAttached(owner);
+
 	owner->m_scene->m_renderShapes.emplace_back(this);
 }
 
@@ -128,5 +129,6 @@ void Shape::OnDetached()
 {
 	auto it = find(m_owner->m_scene->m_renderShapes.begin(), m_owner->m_scene->m_renderShapes.end(), this);
 	if (it != m_owner->m_scene->m_renderShapes.end()) m_owner->m_scene->m_renderShapes.erase(it);
+
 	Component::OnDetached();
 }

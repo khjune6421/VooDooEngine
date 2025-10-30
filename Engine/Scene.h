@@ -4,12 +4,15 @@
 #include "Camera.h"
 
 extern Camera* g_camera;
-extern std::vector<Shape*> g_renderShapes;
 
 class Scene
 {
 	friend class Shape;
 	std::vector<Shape*> m_renderShapes;
+
+	friend class Collider;
+	std::unordered_map<UINT, std::pair<std::vector<Collider*>, std::vector<Collider*>>> m_collidersMap;
+	void CheckCollisions();
 
 protected:
 	std::vector<std::unique_ptr<Object>> m_objects;

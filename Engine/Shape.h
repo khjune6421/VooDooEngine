@@ -31,7 +31,6 @@ public:
 	);
 
 	void Render(Renderer* renderer) const;
-
 #ifdef _DEBUG
 	void DebugRender(Renderer* renderer) const;
 #endif

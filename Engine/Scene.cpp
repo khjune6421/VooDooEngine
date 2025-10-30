@@ -1,13 +1,29 @@
 #include "Scene.h"
 
 #include "Renderer.h"
+#include "Collider.h"
 
 using namespace DirectX;
 using namespace std;
 
+void Scene::CheckCollisions()
+{
+	for (auto& colliderGroup : m_collidersMap)
+	{
+		for (auto& colliderA : colliderGroup.second.first)
+		{
+			for (auto& colliderB : colliderGroup.second.second)
+			{
+				if (colliderA != colliderB) colliderA->CheckCollision(colliderB);
+			}
+		}
+	}
+}
+
 void Scene::Update(float deltaTime)
 {
 	for (const auto& object : m_objects) object->Update(deltaTime);
+	CheckCollisions();
 
 	SortRenderShapes();
 }

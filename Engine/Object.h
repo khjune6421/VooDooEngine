@@ -22,6 +22,7 @@ class Scene;
 class Object
 {
 	friend class Shape;
+	friend class Collider;
 
 	Scene* m_scene = nullptr;
 	UINT m_id = 0; // For debug purpose

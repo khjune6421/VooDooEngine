@@ -395,10 +395,7 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 	comPtr<ID3DBlob> VSCode;
 	comPtr<ID3DBlob> errorBlob;
 
-	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
-#ifdef _DEBUG
-	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
+	constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("vs_" + string(shaderModel)).c_str(), compileFlags, 0, VSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -429,10 +426,7 @@ void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, c
 	comPtr<ID3DBlob> GSCode;
 	comPtr<ID3DBlob> errorBlob;
 
-	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
-#ifdef _DEBUG
-	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
+	constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("gs_" + string(shaderModel)).c_str(), compileFlags, 0, GSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -460,10 +454,7 @@ void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, cons
 	comPtr<ID3DBlob> PSCode;
 	comPtr<ID3DBlob> errorBlob;
 
-	UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
-#ifdef _DEBUG
-	compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
+	constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("ps_" + string(shaderModel)).c_str(), compileFlags, 0, PSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))

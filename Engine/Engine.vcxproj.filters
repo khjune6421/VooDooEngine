@@ -29,7 +29,9 @@
     <ClCompile Include="Shape.cpp">
       <Filter>Component\RenderingRelated</Filter>
     </ClCompile>
-    <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="Collider.cpp">
+      <Filter>Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">
@@ -95,7 +97,9 @@
     <ClInclude Include="Shape.h">
       <Filter>Component\RenderingRelated</Filter>
     </ClInclude>
-    <ClInclude Include="Collider.h" />
+    <ClInclude Include="Collider.h">
+      <Filter>Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
