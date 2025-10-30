@@ -22,7 +22,6 @@ cbuffer DirectionalLightConstBuffer : register(b2) // Just one directional light
 struct VSInput
 {
     float4 pos0 : POSITION0;
-    float4 col0 : COLOR0;
     float3 norm0 : NORMAL0;
     float3 tangent0 : TANGENT0;
     float2 uv0 : TEXCOORD0;
@@ -33,7 +32,6 @@ struct VSOutput
     float4 pos : SV_POSITION0;
     float4 posWorld : WORLDPOS0;
     
-    float4 col : COLOR0;
     float4 light : COLOR1;
     
     float3 norm : NORMAL0;
@@ -52,7 +50,6 @@ VSOutput main(VSInput input)
     output.pos = mul(input.pos0, WVP);
     output.posWorld = mul(input.pos0, world);
     
-    output.col = input.col0;
     output.norm = normalize(mul(float4(input.norm0, 0.0f), normalMatrix).xyz); // Inverse scale matrix
     float4 diffuseColor = dirLightColor * saturate(dot(output.norm, -dirLightDirection.xyz));
     output.light = ambientLight + diffuseColor;
