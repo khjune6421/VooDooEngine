@@ -32,11 +32,11 @@ void Scene::Render(Renderer* renderer) const
 {
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	for (const auto& shape : m_renderShapes) shape->Render(renderer);
-	//for (auto & reverseShape : ranges::reverse_view(m_renderShapes)) reverseShape->Render(renderer); // Reverse order
+	//for (const auto& renderShape : ranges::reverse_view(m_renderShapes)) renderShape->Render(renderer); // Reverse order
 
 #ifdef _DEBUG
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-	for (const auto& shape : m_renderShapes) shape->DebugRender(this);
+	for (const auto& shape : m_renderShapes) shape->DebugRender(renderer);
 #endif
 }
 

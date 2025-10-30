@@ -1,7 +1,5 @@
 #include "Renderer.h"
 
-#include <ranges>
-
 #include "ObjFileParser.h"
 
 using namespace std;
