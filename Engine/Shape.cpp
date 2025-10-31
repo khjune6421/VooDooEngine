@@ -20,7 +20,10 @@ constexpr UINT offset = 0;
 
 void Shape::Render(Renderer* renderer) const
 {
-	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_shapeVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
+	auto& [vertexBuffer, indexBuffer, vertexCount, indexCount] = renderer->m_shapeBufferMap[m_meshId];
+
+	renderer->m_deviceContext->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+	renderer->m_deviceContext->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	renderer->m_deviceContext->VSSetShader((renderer->m_vertexShaderMap[m_vertexShaderId]).first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[m_pixelShaderId].Get(), nullptr, 0);
@@ -39,10 +42,10 @@ void Shape::Render(Renderer* renderer) const
 
 	for (size_t i = 0; i < m_textureIds.size(); ++i)
 	{
-		renderer->m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, renderer->m_textureMap[m_textureIds[i]].GetAddressOf()); // This can be optimized further
+		renderer->m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, renderer->m_textureMap[m_textureIds[i]].GetAddressOf());
 	}
 
-	renderer->m_deviceContext->Draw(renderer->m_shapeVertexBufferMap[m_meshId].second, 0);
+	renderer->m_deviceContext->DrawIndexed(indexCount, 0, 0);
 
 	ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
 	for (size_t i = 0; i < m_textureIds.size(); ++i)

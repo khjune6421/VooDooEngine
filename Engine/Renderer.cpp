@@ -235,7 +235,23 @@ void Renderer::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer,
 
 	if (FAILED(m_device->CreateBuffer(&bufferDesc, &subresourceData, buffer->GetAddressOf())))
 	{
-		MessageBoxW(nullptr, L"Failed to create buffer", L"Error", MB_OK);
+		MessageBoxW(nullptr, L"Failed to create vertex buffer", L"Error", MB_OK);
+		return;
+	}
+}
+
+void Renderer::CreateIndexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData)
+{
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.ByteWidth = size;
+	bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+	D3D11_SUBRESOURCE_DATA subresourceData = {};
+	subresourceData.pSysMem = initData;
+
+	if (FAILED(m_device->CreateBuffer(&bufferDesc, &subresourceData, buffer->GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create index buffer", L"Error", MB_OK);
 		return;
 	}
 }
@@ -588,21 +604,39 @@ void Renderer::LoadShapeFile(const filesystem::path filePath)
 
 	wstring parentName = filePath.stem().wstring();
 	vector<Vertex> combinedVertices;
+	vector<UINT> combinedIndices;
 
-	for (const auto& [name, vertices] : shapes.m_shapes)
+	for (const auto& shape : shapes.m_shapes)
 	{
-		wstring childName = parentName + L"_" + name; // Save child shapes as parentName_childName
-		if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextShapeId++;
+		wstring childName = parentName + L"_" + shape.name;
+		if (g_meshIdMap.find(childName) == g_meshIdMap.end()) g_meshIdMap[childName] = s_nextShapeId++;
 
-		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_meshIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
-		m_shapeVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(vertices.size());
+		comPtr<ID3D11Buffer> vertexBuffer;
+		comPtr<ID3D11Buffer> indexBuffer;
 
-		combinedVertices.insert(combinedVertices.end(), vertices.begin(), vertices.end());
+		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * shape.vertices.size()), &vertexBuffer, shape.vertices.data(), sizeof(Vertex));
+		CreateIndexBuffer(static_cast<UINT>(sizeof(UINT) * shape.indices.size()), &indexBuffer, shape.indices.data());
+
+		m_shapeBufferMap[g_meshIdMap[childName]] = std::make_tuple(vertexBuffer, indexBuffer, static_cast<UINT>(shape.vertices.size()), static_cast<UINT>(shape.indices.size()));
+
+		UINT baseIndex = static_cast<UINT>(combinedVertices.size());
+		combinedVertices.insert(combinedVertices.end(), shape.vertices.begin(), shape.vertices.end());
+
+		for (UINT index : shape.indices)
+		{
+			combinedIndices.push_back(baseIndex + index);
+		}
 	}
 
 	if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextShapeId++;
-	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_shapeVertexBufferMap[g_meshIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
-	m_shapeVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
+
+	comPtr<ID3D11Buffer> combinedVertexBuffer;
+	comPtr<ID3D11Buffer> combinedIndexBuffer;
+
+	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &combinedVertexBuffer, combinedVertices.data(), sizeof(Vertex));
+	CreateIndexBuffer(static_cast<UINT>(sizeof(UINT) * combinedIndices.size()), &combinedIndexBuffer, combinedIndices.data());
+
+	m_shapeBufferMap[g_meshIdMap[parentName]] = std::make_tuple(combinedVertexBuffer, combinedIndexBuffer, static_cast<UINT>(combinedVertices.size()), static_cast<UINT>(combinedIndices.size()));
 }
 
 void Renderer::LoadDefaultShapes(const filesystem::path folderPath)

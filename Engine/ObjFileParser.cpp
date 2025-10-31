@@ -4,15 +4,21 @@
 using namespace std;
 using namespace DirectX;
 
-void ObjFileParser::CalculateTangents(vector<Vertex>& vertices) // How the hell does this even work
+void ObjFileParser::CalculateTangents(vector<Vertex>& vertices, const vector<UINT>& indices)
 {
-	for (size_t i = 0; i < vertices.size(); i += 3)
+	for (size_t i = 0; i < indices.size(); i += 3)
 	{
-		if (i + 2 >= vertices.size()) break;
+		if (i + 2 >= indices.size()) break;
 
-		Vertex& v0 = vertices[i];
-		Vertex& v1 = vertices[i + 1];
-		Vertex& v2 = vertices[i + 2];
+		UINT i0 = indices[i];
+		UINT i1 = indices[i + 1];
+		UINT i2 = indices[i + 2];
+
+		if (i0 >= vertices.size() || i1 >= vertices.size() || i2 >= vertices.size()) continue;
+
+		Vertex& v0 = vertices[i0];
+		Vertex& v1 = vertices[i1];
+		Vertex& v2 = vertices[i2];
 
 		XMFLOAT3 edge1 =
 		{
@@ -55,7 +61,6 @@ void ObjFileParser::CalculateTangents(vector<Vertex>& vertices) // How the hell 
 	}
 }
 
-// Starting to realize why people just use json
 ObjFileParser::ObjFileParser(const wstring& filename)
 {
 	wifstream file(filename);
@@ -94,12 +99,12 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 			wstringstream ss(line.substr(3));
 			XMFLOAT2 uv = {};
 			ss >> uv.x >> uv.y;
-			m_uvs.push_back(uv);
+			m_uvs.emplace_back(uv.x, 1.0f - uv.y); // Flip y for DirectX
 		}
 		else if (line.substr(0, 2) == L"f ")
 		{
 			wstringstream ss(line.substr(2));
-			vector<int> faceIndices;
+			vector<VertexKey> faceVertexKeys;
 			wstring vertexData;
 
 			while (ss >> vertexData)
@@ -110,32 +115,42 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 
 				while (getline(vertexStream, token, L'/')) indices.push_back(token);
 
-				int positionIndex = indices.size() > 0 && !indices[0].empty() ? stoi(indices[0]) - 1 : -1;
-				faceIndices.push_back(positionIndex);
+				VertexKey key = {};
+				key.positionIndex = indices.size() > 0 && !indices[0].empty() ? stoi(indices[0]) - 1 : -1;
+				key.uvIndex = indices.size() > 1 && !indices[1].empty() ? stoi(indices[1]) - 1 : -1;
+				key.normalIndex = indices.size() > 2 && !indices[2].empty() ? stoi(indices[2]) - 1 : -1;
 
-				int uvIndex = indices.size() > 1 && !indices[1].empty() ? stoi(indices[1]) - 1 : -1;
-				faceIndices.push_back(uvIndex);
-
-				int normalIndex = indices.size() > 2 && !indices[2].empty() ? stoi(indices[2]) - 1 : -1;
-				faceIndices.push_back(normalIndex);
+				faceVertexKeys.push_back(key);
 			}
 
-			for (size_t i = 0; i < faceIndices.size(); i += 3)
+			for (size_t i = 1; i < faceVertexKeys.size() - 1; ++i)
 			{
-				Vertex vertex = {};
+				for (size_t j = 0; j < 3; ++j)
+				{
+					size_t keyIndex = (j == 0) ? 0 : ((j == 1) ? i : i + 1);
+					const VertexKey& key = faceVertexKeys[keyIndex];
 
-				int posIdx = faceIndices[i];
-				int uvIdx = faceIndices[i + 1];
-				int normalIdx = faceIndices[i + 2];
+					static unordered_map<VertexKey, UINT, VertexKeyHash> vertexMap;
+					auto it = vertexMap.find(key);
 
-				if (posIdx >= 0 && posIdx < m_positions.size()) vertex.position = m_positions[posIdx];
-				if (normalIdx >= 0 && normalIdx < m_normals.size()) vertex.normal = m_normals[normalIdx];
-				if (uvIdx >= 0 && uvIdx < m_uvs.size()) vertex.uv = XMFLOAT2{ m_uvs[uvIdx].x, 1.0f - m_uvs[uvIdx].y }; // Flip y for DirectX
+					if (it != vertexMap.end()) currentShape->indices.push_back(it->second);
+					else
+					{
+						Vertex vertex = {};
 
-				currentShape->vertices.push_back(vertex);
+						if (key.positionIndex >= 0 && key.positionIndex < m_positions.size()) vertex.position = m_positions[key.positionIndex];
+						if (key.normalIndex >= 0 && key.normalIndex < m_normals.size()) vertex.normal = m_normals[key.normalIndex];
+						if (key.uvIndex >= 0 && key.uvIndex < m_uvs.size()) vertex.uv = m_uvs[key.uvIndex];
+
+						UINT newIndex = static_cast<UINT>(currentShape->vertices.size());
+						currentShape->vertices.push_back(vertex);
+						currentShape->indices.push_back(newIndex);
+						vertexMap[key] = newIndex;
+					}
+				}
 			}
 		}
 	}
 
-	for (auto& shape : m_shapes) CalculateTangents(shape.vertices);
+	for (auto& shape : m_shapes) CalculateTangents(shape.vertices, shape.indices);
 }

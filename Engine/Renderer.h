@@ -115,7 +115,7 @@ class Renderer
 
 	// Maps shape ID to its vertex buffer and vertex count
 	static UINT s_nextShapeId;
-	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
+	std::unordered_map<UINT, std::tuple<comPtr<ID3D11Buffer>, comPtr<ID3D11Buffer>, UINT, UINT>> m_shapeBufferMap;
 
 	static UINT s_vertexShaderId;
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11VertexShader>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
@@ -158,6 +158,7 @@ class Renderer
 	void ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth = 1.0f, UINT8 stencil = 0);
 
 	void CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride);
+	void CreateIndexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData);
 	void CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer);
 
 	void ShowFPS();
