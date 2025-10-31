@@ -1,9 +1,7 @@
 #pragma once
-
 #include "pch.h"
 
 #include "Component.h"
-
 #include "Object.h"
 
 class Light : public Component
