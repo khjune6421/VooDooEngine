@@ -115,7 +115,7 @@ class Renderer
 
 	// Maps shape ID to its vertex buffer and vertex count
 	static UINT s_nextMeshId;
-	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
+	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_meshVertexBufferMap;
 
 	static UINT s_vertexShaderId;
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11VertexShader>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
@@ -176,7 +176,7 @@ class Renderer
 	void CreateSamplerState();
 	void CreateBlendState();
 
-	void LoadMeshFile(const std::filesystem::path filePath);
+	void LoadObjFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();

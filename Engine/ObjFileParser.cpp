@@ -61,7 +61,7 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 	wifstream file(filename);
 	if (!file.is_open()) { MessageBoxW(nullptr, (L"Failed to open .obj file: " + filename).c_str(), L"Error", MB_OK); return; }
 
-	Shape* currentShape = nullptr;
+	Mesh* currentShape = nullptr;
 
 	wstring line;
 	while (getline(file, line))

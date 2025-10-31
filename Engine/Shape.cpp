@@ -20,7 +20,7 @@ constexpr UINT offset = 0;
 
 void Shape::Render(Renderer* renderer) const
 {
-	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_shapeVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
+	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
 
 	renderer->m_deviceContext->VSSetShader((renderer->m_vertexShaderMap[m_vertexShaderId]).first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[m_pixelShaderId].Get(), nullptr, 0);
@@ -42,7 +42,7 @@ void Shape::Render(Renderer* renderer) const
 		renderer->m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, renderer->m_textureMap[m_textureIds[i]].GetAddressOf()); // This can be optimized further
 	}
 
-	renderer->m_deviceContext->Draw(renderer->m_shapeVertexBufferMap[m_meshId].second, 0);
+	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
 
 	ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
 	for (size_t i = 0; i < m_textureIds.size(); ++i)
@@ -54,7 +54,7 @@ void Shape::Render(Renderer* renderer) const
 #ifdef _DEBUG
 void Shape::DebugRender(Renderer* renderer) const
 {
-	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_shapeVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
+	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]].first.Get(), nullptr, 0);
@@ -74,7 +74,7 @@ void Shape::DebugRender(Renderer* renderer) const
 
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"VSShowNormal"]].second.Get());
 
-	renderer->m_deviceContext->Draw(renderer->m_shapeVertexBufferMap[m_meshId].second, 0);
+	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
 
 	renderer->m_deviceContext->GSSetShader(nullptr, nullptr, 0);
 }
