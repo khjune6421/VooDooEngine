@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DirectXLib.h"
+#include "pch.h"
 
 #include "Component.h"
 #include "Object.h"

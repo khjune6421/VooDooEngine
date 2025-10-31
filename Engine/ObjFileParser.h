@@ -1,7 +1,6 @@
 #pragma once
 
-#include "DirectXLib.h"
-#include "UtilityHeaders.h"
+#include "pch.h"
 
 struct Vertex
 {

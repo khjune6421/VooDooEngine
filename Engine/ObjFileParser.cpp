@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "ObjFileParser.h"
 
 using namespace std;

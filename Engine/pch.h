@@ -1,11 +1,23 @@
 #pragma once
 
-// DirectX header files
+// Utility header
+#include <Windows.h>
+#include <iostream>
+#include <vector>
+#include <deque>
+#include <wrl/client.h>
+#include <memory>
+#include <unordered_map>
+#include <filesystem>
+#include <fstream>
+#include <typeindex>
+
+// DirectX header
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 
-// DirectXTK header files
+// DirectXTK header
 #include <SimpleMath.h>
 #include <SpriteFont.h>
 #include <DDSTextureLoader.h>

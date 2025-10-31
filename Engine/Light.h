@@ -1,7 +1,6 @@
 #pragma once
 
-#include "UtilityHeaders.h"
-#include "DirectXLib.h"
+#include "pch.h"
 
 #include "Component.h"
 

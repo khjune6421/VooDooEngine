@@ -32,6 +32,7 @@
     <ClCompile Include="Collider.cpp">
       <Filter>Component</Filter>
     </ClCompile>
+    <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">
@@ -51,9 +52,6 @@
     </Filter>
     <Filter Include="Parser">
       <UniqueIdentifier>{1c6fed32-0140-4ec4-b8f6-7fd881926905}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="LibrariesAndIncludes">
-      <UniqueIdentifier>{9606c912-bcd4-4e40-b771-0f4344ff78c4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Component">
       <UniqueIdentifier>{74d01adb-e5fc-4323-b2e0-3c3d03d9440a}</UniqueIdentifier>
@@ -76,12 +74,6 @@
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXLib.h">
-      <Filter>LibrariesAndIncludes</Filter>
-    </ClInclude>
-    <ClInclude Include="UtilityHeaders.h">
-      <Filter>LibrariesAndIncludes</Filter>
-    </ClInclude>
     <ClInclude Include="ObjFileParser.h">
       <Filter>Parser</Filter>
     </ClInclude>
@@ -100,6 +92,7 @@
     <ClInclude Include="Collider.h">
       <Filter>Component</Filter>
     </ClInclude>
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

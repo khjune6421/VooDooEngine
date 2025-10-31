@@ -1,10 +1,6 @@
 #pragma once
 
-// Standard header files
-#include "UtilityHeaders.h"
-
-// DirectX header files
-#include "DirectXLib.h"
+#include "pch.h"
 
 // Other header files
 #include "Scene.h"
