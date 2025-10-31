@@ -20,7 +20,6 @@ void ObjFileParser::CalculateTangents(vector<Vertex>& vertices) // How the hell 
 			v1.position.y - v0.position.y,
 			v1.position.z - v0.position.z
 		};
-
 		XMFLOAT3 edge2 =
 		{
 			v2.position.x - v0.position.x,
@@ -33,7 +32,6 @@ void ObjFileParser::CalculateTangents(vector<Vertex>& vertices) // How the hell 
 			v1.uv.x - v0.uv.x,
 			v1.uv.y - v0.uv.y
 		};
-
 		XMFLOAT2 deltaUV2 =
 		{
 			v2.uv.x - v0.uv.x,
@@ -41,7 +39,6 @@ void ObjFileParser::CalculateTangents(vector<Vertex>& vertices) // How the hell 
 		};
 
 		float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-
 		XMFLOAT3 tangent =
 		{
 			r * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
