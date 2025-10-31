@@ -21,9 +21,6 @@ public:
 		std::wstring name;
 		std::vector<Vertex> vertices;
 	};
-	std::vector<DirectX::XMFLOAT3> m_positions;
-	std::vector<DirectX::XMFLOAT3> m_normals;
-	std::vector<DirectX::XMFLOAT2> m_uvs;
 
 	std::vector<Mesh> m_meshes;
 };

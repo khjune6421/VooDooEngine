@@ -61,7 +61,11 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 	wifstream file(filename);
 	if (!file.is_open()) { MessageBoxW(nullptr, (L"Failed to open .obj file: " + filename).c_str(), L"Error", MB_OK); return; }
 
-	Mesh* currentShape = nullptr;
+	Mesh* currentMesh = nullptr;
+
+	vector<XMFLOAT3> positions;
+	vector<XMFLOAT3> normals;
+	vector<XMFLOAT2> uvs;
 
 	wstring line;
 	while (getline(file, line))
@@ -70,31 +74,31 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 
 		if (line.substr(0, 2) == L"o ")
 		{
-			currentShape = &m_meshes.emplace_back();
-			currentShape->name = line.substr(2);
+			currentMesh = &m_meshes.emplace_back();
+			currentMesh->name = line.substr(2);
 		}
-		if (!currentShape) continue;
+		if (!currentMesh) continue;
 
 		if (line.substr(0, 2) == L"v ")
 		{
 			wstringstream ss(line.substr(2));
 			XMFLOAT3 position = {};
 			ss >> position.x >> position.y >> position.z;
-			m_positions.push_back(position);
+			positions.push_back(position);
 		}
 		else if (line.substr(0, 3) == L"vn ")
 		{
 			wstringstream ss(line.substr(3));
 			XMFLOAT3 normal = {};
 			ss >> normal.x >> normal.y >> normal.z;
-			m_normals.push_back(normal);
+			normals.push_back(normal);
 		}
 		else if (line.substr(0, 3) == L"vt ")
 		{
 			wstringstream ss(line.substr(3));
 			XMFLOAT2 uv = {};
 			ss >> uv.x >> uv.y;
-			m_uvs.push_back(uv);
+			uvs.emplace_back(uv.x, 1.0f - uv.y); // Flip y for DirectX
 		}
 		else if (line.substr(0, 2) == L"f ")
 		{
@@ -128,11 +132,11 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 				int uvIdx = faceIndices[i + 1];
 				int normalIdx = faceIndices[i + 2];
 
-				if (posIdx >= 0 && posIdx < m_positions.size()) vertex.position = m_positions[posIdx];
-				if (normalIdx >= 0 && normalIdx < m_normals.size()) vertex.normal = m_normals[normalIdx];
-				if (uvIdx >= 0 && uvIdx < m_uvs.size()) vertex.uv = XMFLOAT2{ m_uvs[uvIdx].x, 1.0f - m_uvs[uvIdx].y }; // Flip y for DirectX
+				if (posIdx >= 0 && posIdx < positions.size()) vertex.position = positions[posIdx];
+				if (normalIdx >= 0 && normalIdx < normals.size()) vertex.normal = normals[normalIdx];
+				if (uvIdx >= 0 && uvIdx < uvs.size()) vertex.uv = uvs[uvIdx];
 
-				currentShape->vertices.push_back(vertex);
+				currentMesh->vertices.push_back(vertex);
 			}
 		}
 	}
