@@ -114,7 +114,7 @@ class Renderer
 	std::unordered_map<std::wstring, std::unique_ptr<DirectX::SpriteFont>> m_SpriteFontMap;
 
 	// Maps shape ID to its vertex buffer and vertex count
-	static UINT s_nextShapeId;
+	static UINT s_nextMeshId;
 	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_shapeVertexBufferMap;
 
 	static UINT s_vertexShaderId;
@@ -176,7 +176,7 @@ class Renderer
 	void CreateSamplerState();
 	void CreateBlendState();
 
-	void LoadShapeFile(const std::filesystem::path filePath);
+	void LoadMeshFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();

@@ -8,7 +8,7 @@ using namespace DirectX;
 
 #define comPtr Microsoft::WRL::ComPtr
 
-UINT Renderer::s_nextShapeId = 0;
+UINT Renderer::s_nextMeshId = 0;
 unordered_map<wstring, UINT> g_meshIdMap;
 
 UINT Renderer::s_vertexShaderId = 0;
@@ -582,27 +582,27 @@ void Renderer::CreateBlendState()
 	m_deviceContext->OMSetBlendState(m_blendStates[NoBlend].Get(), nullptr, 0xffffffff);
 }
 
-void Renderer::LoadShapeFile(const filesystem::path filePath)
+void Renderer::LoadObjFile(const filesystem::path filePath)
 {
-	ObjFileParser shapes(filePath.c_str());
+	ObjFileParser objects(filePath.c_str());
 
 	wstring parentName = filePath.stem().wstring();
 	vector<Vertex> combinedVertices;
 
-	for (const auto& [name, vertices] : shapes.m_shapes)
+	for (const auto& [name, vertices] : objects.m_meshes)
 	{
 		wstring childName = parentName + L"_" + name; // Save child shapes as parentName_childName
-		if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextShapeId++;
+		if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextMeshId++;
 
-		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_shapeVertexBufferMap[g_meshIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
-		m_shapeVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(vertices.size());
+		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_meshVertexBufferMap[g_meshIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
+		m_meshVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(vertices.size());
 
 		combinedVertices.insert(combinedVertices.end(), vertices.begin(), vertices.end());
 	}
 
-	if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextShapeId++;
-	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_shapeVertexBufferMap[g_meshIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
-	m_shapeVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
+	if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextMeshId++;
+	CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * combinedVertices.size()), &m_meshVertexBufferMap[g_meshIdMap[parentName]].first, combinedVertices.data(), sizeof(Vertex));
+	m_meshVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(combinedVertices.size());
 }
 
 void Renderer::LoadDefaultShapes(const filesystem::path folderPath)
@@ -611,7 +611,7 @@ void Renderer::LoadDefaultShapes(const filesystem::path folderPath)
 	{
 		for (const auto& entry : filesystem::directory_iterator(folderPath))
 		{
-			if (entry.path().extension() == L".obj") LoadShapeFile(entry.path().c_str());
+			if (entry.path().extension() == L".obj") LoadObjFile(entry.path().c_str());
 		}
 	}
 }

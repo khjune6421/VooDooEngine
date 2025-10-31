@@ -17,7 +17,7 @@ class ObjFileParser
 public:
 	ObjFileParser(const std::wstring& filename);
 
-	struct Shape
+	struct Mesh
 	{
 		std::wstring name;
 		std::vector<Vertex> vertices;
@@ -26,5 +26,5 @@ public:
 	std::vector<DirectX::XMFLOAT3> m_normals;
 	std::vector<DirectX::XMFLOAT2> m_uvs;
 
-	std::vector<Shape> m_shapes;
+	std::vector<Mesh> m_meshes;
 };

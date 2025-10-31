@@ -70,7 +70,7 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 
 		if (line.substr(0, 2) == L"o ")
 		{
-			currentShape = &m_shapes.emplace_back();
+			currentShape = &m_meshes.emplace_back();
 			currentShape->name = line.substr(2);
 		}
 		if (!currentShape) continue;
@@ -137,5 +137,5 @@ ObjFileParser::ObjFileParser(const wstring& filename)
 		}
 	}
 
-	for (auto& shape : m_shapes) CalculateTangents(shape.vertices);
+	for (auto& shape : m_meshes) CalculateTangents(shape.vertices);
 }
