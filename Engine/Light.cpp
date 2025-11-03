@@ -4,8 +4,6 @@
 using namespace std;
 using namespace DirectX;
 
-DirectionalLightConstBuffer DirectionalLight::s_lightData = {};
-
 vector<PointLight*> g_pointLights;
 
 void PointLight::OnDetached()

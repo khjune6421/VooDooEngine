@@ -21,38 +21,6 @@ public:
 	virtual void SetIntensity(float intensity) { m_intensity = intensity; }
 };
 
-struct DirectionalLightConstBuffer
-{
-	DirectX::XMVECTOR direction = { 0.0f, -1.0f, 0.0f, 0.0f };
-	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 0.0f };
-};
-class DirectionalLight : public Light
-{
-	DirectX::XMVECTOR m_direction = { 0.0f, -1.0f, 0.0f, 0.0f };
-
-	friend class Renderer;
-	static DirectionalLightConstBuffer s_lightData;
-
-	void UpdateColor() { s_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f }; }
-
-public:
-	DirectionalLight
-	(
-		const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f },
-		const float intensity = 1.0f,
-		const DirectX::XMVECTOR& direction = { 1.0f, -1.0f, 0.0f, 0.0f }
-	) : Light(color, intensity) { m_direction = DirectX::XMVector3Normalize(direction); }
-
-	void OnAttached(class Object* owner) override { Component::OnAttached(owner); UpdateColor(); s_lightData.direction = m_direction; }
-	void OnDetached() override { s_lightData = {}; }
-
-	void SetColor(const DirectX::XMFLOAT3& color) override { m_color = color; UpdateColor(); }
-	void SetIntensity(float intensity) override { m_intensity = intensity; UpdateColor(); }
-
-	DirectX::XMVECTOR GetDirection() const { return m_direction; }
-	void SetDirection(const DirectX::XMVECTOR& direction) { m_direction = DirectX::XMVector3Normalize(direction); s_lightData.direction = m_direction; }
-};
-
 constexpr int MAX_POINT_LIGHTS = 2;
 
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;

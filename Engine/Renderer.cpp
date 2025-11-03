@@ -639,7 +639,7 @@ void Renderer::UpdateRenderer()
 	m_deviceContext->VSSetConstantBuffers(2, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
 
 	// Directional Light
-	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &DirectionalLight::s_lightData, 0, 0);
+	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_directionalLight, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(3, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
 
 	// Camera
