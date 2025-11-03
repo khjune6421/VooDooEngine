@@ -19,7 +19,7 @@ namespace VDGM
 class Renderer
 {
 	friend class Shape;
-	friend void Scene::Render(Renderer* renderer);
+	friend class Scene;
 
 	// Device
 	struct HardwareInfo
@@ -41,6 +41,38 @@ class Renderer
 
 		std::vector<HardwareInfo> hardwareInfos = {};
 	};
+
+	struct ShadowMapInfo
+	{
+		UINT shadowMapWidth = 2048;
+		UINT shadowMapHeight = 2048;
+	};
+	enum DepthState
+	{
+		DefaultDepth,
+		ShadowDepth,
+
+		DepthStateCount
+	};
+
+	// Shadow map
+	ShadowMapInfo m_shadowMapInfo = {};
+	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
+	comPtr<ID3D11DepthStencilView> m_shadowMapDepthView = nullptr;
+	comPtr<ID3D11ShaderResourceView> m_shadowMapResourceView = nullptr;
+	comPtr<ID3D11RenderTargetView> m_shadowMapRenderTarget = nullptr;
+	comPtr<ID3D11DepthStencilState> m_depthStates[DepthStateCount] = {};
+
+	DirectX::XMMATRIX m_lightViewMatrix = DirectX::XMMatrixIdentity();
+	DirectX::XMMATRIX m_lightProjectionMatrix = DirectX::XMMatrixIdentity();
+
+	struct ShadowConstBuffer
+	{
+		DirectX::XMMATRIX lightView;
+		DirectX::XMMATRIX lightProjection;
+		DirectX::XMMATRIX lightWVP;
+	};
+
 	enum ConstBufferType
 	{
 		MatrixBuffer,
@@ -49,6 +81,7 @@ class Renderer
 		AmbientFogBuffer,
 		DirectionalLightBuffer,
 		PointLightBuffer,
+		ShadowBuffer,
 
 		ConstBufferCount
 	};
@@ -62,6 +95,7 @@ class Renderer
 	enum SamplerType
 	{
 		DefaultSampler,
+		ShadowSampler,
 
 		SamplerCount
 	};
@@ -130,6 +164,8 @@ class Renderer
 	void CreateDeviceSwapChain();
 	void CreateRenderTarget();
 	void CreateDepthStencil();
+	void CreateDepthStates();
+	void CreateShadowMap();
 	void SetScissorRect(LONG width, LONG height);
 	void LoadFonts(const std::filesystem::path fontPath);
 	void GetHardwareInfo();
@@ -162,7 +198,10 @@ class Renderer
 	void UpdateVSConstBuffers();
 	void UpdatePSConstBuffers();
 
-	bool m_drawNormalLines = false; // for debugging
+	void SetShadowMapRenderTarget();
+
+	void ClearShadowMapRenderTarget();
+	void RenderShadowMap();
 
 	void UpdateRenderMode();
 
@@ -180,8 +219,6 @@ public:
 	void DrawText(const wchar_t* text, DirectX::XMFLOAT2 position, DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), float scale = 1.0f, const wchar_t* fontName = L"Gugi");
 
 	void Render();
-
-	void ToggleNormalLines() { m_drawNormalLines = !m_drawNormalLines; }
 	void ChangeState();
 
 	void ScreenPointToWorld(POINT screenPos) const;

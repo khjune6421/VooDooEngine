@@ -142,6 +142,79 @@ void Renderer::CreateDepthStencil()
 	}
 }
 
+void Renderer::CreateDepthStates()
+{
+	// Default depth state
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = FALSE;
+
+	if (FAILED(m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStates[DefaultDepth].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create default depth state", L"Error", MB_OK);
+		return;
+	}
+
+	// Shadow depth state
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = FALSE;
+
+	if (FAILED(m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStates[ShadowDepth].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow depth state", L"Error", MB_OK);
+		return;
+	}
+}
+
+void Renderer::CreateShadowMap()
+{
+	D3D11_TEXTURE2D_DESC shadowMapDesc = {};
+	shadowMapDesc.Width = m_shadowMapInfo.shadowMapWidth;
+	shadowMapDesc.Height = m_shadowMapInfo.shadowMapHeight;
+	shadowMapDesc.MipLevels = 1;
+	shadowMapDesc.ArraySize = 1;
+	shadowMapDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	shadowMapDesc.SampleDesc.Count = 1;
+	shadowMapDesc.SampleDesc.Quality = 0;
+	shadowMapDesc.Usage = D3D11_USAGE_DEFAULT;
+	shadowMapDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	shadowMapDesc.CPUAccessFlags = 0;
+	shadowMapDesc.MiscFlags = 0;
+
+	if (FAILED(m_device->CreateTexture2D(&shadowMapDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map texture", L"Error", MB_OK);
+		return;
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	if (FAILED(m_device->CreateDepthStencilView(m_shadowMapTexture.Get(), &depthStencilViewDesc, m_shadowMapDepthView.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map depth stencil view", L"Error", MB_OK);
+		return;
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
+	shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	if (FAILED(m_device->CreateShaderResourceView(m_shadowMapTexture.Get(), &shaderResourceViewDesc, m_shadowMapResourceView.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map shader resource view", L"Error", MB_OK);
+		return;
+	}
+}
+
 void Renderer::SetScissorRect(LONG width, LONG height)
 {
 	D3D11_RECT scissorRect = {};
@@ -532,6 +605,27 @@ void Renderer::CreateSamplerState()
 		MessageBoxW(nullptr, L"Failed to create sampler state", L"Error", MB_OK);
 		return;
 	}
+
+	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
+	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.MipLODBias = 0.0f;
+	shadowSamplerDesc.MaxAnisotropy = 1;
+	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	shadowSamplerDesc.BorderColor[0] = 1.0f;
+	shadowSamplerDesc.BorderColor[1] = 1.0f;
+	shadowSamplerDesc.BorderColor[2] = 1.0f;
+	shadowSamplerDesc.BorderColor[3] = 1.0f;
+	shadowSamplerDesc.MinLOD = 0;
+	shadowSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	if (FAILED(m_device->CreateSamplerState(&shadowSamplerDesc, m_samplers[ShadowSampler].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow sampler state", L"Error", MB_OK);
+		return;
+	}
 }
 
 void Renderer::CreateBlendState()
@@ -614,8 +708,10 @@ void Renderer::LoadDefaultShapes(const filesystem::path folderPath)
 	}
 }
 
-void Renderer::UpdateRenderer()
+void Renderer::UpdateRenderer() // TODO:
 {
+	RenderShadowMap();
+
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
 	// Vertex Shader Constant Buffers
@@ -647,7 +743,9 @@ void Renderer::UpdateRenderer()
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
-	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
+	m_deviceContext->PSSetShaderResources(3, 1, m_shadowMapResourceView.GetAddressOf());
+	m_deviceContext->PSSetSamplers(1, 1, m_samplers[ShadowSampler].GetAddressOf());
+	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
 
 	UpdateRenderMode();
 }
@@ -658,6 +756,57 @@ void Renderer::UpdateVSConstBuffers()
 
 void Renderer::UpdatePSConstBuffers()
 {
+}
+
+void Renderer::SetShadowMapRenderTarget()
+{
+	m_deviceContext->OMSetRenderTargets(0, nullptr, m_shadowMapDepthView.Get());
+
+	D3D11_VIEWPORT shadowViewport = {};
+	shadowViewport.TopLeftX = 0.0f;
+	shadowViewport.TopLeftY = 0.0f;
+	shadowViewport.Width = static_cast<FLOAT>(m_shadowMapInfo.shadowMapWidth);
+	shadowViewport.Height = static_cast<FLOAT>(m_shadowMapInfo.shadowMapHeight);
+	shadowViewport.MinDepth = 0.0f;
+	shadowViewport.MaxDepth = 1.0f;
+
+	m_deviceContext->RSSetViewports(1, &shadowViewport);
+}
+
+void Renderer::ClearShadowMapRenderTarget()
+{
+	m_deviceContext->ClearDepthStencilView(m_shadowMapDepthView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+}
+
+void Renderer::RenderShadowMap()
+{
+	XMVECTOR lightPosition = VDGM::g_currentScene->m_directionalLight.direction * -100.0f;
+	lightPosition = XMVectorSetW(lightPosition, 1.0f);
+
+	XMVECTOR lightTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	XMVECTOR lightUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	m_lightViewMatrix = XMMatrixLookAtLH(lightPosition, lightTarget, lightUp);
+	m_lightProjectionMatrix = XMMatrixOrthographicLH(100.0f, 100.0f, 1.0f, 200.0f);
+	XMMATRIX lightWVP = m_lightViewMatrix * m_lightProjectionMatrix;
+
+	// Update shadow constant buffer
+	ShadowConstBuffer shadowBuffer = {};
+	shadowBuffer.lightView = XMMatrixTranspose(m_lightViewMatrix);
+	shadowBuffer.lightProjection = XMMatrixTranspose(m_lightProjectionMatrix);
+	shadowBuffer.lightWVP = XMMatrixTranspose(lightWVP);
+
+	m_deviceContext->UpdateSubresource(m_constBuffers[ShadowBuffer].Get(), 0, nullptr, &shadowBuffer, 0, 0);
+	m_deviceContext->VSSetConstantBuffers(4, 1, m_constBuffers[ShadowBuffer].GetAddressOf());
+
+	ClearShadowMapRenderTarget();
+
+	m_deviceContext->OMSetDepthStencilState(m_depthStates[ShadowDepth].Get(), 0);
+
+	VDGM::g_currentScene->RenderShadowMap(this);
+
+	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
+	m_deviceContext->OMSetDepthStencilState(m_depthStates[DefaultDepth].Get(), 0);
 }
 
 void Renderer::UpdateRenderMode()
@@ -686,6 +835,8 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	m_DXSubVersion = (m_deviceInfo.featureLevels & 0x0f00) >> 8;
 
 	// Initialize render
+	CreateShadowMap();
+	CreateDepthStates();
 	CreateRasterState();
 	CreateSamplerState();
 	CreateBlendState();
@@ -697,6 +848,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientFogBuffer]); // Ambient fog buffer
 	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
 	CreateConstBuffer(sizeof(PointLightArrayConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
+	CreateConstBuffer(sizeof(ShadowConstBuffer), &m_constBuffers[ShadowBuffer]); // Shadow buffer
 
 	static const filesystem::path defaultPath(L"../Assets/Default/");
 	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");
@@ -745,8 +897,6 @@ void Renderer::Resize(UINT width, UINT height)
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }
 
-constexpr UINT VEWPORT_NUM = 1;
-
 void Renderer::SetViewport(float topLeftX, float topLeftY)
 {
 	D3D11_VIEWPORT viewport = {};
@@ -757,7 +907,7 @@ void Renderer::SetViewport(float topLeftX, float topLeftY)
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
-	m_deviceContext->RSSetViewports(VEWPORT_NUM, &viewport);
+	m_deviceContext->RSSetViewports(1, &viewport);
 }
 
 void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)
@@ -804,7 +954,7 @@ void Renderer::ChangeState()
 void Renderer::ScreenPointToWorld(POINT screenPos) const
 {
 	D3D11_VIEWPORT vp;
-	UINT numViewports = VEWPORT_NUM;
+	UINT numViewports = 1;
 	m_deviceContext->RSGetViewports(&numViewports, &vp);
 
 	XMVECTOR rayOrigin = XMVectorSet(static_cast<float>(screenPos.x), static_cast<float>(screenPos.y), 0.0f, 1.0f);

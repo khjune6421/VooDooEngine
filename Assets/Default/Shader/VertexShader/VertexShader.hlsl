@@ -24,6 +24,13 @@ cbuffer DirectionalLightConstBuffer : register(b3) // Just one directional light
     float4 directionalLightColor;
 }
 
+cbuffer ShadowConstBuffer : register(b4)
+{
+    matrix lightView;
+    matrix lightProjection;
+    matrix lightWVP;
+}
+
 struct VSInput
 {
     float4 pos0 : POSITION0;
@@ -42,6 +49,8 @@ struct VSOutput
     float4 posWorld : WORLDPOS0;
     float4 light : COLOR1;
     float3 bitangent : BITANGENT0;
+    
+    float4 lightSpacePos : TEXCOORD1;
 };
 
 VSOutput main(VSInput input)
@@ -70,6 +79,8 @@ VSOutput main(VSInput input)
         float specularFactor = dot(output.norm, blinnPhongHalfVector);
         output.light += directionalLightColor * specularFactor;
     }
+    
+    output.lightSpacePos = mul(input.pos0, lightWVP);
     
     return output;
 }

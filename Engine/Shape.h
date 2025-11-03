@@ -29,6 +29,7 @@ public:
 	);
 
 	void Render(class Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
+	void RenderShadowMap(class Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
 #ifdef _DEBUG
 	void DebugRender(class Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
 #endif

@@ -47,6 +47,7 @@ public:
 
 	virtual void Update(float deltaTime);
 	virtual void Render(class Renderer* renderer);
+	virtual void RenderShadowMap(class Renderer* renderer);
 
 	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}
 };
