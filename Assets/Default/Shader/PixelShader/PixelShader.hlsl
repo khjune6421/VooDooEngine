@@ -64,7 +64,7 @@ float4 main(PSInput input) : SV_TARGET
         float distance = length(vecToLight);
         if (distance > pointLights[i].range) continue;
         
-        vecToLight = normalize(vecToLight);
+        vecToLight = vecToLight / distance;
         
         float spot = pow(max(dot(-vecToLight, pointLights[i].directionAndAngle.xyz), 1e-5f), pointLights[i].directionAndAngle.w);
         if (spot < 1e-5f) continue;
@@ -78,11 +78,10 @@ float4 main(PSInput input) : SV_TARGET
         float4 diffuseColor = pointLights[i].color * diffuseFactor;
         
         float3 viewDirection = normalize(cameraPos.xyz - input.posWorld.xyz);
-        float3 reflectDirection = reflect(-vecToLight, worldNormal);
-        float specularFactor = saturate(dot(viewDirection, reflectDirection));
+        float3 blinnPhongHalfVector = normalize(vecToLight + viewDirection);
+        float specularFactor = dot(worldNormal, blinnPhongHalfVector);
         
         diffuseColor += pointLights[i].color * specularFactor;
-        
         
         input.light += diffuseColor * attenuation;
     }

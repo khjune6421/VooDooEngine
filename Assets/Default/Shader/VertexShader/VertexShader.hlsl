@@ -20,8 +20,8 @@ cbuffer AmbientLightConstBuffer : register(b2)
 
 cbuffer DirectionalLightConstBuffer : register(b3) // Just one directional light
 {
-    float4 dirLightDirection;
-    float4 dirLightColor;
+    float4 directionalLightNormal;
+    float4 directionalLightColor;
 }
 
 struct VSInput
@@ -57,18 +57,18 @@ VSOutput main(VSInput input)
     
     output.posWorld = mul(input.pos0, world);
     
-    float diffuseFactor = saturate(dot(output.norm, -dirLightDirection.xyz));
-    output.light = ambientLight + dirLightColor * diffuseFactor;
+    float diffuseFactor = dot(output.norm, -directionalLightNormal.xyz);
+    output.light = ambientLight + directionalLightColor * diffuseFactor;
     
     output.bitangent = normalize(cross(output.norm, output.tangent));
     
     if (diffuseFactor > 0.0f)
     {
         float3 viewDirection = normalize(cameraPos.xyz - output.posWorld.xyz);
-        float3 reflectDirection = reflect(dirLightDirection.xyz, output.norm);
+        float3 blinnPhongHalfVector = normalize(-directionalLightNormal.xyz + viewDirection);
 
-        float specularFactor = saturate(dot(viewDirection, reflectDirection));
-        output.light += dirLightColor * specularFactor;
+        float specularFactor = dot(output.norm, blinnPhongHalfVector);
+        output.light += directionalLightColor * specularFactor;
     }
     
     return output;
