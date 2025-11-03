@@ -8,12 +8,13 @@
 using namespace std;
 using namespace DirectX;
 
-Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader, const vector<wstring>& textures)
+Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader, const wstring& texture, const wstring& normalMap)
 {
 	SetMesh(mesh);
 	SetVertexShader(vertexShader);
 	SetPixelShader(pixelShader);
-	SetTextures(textures);
+	SetTexture(texture);
+	SetNormalMap(normalMap);
 }
 
 constexpr UINT stride = sizeof(Vertex);
@@ -35,18 +36,10 @@ void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[m_vertexShaderId].second.Get());
 
-	for (size_t i = 0; i < m_textureIds.size(); ++i)
-	{
-		renderer->m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, renderer->m_textureMap[m_textureIds[i]].GetAddressOf()); // This can be optimized further
-	}
+	renderer->m_deviceContext->PSSetShaderResources(0, 1, renderer->m_textureMap[m_textureId].GetAddressOf());
+	renderer->m_deviceContext->PSSetShaderResources(1, 1, renderer->m_textureMap[m_normalMapId].GetAddressOf());
 
 	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
-
-	ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
-	for (size_t i = 0; i < m_textureIds.size(); ++i)
-	{
-		renderer->m_deviceContext->PSSetShaderResources(static_cast<UINT>(i), 1, nullSRV);
-	}
 }
 
 #ifdef _DEBUG
@@ -83,7 +76,7 @@ void Shape::SetMesh(const std::wstring& mesh)
 	m_meshId = g_meshIdMap[mesh];
 }
 
-void Shape::SetVertexShader(const std::wstring& vertexShader)
+void Shape::SetVertexShader(const wstring& vertexShader)
 {
 	m_vertexShaderId = 0;
 #ifdef _DEBUG
@@ -92,7 +85,7 @@ void Shape::SetVertexShader(const std::wstring& vertexShader)
 	m_vertexShaderId = g_vertexShaderIdMap[vertexShader];
 }
 
-void Shape::SetPixelShader(const std::wstring& pixelShader)
+void Shape::SetPixelShader(const wstring& pixelShader)
 {
 	m_pixelShaderId = 0;
 #ifdef _DEBUG
@@ -101,16 +94,22 @@ void Shape::SetPixelShader(const std::wstring& pixelShader)
 	m_pixelShaderId = g_pixelShaderIdMap[pixelShader];
 }
 
-void Shape::SetTextures(const std::vector<std::wstring>& textures)
+void Shape::SetTexture(const wstring& texture)
 {
-	m_textureIds.clear();
-	for (const auto& texture : textures)
-	{
+	m_textureId = 0;
 #ifdef _DEBUG
-		if (g_textureIdMap.find(texture) == g_textureIdMap.end()) MessageBoxW(nullptr, (L"Texture not found: " + texture).c_str(), L"Error", MB_OK);
+	if (g_textureIdMap.find(texture) == g_textureIdMap.end()) MessageBoxW(nullptr, (L"Texture not found: " + texture).c_str(), L"Error", MB_OK);
 #endif
-		m_textureIds.push_back(g_textureIdMap[texture]);
-	}
+	m_textureId = g_textureIdMap[texture];
+}
+
+void Shape::SetNormalMap(const std::wstring& normalMap)
+{
+	m_normalMapId = 0;
+#ifdef _DEBUG
+	if (g_textureIdMap.find(normalMap) == g_textureIdMap.end()) MessageBoxW(nullptr, (L"Normal map not found: " + normalMap).c_str(), L"Error", MB_OK);
+#endif
+	m_normalMapId = g_textureIdMap[normalMap];
 }
 
 void Shape::OnAttached(Object* owner)

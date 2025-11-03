@@ -26,9 +26,9 @@ void Scene::CheckCollisions()
 void Scene::Update(float deltaTime)
 {
 	for (const auto& object : m_objects) object->Update(deltaTime);
+	m_directionalLight.direction = XMVector3Normalize(m_directionalLight.direction);
 
 	CheckCollisions();
-
 	UpdateCamera();
 }
 

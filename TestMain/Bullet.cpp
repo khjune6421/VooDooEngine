@@ -5,7 +5,7 @@ using namespace DirectX;
 
 Bullet::Bullet(Scene* scene) : Object(scene)
 {
-	AddComponent<Shape>(L"WindmillWings", L"VertexShader", L"PixelShader", std::vector<std::wstring>{ L"Wood", L"NoNormal" });
+	AddComponent<Shape>(L"WindmillWings", L"VertexShader", L"PixelShader", L"Wood");
 	AddComponent<Collider>(1.0f, vector<UINT>{ 1 });
 }
 

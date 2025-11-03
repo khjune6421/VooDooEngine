@@ -14,11 +14,11 @@ class Tree : public Object
 public:
 	Tree(Scene* scnene) : Object(scnene)
 	{
-		AddComponent<Shape>(L"TreeTrunk", L"VertexShader", L"PixelShader", std::vector<std::wstring>{ L"Bark", L"BarkNormal" });
+		AddComponent<Shape>(L"TreeTrunk", L"VertexShader", L"PixelShader", L"Bark", L"BarkNormal");
 		AddComponent<Collider>(1.0f, std::vector<UINT>{}, std::vector<UINT>{ 1 });
 		m_collider = GetComponent<Collider>();
 		m_leaves = std::make_unique<Object>(scnene);
-		m_leaves->AddComponent<Shape>(L"Leaves", L"VertexShader", L"PixelShader", std::vector<std::wstring>{ L"Leaves", L"LeavesNormal" });
+		m_leaves->AddComponent<Shape>(L"Leaves", L"VertexShader", L"PixelShader", L"Leaves", L"LeavesNormal");
 		AddChild(m_leaves.get());
 	}
 	void Update(float deltaTime) override;
