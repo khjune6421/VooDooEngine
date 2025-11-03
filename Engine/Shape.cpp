@@ -42,6 +42,20 @@ void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
 }
 
+void Shape::RenderShadowMap(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
+{
+	XMMATRIX worldMatrix = m_owner->GetWorldMatrix();
+	matrixBuffer->world = XMMatrixTranspose(worldMatrix);
+	matrixBuffer->WVP = XMMatrixTranspose(worldMatrix * XMMatrixTranspose(matrixBuffer->view) * XMMatrixTranspose(matrixBuffer->projection));
+	matrixBuffer->normalMatrix = XMMatrixTranspose(XMMatrixInverse(nullptr, worldMatrix));
+
+	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, matrixBuffer, 0, 0);
+	renderer->m_deviceContext->VSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::MatrixBuffer].GetAddressOf());
+
+	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
+	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
+}
+
 #ifdef _DEBUG
 void Shape::DebugRender(Renderer* renderer, struct MatrixConstBuffer* matrixBuffer)
 {

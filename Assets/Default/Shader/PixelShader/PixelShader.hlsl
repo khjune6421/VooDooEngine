@@ -1,7 +1,9 @@
 SamplerState mainTexSampler : register(s0);
+SamplerComparisonState shadowSampler : register(s1);
 
 Texture2D mainTex : register(t0);
 Texture2D normalMap : register(t1);
+Texture2D shadowMap : register(t3);
 
 cbuffer CameraConstBuffer : register(b0)
 {
@@ -42,7 +44,23 @@ struct PSInput
     float4 posWorld : WORLDPOS0;
     float4 light : COLOR1;
     float3 bitangent : BITANGENT0;
+    
+    float4 lightSpacePos : TEXCOORD1;
 };
+
+float CalculateShadowFactor(float4 lightSpacePos)
+{
+    float3 projCoords = lightSpacePos.xyz / lightSpacePos.w;
+    
+    projCoords.x = projCoords.x * 0.5f + 0.5f;
+    projCoords.y = projCoords.y * -0.5f + 0.5f;
+    
+    if (projCoords.x < 0.0f || projCoords.x > 1.0f || projCoords.y < 0.0f || projCoords.y > 1.0f) return 1.0f;
+    
+    float shadowFactor = shadowMap.SampleCmpLevelZero(shadowSampler, projCoords.xy, projCoords.z);
+    
+    return shadowFactor;
+}
 
 float4 main(PSInput input) : SV_TARGET
 {
@@ -56,6 +74,11 @@ float4 main(PSInput input) : SV_TARGET
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
     float3 worldNormal = normalize(mul(normalMapSample, TBN));
     
+    float shadowFactor = CalculateShadowFactor(input.lightSpacePos);
+    float4 finalLight = input.light;
+    finalLight.rgb = lerp(finalLight.rgb * 0.3f, finalLight.rgb, shadowFactor);
+    
+    float4 pointLightContribution = float4(0.0f, 0.0f, 0.0f, 0.0f);
     [unroll]
     for (int i = 0; i < 2; i++)
     {
@@ -75,16 +98,18 @@ float4 main(PSInput input) : SV_TARGET
         float diffuseFactor = saturate(dot(worldNormal, vecToLight));
         if (diffuseFactor < 1e-5f) continue;
         
-        float4 diffuseColor = pointLights[i].color * diffuseFactor;
+        float4 pointLightColor = pointLights[i].color * diffuseFactor;
         
         float3 viewDirection = normalize(cameraPos.xyz - input.posWorld.xyz);
         float3 blinnPhongHalfVector = normalize(vecToLight + viewDirection);
         float specularFactor = dot(worldNormal, blinnPhongHalfVector);
         
-        diffuseColor += pointLights[i].color * specularFactor;
+        pointLightColor += pointLights[i].color * specularFactor;
         
-        input.light += diffuseColor * attenuation;
+        pointLightContribution += pointLightColor * attenuation;
     }
     
-    return lerp(texColor * input.light, fogColor, fogFactor);
+    float4 finalColor = texColor * (finalLight + pointLightContribution);
+    
+    return lerp(finalColor, fogColor, fogFactor);
 }

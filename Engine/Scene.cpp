@@ -5,6 +5,7 @@
 #include "Collider.h"
 #include "Camera.h"
 #include "Object.h"
+#include "Shape.h"
 
 using namespace DirectX;
 using namespace std;
@@ -43,6 +44,31 @@ void Scene::Render(Renderer* renderer)
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 	for (const auto& shape : m_renderShapes) shape->DebugRender(renderer, &m_matrixConstBuffer);
 #endif
+}
+
+void Scene::RenderShadowMap(Renderer* renderer)
+{
+	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	renderer->m_deviceContext->OMSetBlendState(renderer->m_blendStates[Renderer::NoBlend].Get(), nullptr, 0xffffffff);
+
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"ShadowVertexShader"]].first.Get(), nullptr, 0);
+	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"ShadowVertexShader"]].second.Get());
+	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"ShadowPixelShader"]].Get(), nullptr, 0);
+
+	MatrixConstBuffer shadowMatrixBuffer = m_matrixConstBuffer;
+
+	XMVECTOR lightDirection = m_directionalLight.direction;
+	XMVECTOR lightPosition = XMVectorScale(XMVectorNegate(lightDirection), 50.0f);
+	XMVECTOR lightTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	XMVECTOR lightUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	XMMATRIX lightViewMatrix = XMMatrixLookAtLH(lightPosition, lightTarget, lightUp);
+	XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(100.0f, 100.0f, 1.0f, 200.0f);
+
+	shadowMatrixBuffer.view = XMMatrixTranspose(lightViewMatrix);
+	shadowMatrixBuffer.projection = XMMatrixTranspose(lightProjectionMatrix);
+
+	for (const auto& shape : m_renderShapes) shape->RenderShadowMap(renderer, &shadowMatrixBuffer);
 }
 
 void Scene::UpdateCamera()
