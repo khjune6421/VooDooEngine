@@ -1,6 +1,5 @@
 #pragma once
 #include "pch.h"
-
 #include "Component.h"
 
 extern std::unordered_map<std::wstring, UINT> g_meshIdMap;
@@ -8,8 +7,6 @@ extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_geometryShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_pixelShaderIdMap;
 extern std::unordered_map<std::wstring, UINT> g_textureIdMap;
-
-class Renderer;
 
 class Shape : public Component
 {
@@ -28,9 +25,9 @@ public:
 		const std::vector<std::wstring>& textures = { L"NoTexture", L"NoNormal" }
 	);
 
-	void Render(Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
+	void Render(class Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
 #ifdef _DEBUG
-	void DebugRender(Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
+	void DebugRender(class Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
 #endif
 
 	void SetMesh(const std::wstring& mesh);

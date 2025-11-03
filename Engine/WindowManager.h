@@ -1,12 +1,13 @@
 #pragma once
+#include "pch.h"
 
 #include "Renderer.h"
 
 namespace VDW
 {
 	extern HINSTANCE g_hInstance;
-	extern std::vector<Renderer*> g_renderers;
-	extern std::unordered_map<HWND, Renderer*> g_windows;
+	extern std::vector<class Renderer*> g_renderers;
+	extern std::unordered_map<HWND, class Renderer*> g_windows;
 
 	LRESULT CALLBACK Wndproc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	bool ProcessMessage();

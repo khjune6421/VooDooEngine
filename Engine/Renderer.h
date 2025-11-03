@@ -1,21 +1,19 @@
 #pragma once
 #include "pch.h"
 
-// Other header files
 #include "Scene.h"
-#include "Light.h"
 
 // I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
-extern std::vector<PointLight*> g_pointLights;
+extern std::vector<class PointLight*> g_pointLights;
 
 namespace VDGM
 {
 	extern float g_deltaTime;
 
 	// this is so cursed // TODO: not this
-	extern std::unique_ptr<Scene> g_currentScene;
+	extern std::unique_ptr<class Scene> g_currentScene;
 }
 
 class Renderer

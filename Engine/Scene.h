@@ -1,8 +1,14 @@
 #pragma once
 
-#include "Object.h"
-#include "Camera.h"
+struct MatrixConstBuffer
+{
+	DirectX::XMMATRIX world = DirectX::XMMatrixIdentity(); // world matrix
+	DirectX::XMMATRIX view = DirectX::XMMatrixIdentity(); // view matrix
+	DirectX::XMMATRIX projection = DirectX::XMMatrixIdentity(); // projection matrix
+	DirectX::XMMATRIX WVP = DirectX::XMMatrixIdentity(); // world view projection matrix
 
+	DirectX::XMMATRIX normalMatrix = DirectX::XMMatrixIdentity(); // world matrix without scale for normal transformation
+};
 struct DirectionalLightConstBuffer
 {
 	DirectX::XMVECTOR direction = { 0.0f, -1.0f, 0.0f, 0.0f };
@@ -14,7 +20,7 @@ class Collider;
 class Scene
 {
 	friend class Shape;
-	std::vector<Shape*> m_renderShapes;
+	std::vector<Shape*> m_renderShapes = {};
 
 	friend class Collider;
 	std::unordered_map<UINT, std::pair<std::vector<Collider*>, std::vector<Collider*>>> m_collidersMap;
@@ -23,12 +29,12 @@ class Scene
 	void UpdateCamera();
 
 protected:
-	std::vector<std::unique_ptr<Object>> m_objects;
+	std::vector<std::unique_ptr<class Object>> m_objects;
 
 public:
 	Scene() = default;
 
-	Camera* m_mainCamera = nullptr;
+	class Camera* m_mainCamera = nullptr;
 	DirectX::XMVECTOR m_mainCameraPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	MatrixConstBuffer m_matrixConstBuffer = {};
@@ -40,7 +46,7 @@ public:
 	DirectX::XMFLOAT4 m_ambientFog = { 0.5f, 0.5f, 0.5f, 100.0f }; // w value is range
 
 	virtual void Update(float deltaTime);
-	virtual void Render(Renderer* renderer);
+	virtual void Render(class Renderer* renderer);
 
 	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}
 };

@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include "ObjFileParser.h"
+#include "Light.h"
 
 using namespace std;
 using namespace DirectX;

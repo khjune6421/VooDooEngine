@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Light.h"
 
+#include "Object.h"
+
 using namespace std;
 using namespace DirectX;
 

@@ -2,6 +2,7 @@
 #include "Shape.h"
 
 #include "Renderer.h"
+#include "Object.h"
 #include "ObjFileParser.h"
 
 using namespace std;

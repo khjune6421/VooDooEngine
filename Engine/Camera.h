@@ -1,8 +1,6 @@
 #pragma once
 #include "pch.h"
-
 #include "Component.h"
-#include "Object.h"
 
 class Camera : public Component
 {
@@ -33,6 +31,6 @@ public:
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() const { return m_projectionMatrix; }
 
-	void OnAttached(Object* owner) override;
+	void OnAttached(class Object* owner) override;
 	void OnDetached() override;
 };

@@ -4,8 +4,8 @@
 
 namespace VDGM
 {
-	extern std::unique_ptr<Scene> g_currentScene;
-	extern std::unordered_map<std::wstring, std::function<std::unique_ptr<Scene>()>> g_sceneFactory;
+	extern std::unique_ptr<class Scene> g_currentScene;
+	extern std::unordered_map<std::wstring, std::function<std::unique_ptr<class Scene>()>> g_sceneFactory;
 
 	extern float g_deltaTime;
 
