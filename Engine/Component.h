@@ -1,7 +1,5 @@
 #pragma once
 
-class Object;
-
 class Component
 {
 public:
@@ -12,7 +10,7 @@ public:
 	Component(Component&& other) noexcept = default;
 	Component& operator=(Component&& other) noexcept = default;
 
-	Object* m_owner = nullptr;
+	class Object* m_owner = nullptr;
 
 	virtual void Update(float deltaTime) {}
 	virtual void OnAttached(class Object* owner) { m_owner = owner; }

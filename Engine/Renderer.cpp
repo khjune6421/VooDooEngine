@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include "ObjFileParser.h"
+#include "Light.h"
 
 using namespace std;
 using namespace DirectX;
@@ -27,8 +28,8 @@ D3D11_INPUT_ELEMENT_DESC Renderer::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE]
 {
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 
 D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
@@ -42,9 +43,6 @@ D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
 	D3D11_COMPARISON_NEVER,
 	{ 1, 1, 1, 1 }
 };
-
-XMMATRIX Renderer::s_viewMatrix = XMMatrixIdentity();
-XMMATRIX Renderer::s_projectionMatrix = XMMatrixIdentity();
 
 void Renderer::CreateDeviceSwapChain()
 {
@@ -620,40 +618,46 @@ void Renderer::UpdateRenderer()
 {
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
-	AmbientFogConstBuffer fogData = {};
-	if (!g_camera) DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-	else
-	{
-		g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height); // Feels wasteful to do this every frame // TODO: Fix this
-
-		s_viewMatrix = g_camera->GetViewMatrix();
-		fogData.cameraPosition = g_camera->m_cameraPosition;
-		s_projectionMatrix = g_camera->GetProjectionMatrix();
-	}
+	// Vertex Shader Constant Buffers
+	// Camera
+	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
+	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
 
 	// Ambient Light
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0);
-	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
+	m_deviceContext->VSSetConstantBuffers(2, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
 
 	// Directional Light
-	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &DirectionalLight::s_lightData, 0, 0);
-	m_deviceContext->VSSetConstantBuffers(2, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
+	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_directionalLight, 0, 0);
+	m_deviceContext->VSSetConstantBuffers(3, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
+
+	// Pixel Shader Constant Buffers
+	// Camera
+	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[CameraBuffer].GetAddressOf());
 
 	// Ambient Fog
-	fogData.colorAndRange = VDGM::g_currentScene->m_ambientFog;
-	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &fogData, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
+	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientFog, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
 	// Point Lights // TODO: make it for loop
 	PointLightArrayConstBuffer pointLightBufferData = {};
 	pointLightBufferData.pointLights[0] = g_pointLights[0]->GetLightData();
 	pointLightBufferData.pointLights[1] = g_pointLights[1]->GetLightData();
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
 	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
 
 	UpdateRenderMode();
+}
+
+void Renderer::UpdateVSConstBuffers()
+{
+}
+
+void Renderer::UpdatePSConstBuffers()
+{
 }
 
 void Renderer::UpdateRenderMode()
@@ -688,8 +692,9 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 
 	// Initialize constant buffers
 	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[MatrixBuffer]);
+	CreateConstBuffer(sizeof(XMVECTOR), &m_constBuffers[CameraBuffer]); // Camera buffer
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientLightBuffer]); // Ambient light buffer
-	CreateConstBuffer(sizeof(AmbientFogConstBuffer), &m_constBuffers[AmbientFogBuffer]); // Ambient fog buffer
+	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientFogBuffer]); // Ambient fog buffer
 	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
 	CreateConstBuffer(sizeof(PointLightArrayConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
 
@@ -811,7 +816,9 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 		vp.TopLeftX, vp.TopLeftY,
 		vp.Width, vp.Height,
 		vp.MinDepth, vp.MaxDepth,
-		s_projectionMatrix, s_viewMatrix, XMMatrixIdentity()
+		VDGM::g_currentScene->m_matrixConstBuffer.projection,
+		VDGM::g_currentScene->m_matrixConstBuffer.view,
+		XMMatrixIdentity()
 	);
 	rayEnd = XMVector3Unproject
 	(
@@ -819,7 +826,9 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 		vp.TopLeftX, vp.TopLeftY,
 		vp.Width, vp.Height,
 		vp.MinDepth, vp.MaxDepth,
-		s_projectionMatrix, s_viewMatrix, XMMatrixIdentity()
+		VDGM::g_currentScene->m_matrixConstBuffer.projection,
+		VDGM::g_currentScene->m_matrixConstBuffer.view,
+		XMMatrixIdentity()
 	);
 
 	if (VDGM::g_currentScene) VDGM::g_currentScene->Raycast(rayOrigin, rayEnd);

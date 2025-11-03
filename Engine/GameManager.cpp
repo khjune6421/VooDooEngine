@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "GameManager.h"
 
+#include "Object.h"
+#include "Scene.h"
+
 using namespace std;
 
 namespace VDGM

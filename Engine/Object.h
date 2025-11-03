@@ -1,9 +1,8 @@
 #pragma once
 #include "pch.h"
 
-#include "Component.h"
 #include "Shape.h"
-
+#include "Light.h"
 
 enum class Directions
 {
@@ -15,22 +14,16 @@ enum class Directions
 	Down
 };
 
-class Scene;
-
 class Object
 {
-	friend class Shape;
-	friend class Collider;
-
 	UINT m_id = 0; // For debug purpose
 
 	// Not sure if these should be private or protected
 	DirectX::XMMATRIX m_positionMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_rotationMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_scaleMatrix = DirectX::XMMatrixIdentity();
-
 	mutable DirectX::XMMATRIX m_worldMatrix = DirectX::XMMatrixIdentity();
-	mutable DirectX::XMMATRIX m_inverseScaleMatrix = DirectX::XMMatrixIdentity(); // For normal
+
 
 	DirectX::XMVECTOR QuaternionToEuler(const DirectX::XMVECTOR& quat) const;
 
@@ -38,10 +31,9 @@ class Object
 	void SetDirty(); // Recursive
 
 	// Component system
-	std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components;
+	std::unordered_map<std::type_index, std::unique_ptr<class Component>> m_components;
 
 protected:
-	Scene* m_scene = nullptr;
 
 	DirectX::XMVECTOR m_position = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	DirectX::XMVECTOR m_rotation = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
@@ -53,14 +45,14 @@ protected:
 	std::vector<Object*> m_childrens;
 
 public:
-	Object(Scene* scene) : m_scene(scene) { static UINT nextId = 1; m_id = nextId++; }
+	Object(class Scene* scene) : m_scene(scene) { static UINT nextId = 1; m_id = nextId++; }
 	~Object();
 	Object(const Object& other) = default;
 	Object& operator=(const Object& other) = default;
 	Object(Object&& other) noexcept = default;
 	Object& operator=(Object&& other) noexcept = default;
 
-	Scene* GetScene() const { return m_scene; }
+	Scene* m_scene = nullptr;
 
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);
@@ -85,6 +77,7 @@ public:
 	DirectX::XMFLOAT3 GetWorldScale() const;
 
 	DirectX::XMMATRIX GetWorldMatrix() const;
+	mutable DirectX::XMMATRIX m_inverseScaleMatrix = DirectX::XMMatrixIdentity(); // For normal
 
 	void AddChild(Object* child);
 	void AddChildViaWorldPosition(Object* child);
@@ -96,7 +89,7 @@ public:
 	template<typename T, typename... Args>
 	T* AddComponent(Args&&... args)
 	{
-		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
+		static_assert(std::is_base_of_v<class Component, T>, "T must derive from Component");
 
 		auto component = std::make_unique<T>(std::forward<Args>(args)...);
 		T* componentPtr = component.get();
@@ -109,7 +102,7 @@ public:
 	template<typename T>
 	T* GetComponent() const
 	{
-		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
+		static_assert(std::is_base_of_v<class Component, T>, "T must derive from Component");
 
 		auto it = m_components.find(std::type_index(typeid(T)));
 		if (it != m_components.end()) return static_cast<T*>(it->second.get());
@@ -119,7 +112,7 @@ public:
 	template<typename T>
 	bool RemoveComponent()
 	{
-		static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
+		static_assert(std::is_base_of_v<class Component, T>, "T must derive from Component");
 
 		auto it = m_components.find(std::type_index(typeid(T)));
 		if (it != m_components.end())

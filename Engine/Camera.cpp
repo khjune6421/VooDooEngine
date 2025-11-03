@@ -1,25 +1,21 @@
 #include "pch.h"
 #include "Camera.h"
 
+#include "Object.h"
+#include "Scene.h"
+
 using namespace DirectX;
 
-Camera* g_camera = nullptr;
-
-Camera::Camera(float fov, UINT screenWidth, UINT screenHeight, float nearPlane, float farPlane)
+Camera::Camera(UINT screenWidth, UINT screenHeight, float nearPlane, float farPlane, float fov)
 	:
-	m_fov(fov),
 	m_screenWidth(screenWidth), m_screenHeight(screenHeight),
 	m_nearPlane(nearPlane), m_farPlane(farPlane),
+	m_fov(fov),
 	m_aspectRatio(static_cast<float>(screenWidth) / static_cast<float>(screenHeight)),
-	m_projectionMatrix(XMMatrixPerspectiveFovLH(m_fov, m_aspectRatio, m_nearPlane, m_farPlane))
-{
-	// How should I handle multiple cameras? // send an error message?
-	g_camera = this;
-}
+	m_projectionMatrix(XMMatrixPerspectiveFovLH(m_fov, m_aspectRatio, m_nearPlane, m_farPlane)) {}
 
-void Camera::SetScreen(float fov, UINT screenWidth, UINT screenHeight, float nearPlane, float farPlane)
+void Camera::SetScreen(UINT screenWidth, UINT screenHeight, float nearPlane, float farPlane, float fov)
 {
-	if (fov > 0.0f) m_fov = fov;
 	if (screenWidth != 0 && screenHeight != 0)
 	{
 		m_screenWidth = screenWidth;
@@ -28,6 +24,7 @@ void Camera::SetScreen(float fov, UINT screenWidth, UINT screenHeight, float nea
 	}
 	if (nearPlane > 0.0f) m_nearPlane = nearPlane;
 	if (farPlane > 0.0f) m_farPlane = farPlane;
+	if (fov > 0.0f) m_fov = fov;
 
 	m_projectionMatrix = XMMatrixPerspectiveFovLH(m_fov, m_aspectRatio, m_nearPlane, m_farPlane);
 }
@@ -41,4 +38,18 @@ XMMATRIX Camera::GetViewMatrix()
 	m_viewMatrix = XMMatrixLookAtLH(m_cameraPosition, XMVectorAdd(m_cameraPosition, forward), up);
 
 	return m_viewMatrix;
+}
+
+void Camera::OnAttached(Object* owner)
+{
+	Component::OnAttached(owner);
+
+	owner->m_scene->m_mainCamera = this;
+}
+
+void Camera::OnDetached()
+{
+	m_owner->m_scene->m_mainCamera = nullptr;
+
+	Component::OnDetached();
 }

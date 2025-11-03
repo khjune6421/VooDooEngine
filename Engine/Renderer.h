@@ -1,27 +1,25 @@
 #pragma once
 #include "pch.h"
 
-// Other header files
 #include "Scene.h"
-#include "Light.h"
 
 // I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
-extern std::vector<PointLight*> g_pointLights;
+extern std::vector<class PointLight*> g_pointLights;
 
 namespace VDGM
 {
 	extern float g_deltaTime;
 
 	// this is so cursed // TODO: not this
-	extern std::unique_ptr<Scene> g_currentScene;
+	extern std::unique_ptr<class Scene> g_currentScene;
 }
 
 class Renderer
 {
 	friend class Shape;
-	friend void Scene::Render(Renderer* renderer) const;
+	friend void Scene::Render(Renderer* renderer);
 
 	// Device
 	struct HardwareInfo
@@ -43,24 +41,11 @@ class Renderer
 
 		std::vector<HardwareInfo> hardwareInfos = {};
 	};
-	struct MatrixConstBuffer
-	{
-		DirectX::XMMATRIX world; // world matrix
-		DirectX::XMMATRIX view; // view matrix
-		DirectX::XMMATRIX projection; // projection matrix
-		DirectX::XMMATRIX WVP; // world-view-projection matrix
-
-		DirectX::XMMATRIX normalMatrix; // inverse transpose scale matrix for normal transformation
-	};
-	struct AmbientFogConstBuffer
-	{
-		DirectX::XMVECTOR cameraPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
-		DirectX::XMFLOAT4 colorAndRange = { 0.5f, 0.5f, 0.5f, 50.0f }; // w is range
-	};
 	enum ConstBufferType
 	{
 		MatrixBuffer,
 		AmbientLightBuffer,
+		CameraBuffer,
 		AmbientFogBuffer,
 		DirectionalLightBuffer,
 		PointLightBuffer,
@@ -139,11 +124,6 @@ class Renderer
 	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
 	RasterState m_currentRasterState = RasterState::Solid;
 
-
-	// static view and projection matrix for all renders
-	static DirectX::XMMATRIX s_viewMatrix;
-	static DirectX::XMMATRIX s_projectionMatrix;
-
 	// Functions
 
 	// Device
@@ -179,6 +159,8 @@ class Renderer
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();
+	void UpdateVSConstBuffers();
+	void UpdatePSConstBuffers();
 
 	bool m_drawNormalLines = false; // for debugging
 

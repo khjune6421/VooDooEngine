@@ -1,4 +1,4 @@
-cbuffer TestConstBuffer : register(b0)
+cbuffer MatrixConstBuffer : register(b0)
 {
     matrix world;
     matrix view;
@@ -8,37 +8,40 @@ cbuffer TestConstBuffer : register(b0)
     matrix normalMatrix;
 }
 
-cbuffer AmbientLightConstBuffer : register(b1)
+cbuffer CameraConstBuffer : register(b1)
+{
+    float4 cameraPos;
+}
+
+cbuffer AmbientLightConstBuffer : register(b2)
 {
     float4 ambientLight;
 }
 
-cbuffer DirectionalLightConstBuffer : register(b2) // Just one directional light
+cbuffer DirectionalLightConstBuffer : register(b3) // Just one directional light
 {
-    float4 dirLightDirection;
-    float4 dirLightColor;
+    float4 directionalLightNormal;
+    float4 directionalLightColor;
 }
 
 struct VSInput
 {
     float4 pos0 : POSITION0;
     float3 norm0 : NORMAL0;
-    float3 tangent0 : TANGENT0;
     float2 uv0 : TEXCOORD0;
+    float3 tangent0 : TANGENT0;
 };
 
 struct VSOutput
 {
     float4 pos : SV_POSITION0;
-    float4 posWorld : WORLDPOS0;
-    
-    float4 light : COLOR1;
-    
     float3 norm : NORMAL0;
-    float3 tangent : TANGENT0;
-    float3 bitangent : BITANGENT0;
-    
     float2 uv : TEXCOORD0;
+    float3 tangent : TANGENT0;
+    
+    float4 posWorld : WORLDPOS0;
+    float4 light : COLOR1;
+    float3 bitangent : BITANGENT0;
 };
 
 VSOutput main(VSInput input)
@@ -48,16 +51,25 @@ VSOutput main(VSInput input)
     input.pos0.w = 1.0f;
     
     output.pos = mul(input.pos0, WVP);
+    output.norm = normalize(mul(float4(input.norm0, 0.0f), normalMatrix).xyz); // Inverse scale matrix
+    output.uv = input.uv0;
+    output.tangent = normalize(mul(float4(input.tangent0, 0.0f), normalMatrix).xyz);
+    
     output.posWorld = mul(input.pos0, world);
     
-    output.norm = normalize(mul(float4(input.norm0, 0.0f), normalMatrix).xyz); // Inverse scale matrix
-    float4 diffuseColor = dirLightColor * saturate(dot(output.norm, -dirLightDirection.xyz));
-    output.light = ambientLight + diffuseColor;
+    float diffuseFactor = dot(output.norm, -directionalLightNormal.xyz);
+    output.light = ambientLight + directionalLightColor * diffuseFactor;
     
-    output.tangent = normalize(mul(float4(input.tangent0, 0.0f), normalMatrix).xyz);
     output.bitangent = normalize(cross(output.norm, output.tangent));
     
-    output.uv = input.uv0;
+    if (diffuseFactor > 0.0f)
+    {
+        float3 viewDirection = normalize(cameraPos.xyz - output.posWorld.xyz);
+        float3 blinnPhongHalfVector = normalize(-directionalLightNormal.xyz + viewDirection);
+
+        float specularFactor = dot(output.norm, blinnPhongHalfVector);
+        output.light += directionalLightColor * specularFactor;
+    }
     
     return output;
 }

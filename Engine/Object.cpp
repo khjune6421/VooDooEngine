@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Object.h"
 
+#include "Component.h"
+
 using namespace std;
 using namespace DirectX;
 
