@@ -43,9 +43,6 @@ D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
 	{ 1, 1, 1, 1 }
 };
 
-XMMATRIX Renderer::s_viewMatrix = XMMatrixIdentity();
-XMMATRIX Renderer::s_projectionMatrix = XMMatrixIdentity();
-
 void Renderer::CreateDeviceSwapChain()
 {
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
@@ -620,16 +617,8 @@ void Renderer::UpdateRenderer()
 {
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
-	XMVECTOR cameraPosition = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-	if (!g_camera) DrawText(L"Camera not found", XMFLOAT2(m_deviceInfo.displayMode.Width / 2.0f, m_deviceInfo.displayMode.Height / 2.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-	else
-	{
-		g_camera->SetScreen(-1.0f, m_deviceInfo.displayMode.Width, m_deviceInfo.displayMode.Height); // Feels wasteful to do this every frame // TODO: Fix this
-
-		s_viewMatrix = g_camera->GetViewMatrix();
-		cameraPosition = g_camera->m_cameraPosition;
-		s_projectionMatrix = g_camera->GetProjectionMatrix();
-	}
+	XMVECTOR cameraPosition = VDGM::g_currentScene->m_mainCamera->GetPosition();
+	// Vertex Shader Constant Buffers
 	// Camera
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &cameraPosition, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
@@ -642,6 +631,7 @@ void Renderer::UpdateRenderer()
 	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_directionalLight, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(3, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
 
+	// Pixel Shader Constant Buffers
 	// Camera
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &cameraPosition, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[CameraBuffer].GetAddressOf());
@@ -660,6 +650,14 @@ void Renderer::UpdateRenderer()
 	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
 
 	UpdateRenderMode();
+}
+
+void Renderer::UpdateVSConstBuffers()
+{
+}
+
+void Renderer::UpdatePSConstBuffers()
+{
 }
 
 void Renderer::UpdateRenderMode()
@@ -818,7 +816,9 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 		vp.TopLeftX, vp.TopLeftY,
 		vp.Width, vp.Height,
 		vp.MinDepth, vp.MaxDepth,
-		s_projectionMatrix, s_viewMatrix, XMMatrixIdentity()
+		VDGM::g_currentScene->m_matrixConstBuffer.projection,
+		VDGM::g_currentScene->m_matrixConstBuffer.view,
+		XMMatrixIdentity()
 	);
 	rayEnd = XMVector3Unproject
 	(
@@ -826,7 +826,9 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 		vp.TopLeftX, vp.TopLeftY,
 		vp.Width, vp.Height,
 		vp.MinDepth, vp.MaxDepth,
-		s_projectionMatrix, s_viewMatrix, XMMatrixIdentity()
+		VDGM::g_currentScene->m_matrixConstBuffer.projection,
+		VDGM::g_currentScene->m_matrixConstBuffer.view,
+		XMMatrixIdentity()
 	);
 
 	if (VDGM::g_currentScene) VDGM::g_currentScene->Raycast(rayOrigin, rayEnd);

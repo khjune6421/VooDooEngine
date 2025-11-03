@@ -18,21 +18,18 @@ Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pi
 constexpr UINT stride = sizeof(Vertex);
 constexpr UINT offset = 0;
 
-void Shape::Render(Renderer* renderer) const
+void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 {
 	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
 
 	renderer->m_deviceContext->VSSetShader((renderer->m_vertexShaderMap[m_vertexShaderId]).first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[m_pixelShaderId].Get(), nullptr, 0);
 
-	Renderer::MatrixConstBuffer constBufferData = {};
-	constBufferData.world = XMMatrixTranspose(m_owner->m_worldMatrix);
-	constBufferData.view = XMMatrixTranspose(Renderer::s_viewMatrix);
-	constBufferData.projection = XMMatrixTranspose(Renderer::s_projectionMatrix);
-	constBufferData.WVP = XMMatrixTranspose(m_owner->m_worldMatrix * Renderer::s_viewMatrix * Renderer::s_projectionMatrix);
-	constBufferData.normalMatrix = XMMatrixTranspose(m_owner->m_inverseScaleMatrix * m_owner->m_worldMatrix);
+	matrixBuffer->world = XMMatrixTranspose(m_owner->GetWorldMatrix());
+	matrixBuffer->WVP = XMMatrixTranspose(m_owner->GetWorldMatrix() * XMMatrixTranspose(matrixBuffer->view) * XMMatrixTranspose(matrixBuffer->projection));
+	matrixBuffer->normalMatrix = XMMatrixTranspose(m_owner->m_inverseScaleMatrix * m_owner->GetWorldMatrix());
 
-	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
+	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, matrixBuffer, 0, 0);
 	renderer->m_deviceContext->VSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::MatrixBuffer].GetAddressOf());
 
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[m_vertexShaderId].second.Get());
@@ -52,7 +49,7 @@ void Shape::Render(Renderer* renderer) const
 }
 
 #ifdef _DEBUG
-void Shape::DebugRender(Renderer* renderer) const
+void Shape::DebugRender(Renderer* renderer, struct MatrixConstBuffer* matrixBuffer)
 {
 	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
@@ -61,14 +58,10 @@ void Shape::DebugRender(Renderer* renderer) const
 	renderer->m_deviceContext->GSSetShader(renderer->m_geometryShaderMap[g_geometryShaderIdMap[L"GSShowNormal"]].Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"PSShowNormal"]].Get(), nullptr, 0);
 
-	Renderer::MatrixConstBuffer constBufferData = {};
-	constBufferData.world = XMMatrixTranspose(m_owner->m_worldMatrix);
-	constBufferData.view = XMMatrixTranspose(Renderer::s_viewMatrix);
-	constBufferData.projection = XMMatrixTranspose(Renderer::s_projectionMatrix);
-	constBufferData.WVP = XMMatrixTranspose(m_owner->m_worldMatrix * Renderer::s_viewMatrix * Renderer::s_projectionMatrix);
-	constBufferData.normalMatrix = XMMatrixTranspose(m_owner->m_inverseScaleMatrix * m_owner->m_worldMatrix);
+	matrixBuffer->world = XMMatrixTranspose(m_owner->GetWorldMatrix());
+	matrixBuffer->normalMatrix = XMMatrixTranspose(m_owner->m_inverseScaleMatrix * m_owner->GetWorldMatrix());
 
-	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, &constBufferData, 0, 0);
+	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, matrixBuffer, 0, 0);
 	renderer->m_deviceContext->VSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::MatrixBuffer].GetAddressOf());
 	renderer->m_deviceContext->GSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::MatrixBuffer].GetAddressOf());
 

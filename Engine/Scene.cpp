@@ -27,37 +27,39 @@ void Scene::Update(float deltaTime)
 
 	CheckCollisions();
 
-	SortRenderShapes();
+	UpdateCamera();
 }
 
-void Scene::Render(Renderer* renderer) const
+void Scene::Render(Renderer* renderer)
 {
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	renderer->m_deviceContext->OMSetBlendState(renderer->m_blendStates[Renderer::AlphaToCoverage].Get(), nullptr, 0xffffffff); // It just works // but only if it is sorted
-	for (const auto& shape : m_renderShapes) shape->Render(renderer);
+	for (const auto& shape : m_renderShapes) shape->Render(renderer, &m_matrixConstBuffer);
 
 #ifdef _DEBUG
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-	for (const auto& shape : m_renderShapes) shape->DebugRender(renderer);
+	for (const auto& shape : m_renderShapes) shape->DebugRender(renderer, &m_matrixConstBuffer);
 #endif
 }
 
-void Scene::SortRenderShapes()
+void Scene::UpdateCamera()
 {
-	if (!g_camera) return;
+	if (!m_mainCamera) return;
 
-	XMVECTOR cameraPos = g_camera->m_cameraPosition;
+	m_mainCameraPosition = m_mainCamera->GetPosition();
+	m_matrixConstBuffer.view = XMMatrixTranspose(m_mainCamera->GetViewMatrix());
+	m_matrixConstBuffer.projection = XMMatrixTranspose(m_mainCamera->GetProjectionMatrix());
 
 	sort
 	(
 		m_renderShapes.begin(), m_renderShapes.end(),
-		[&cameraPos](const Shape* a, const Shape* b)
+		[this](const Shape* a, const Shape* b)
 		{
 			XMVECTOR aPos = a->m_owner->GetWorldPosition();
 			XMVECTOR bPos = b->m_owner->GetWorldPosition();
-			float aDist = XMVectorGetX(XMVector3Length(XMVectorSubtract(aPos, cameraPos)));
-			float bDist = XMVectorGetX(XMVector3Length(XMVectorSubtract(bPos, cameraPos)));
+			float aDist = XMVectorGetX(XMVector3Length(XMVectorSubtract(aPos, m_mainCameraPosition)));
+			float bDist = XMVectorGetX(XMVector3Length(XMVectorSubtract(bPos, m_mainCameraPosition)));
 			return aDist < bDist;
 		}
 	);

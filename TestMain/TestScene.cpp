@@ -15,7 +15,7 @@ TestScene::TestScene()
 
 	m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-	m_camera->AddComponent<Camera>();
+	m_camera->AddComponent<Camera>(3400, 1440);
 
 	m_windmill->SetPosition(XMVECTOR{ 5.0f, 0.0f, 5.0f, 1.0f });
 	m_windmill->SetScale(XMFLOAT3{ 1.5f, 1.5f, 1.5f });

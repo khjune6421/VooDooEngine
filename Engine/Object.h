@@ -4,6 +4,15 @@
 #include "Component.h"
 #include "Shape.h"
 
+struct MatrixConstBuffer
+{
+	DirectX::XMMATRIX world; // world matrix
+	DirectX::XMMATRIX view; // view matrix
+	DirectX::XMMATRIX projection; // projection matrix
+	DirectX::XMMATRIX WVP; // world-view-projection matrix
+
+	DirectX::XMMATRIX normalMatrix; // inverse transpose scale matrix for normal transformation
+};
 
 enum class Directions
 {
@@ -19,18 +28,14 @@ class Scene;
 
 class Object
 {
-	friend class Shape;
-	friend class Collider;
-
 	UINT m_id = 0; // For debug purpose
 
 	// Not sure if these should be private or protected
 	DirectX::XMMATRIX m_positionMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_rotationMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_scaleMatrix = DirectX::XMMatrixIdentity();
-
 	mutable DirectX::XMMATRIX m_worldMatrix = DirectX::XMMatrixIdentity();
-	mutable DirectX::XMMATRIX m_inverseScaleMatrix = DirectX::XMMatrixIdentity(); // For normal
+
 
 	DirectX::XMVECTOR QuaternionToEuler(const DirectX::XMVECTOR& quat) const;
 
@@ -41,7 +46,6 @@ class Object
 	std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components;
 
 protected:
-	Scene* m_scene = nullptr;
 
 	DirectX::XMVECTOR m_position = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	DirectX::XMVECTOR m_rotation = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
@@ -60,7 +64,7 @@ public:
 	Object(Object&& other) noexcept = default;
 	Object& operator=(Object&& other) noexcept = default;
 
-	Scene* GetScene() const { return m_scene; }
+	Scene* m_scene = nullptr;
 
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);
@@ -85,6 +89,7 @@ public:
 	DirectX::XMFLOAT3 GetWorldScale() const;
 
 	DirectX::XMMATRIX GetWorldMatrix() const;
+	mutable DirectX::XMMATRIX m_inverseScaleMatrix = DirectX::XMMatrixIdentity(); // For normal
 
 	void AddChild(Object* child);
 	void AddChildViaWorldPosition(Object* child);

@@ -28,9 +28,9 @@ public:
 		const std::vector<std::wstring>& textures = { L"NoTexture", L"NoNormal" }
 	);
 
-	void Render(Renderer* renderer) const;
+	void Render(Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
 #ifdef _DEBUG
-	void DebugRender(Renderer* renderer) const;
+	void DebugRender(Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
 #endif
 
 	void SetMesh(const std::wstring& mesh);

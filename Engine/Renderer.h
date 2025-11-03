@@ -21,7 +21,7 @@ namespace VDGM
 class Renderer
 {
 	friend class Shape;
-	friend void Scene::Render(Renderer* renderer) const;
+	friend void Scene::Render(Renderer* renderer);
 
 	// Device
 	struct HardwareInfo
@@ -42,15 +42,6 @@ class Renderer
 		DWORD antiAliasingLevel = 4;
 
 		std::vector<HardwareInfo> hardwareInfos = {};
-	};
-	struct MatrixConstBuffer
-	{
-		DirectX::XMMATRIX world; // world matrix
-		DirectX::XMMATRIX view; // view matrix
-		DirectX::XMMATRIX projection; // projection matrix
-		DirectX::XMMATRIX WVP; // world-view-projection matrix
-
-		DirectX::XMMATRIX normalMatrix; // inverse transpose scale matrix for normal transformation
 	};
 	enum ConstBufferType
 	{
@@ -135,11 +126,6 @@ class Renderer
 	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
 	RasterState m_currentRasterState = RasterState::Solid;
 
-
-	// static view and projection matrix for all renders
-	static DirectX::XMMATRIX s_viewMatrix;
-	static DirectX::XMMATRIX s_projectionMatrix;
-
 	// Functions
 
 	// Device
@@ -175,6 +161,8 @@ class Renderer
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();
+	void UpdateVSConstBuffers();
+	void UpdatePSConstBuffers();
 
 	bool m_drawNormalLines = false; // for debugging
 

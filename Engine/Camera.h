@@ -4,8 +4,6 @@
 #include "Component.h"
 #include "Object.h"
 
-extern class Camera* g_camera;
-
 class Camera : public Component
 {
 	float m_fov;
@@ -17,25 +15,24 @@ class Camera : public Component
 	float m_nearPlane;
 	float m_farPlane;
 
+	DirectX::XMVECTOR m_cameraPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
 	DirectX::XMMATRIX m_viewMatrix = DirectX::XMMatrixIdentity();
 	DirectX::XMMATRIX m_projectionMatrix;
 
 public:
 	Camera
 	(
-		float fov = DirectX::XM_PIDIV4,
 		UINT screenWidth = 1920, UINT screenHeight = 1080,
-		float nearPlane = 0.1f, float farPlane = 100.0f
+		float nearPlane = 0.1f, float farPlane = 100.0f,
+		float fov = DirectX::XM_PIDIV4
 	);
-	~Camera() { if (g_camera == this) g_camera = nullptr; }
-	Camera(const Camera& other) = default;
-	Camera& operator=(const Camera& other) = default;
-	Camera(Camera&& other) noexcept = default;
-	Camera& operator=(Camera&& other) noexcept = default;
 
-	void SetScreen(float fov = -1.0f, UINT screenWidth = 0, UINT screenHeight = 0, float nearPlane = -1.0f, float farPlane = -1.0f);
+	void SetScreen(UINT screenWidth = 0, UINT screenHeight = 0, float nearPlane = -1.0f, float farPlane = -1.0f, float fov = -1.0f);
 
-	DirectX::XMVECTOR m_cameraPosition = { 0.0f, 0.0f, 0.0f, 1.0f };
+	DirectX::XMVECTOR GetPosition() const { return m_cameraPosition; }
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() const { return m_projectionMatrix; }
+
+	void OnAttached(Object* owner) override;
+	void OnDetached() override;
 };
