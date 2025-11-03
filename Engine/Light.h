@@ -2,23 +2,6 @@
 #include "pch.h"
 #include "Component.h"
 
-class Light : public Component
-{
-protected:
-	DirectX::XMFLOAT3 m_color = { 0.0f, 0.0f, 0.0f };
-	float m_intensity = 1.0f;
-
-public:
-	Light(const DirectX::XMFLOAT3& color = { 0.0f, 0.0f, 0.0f }, const float intensity = 1.0f)
-		: m_color(color), m_intensity(intensity) {}
-
-	virtual DirectX::XMFLOAT3 GetColor() const { return m_color; }
-	virtual void SetColor(const DirectX::XMFLOAT3& color) { m_color = color; }
-
-	virtual float GetIntensity() const { return m_intensity; }
-	virtual void SetIntensity(float intensity) { m_intensity = intensity; }
-};
-
 constexpr int MAX_POINT_LIGHTS = 2;
 
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
@@ -44,8 +27,10 @@ struct PointLightArrayConstBuffer
 };
 class PointLight;
 extern std::vector<PointLight*> g_pointLights;
-class PointLight : public Light
+class PointLight : public Component
 {
+	DirectX::XMFLOAT3 m_color = { 0.0f, 0.0f, 0.0f };
+	float m_intensity = 1.0f;
 	PointLightConstBuffer m_lightData = {};
 
 	void UpdateColor() { m_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f }; }
@@ -60,8 +45,10 @@ public:
 		const float constantAttenuation = DEFAULT_CONSTANT_ATTENUATION,
 		const float linearAttenuation = DEFAULT_LINEAR_ATTENUATION,
 		const float quadraticAttenuation = DEFAULT_QUADRATIC_ATTENUATION
-	) : Light(color, intensity)
+	)
 	{
+		m_color = color;
+		m_intensity = intensity;
 		UpdateColor();
 		m_lightData.directionAndAngle = DirectX::XMFLOAT4{ 0.0f, 0.0f, 1.0f, spotAngle };
 		m_lightData.range = range;
@@ -73,8 +60,10 @@ public:
 	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_pointLights.push_back(this); }
 	void OnDetached() override;
 
-	void SetColor(const DirectX::XMFLOAT3& color) override { m_color = color; UpdateColor(); }
-	void SetIntensity(float intensity) override { m_intensity = intensity; UpdateColor(); }
+	DirectX::XMFLOAT3 GetColor() const { return m_color; }
+	void SetColor(const DirectX::XMFLOAT3& color) { m_color = color; UpdateColor(); }
+	float GetIntensity() const { return m_intensity; }
+	void SetIntensity(float intensity) { m_intensity = intensity; UpdateColor(); }
 
 	float GetRange() const { return m_lightData.range; }
 	void SetRange(float range) { m_lightData.range = range; }

@@ -33,6 +33,11 @@ protected:
 
 public:
 	Scene() = default;
+	virtual ~Scene() = default;
+	Scene(const Scene& other) = default;
+	Scene& operator=(const Scene& other) = default;
+	Scene(Scene&& other) noexcept = default;
+	Scene& operator=(Scene&& other) noexcept = default;
 
 	class Camera* m_mainCamera = nullptr;
 	DirectX::XMVECTOR m_mainCameraPosition = { 0.0f, 0.0f, 0.0f, 1.0f };

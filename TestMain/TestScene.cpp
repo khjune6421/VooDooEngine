@@ -9,6 +9,7 @@ TestScene::TestScene()
 	m_ambientFog.x = m_timeColors[m_timeOfDay].x;
 	m_ambientFog.y = m_timeColors[m_timeOfDay].y;
 	m_ambientFog.z = m_timeColors[m_timeOfDay].z;
+	m_ambientLight = XMFLOAT4{ m_timeColors[m_timeOfDay].x * 0.5f, m_timeColors[m_timeOfDay].y * 0.5f, m_timeColors[m_timeOfDay].z * 0.5f, 1.0f };
 
 	m_directionalLight.color = XMFLOAT4{ m_timeColors[m_timeOfDay].x * 0.75f, m_timeColors[m_timeOfDay].y * 0.75f, m_timeColors[m_timeOfDay].z * 0.75f, 0.0f };
 	m_directionalLight.direction = XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f };
@@ -68,7 +69,7 @@ void TestScene::Update(float deltaTime)
 		m_ambientFog.x = m_timeColors[m_timeOfDay].x;
 		m_ambientFog.y = m_timeColors[m_timeOfDay].y;
 		m_ambientFog.z = m_timeColors[m_timeOfDay].z;
-		m_ambientLight = XMFLOAT4{ m_timeColors[m_timeOfDay].x * 0.25f, m_timeColors[m_timeOfDay].y * 0.25f, m_timeColors[m_timeOfDay].z * 0.25f, 1.0f };
+		m_ambientLight = XMFLOAT4{ m_timeColors[m_timeOfDay].x * 0.5f, m_timeColors[m_timeOfDay].y * 0.5f, m_timeColors[m_timeOfDay].z * 0.5f, 1.0f };
 		m_directionalLight.color = XMFLOAT4{ m_timeColors[m_timeOfDay].x * 0.75f, m_timeColors[m_timeOfDay].y * 0.75f, m_timeColors[m_timeOfDay].z * 0.75f, 0.0f };
 	}
 

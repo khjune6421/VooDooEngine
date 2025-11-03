@@ -162,8 +162,6 @@ class Renderer
 	void UpdateVSConstBuffers();
 	void UpdatePSConstBuffers();
 
-	bool m_drawNormalLines = false; // for debugging
-
 	void UpdateRenderMode();
 
 public:
@@ -181,7 +179,6 @@ public:
 
 	void Render();
 
-	void ToggleNormalLines() { m_drawNormalLines = !m_drawNormalLines; }
 	void ChangeState();
 
 	void ScreenPointToWorld(POINT screenPos) const;

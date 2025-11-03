@@ -12,9 +12,10 @@ void PointLight::OnDetached()
 {
 	if (!g_pointLights.empty())
 	{
-		auto it = remove(g_pointLights.begin(), g_pointLights.end(), this);
-		g_pointLights.erase(it, g_pointLights.end());
+		auto it = find(g_pointLights.begin(), g_pointLights.end(), this);
+		if (it != g_pointLights.end()) g_pointLights.erase(it);
 	}
+	Component::OnDetached();
 }
 
 PointLightConstBuffer& PointLight::GetLightData()
