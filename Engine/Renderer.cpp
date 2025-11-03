@@ -618,8 +618,14 @@ void Renderer::UpdateRenderer()
 {
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
-	// Vertex Shader Constant Buffers
-	// Camera
+	UpdateVSConstBuffers();
+	UpdatePSConstBuffers();
+
+	UpdateRenderMode();
+}
+
+void Renderer::UpdateVSConstBuffers()
+{
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
 
@@ -630,8 +636,10 @@ void Renderer::UpdateRenderer()
 	// Directional Light
 	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_directionalLight, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(3, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
+}
 
-	// Pixel Shader Constant Buffers
+void Renderer::UpdatePSConstBuffers()
+{
 	// Camera
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[CameraBuffer].GetAddressOf());
@@ -648,16 +656,6 @@ void Renderer::UpdateRenderer()
 	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
 	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
-
-	UpdateRenderMode();
-}
-
-void Renderer::UpdateVSConstBuffers()
-{
-}
-
-void Renderer::UpdatePSConstBuffers()
-{
 }
 
 void Renderer::UpdateRenderMode()
