@@ -37,8 +37,8 @@ namespace VDGM
 
 	float GetdeltaTime()
 	{
-		static ULONGLONG previousTime = GetTickCount64();
-		ULONGLONG currentTime = GetTickCount64();
+		static DWORD previousTime = timeGetTime();
+		DWORD currentTime = timeGetTime();
 		float deltaTime = static_cast<float>(currentTime - previousTime) / 1000.0f;
 		previousTime = currentTime;
 

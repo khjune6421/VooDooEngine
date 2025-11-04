@@ -23,6 +23,9 @@
 #include <DDSTextureLoader.h>
 #include <WICTextureLoader.h>
 
+// Windows libraries
+#pragma comment(lib, "winmm.lib")
+
 // DirectX libraries
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
