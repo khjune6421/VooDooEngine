@@ -19,7 +19,7 @@ namespace VDGM
 class Renderer
 {
 	friend class Shape;
-	friend void Scene::Render(Renderer* renderer);
+	friend class Scene;
 
 	// Device
 	struct HardwareInfo
