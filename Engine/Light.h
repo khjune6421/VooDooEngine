@@ -78,4 +78,6 @@ public:
 	void SetQuadraticAttenuation(float quadratic) { m_lightData.quadratic = quadratic; }
 
 	PointLightConstBuffer& GetLightData();
+	DirectX::XMMATRIX GetViewMatrix();
+	DirectX::XMMATRIX GetProjectionMatrix();
 };

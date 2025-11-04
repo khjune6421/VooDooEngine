@@ -700,15 +700,9 @@ void Renderer::UpdateRenderer()
 
 void Renderer::RenderShadowMap()
 {
-	const DirectionalLightConstBuffer& dirLight = VDGM::g_currentScene->m_directionalLight;
-	XMVECTOR lightDir = XMVector3Normalize(dirLight.direction);
-	XMVECTOR sceneCenter = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-	float shadowDistance = 100.0f;
-	XMVECTOR lightPos = XMVectorSet(0.0f, 10.0f, 0.0f, 1.0f);
-	XMMATRIX lightView = XMMatrixLookAtLH(lightPos, sceneCenter, XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
+	XMMATRIX lightView = g_pointLights[1]->GetViewMatrix();
 
-	float shadowMapSize = 40.0f;
-	XMMATRIX lightProjection = XMMatrixOrthographicLH(shadowMapSize, shadowMapSize, 0.1f, 100.0f);
+	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, 1, 0.1f, 100.0f);
 
 	comPtr<ID3D11RenderTargetView> originalRTV;
 	comPtr<ID3D11DepthStencilView> originalDSV;

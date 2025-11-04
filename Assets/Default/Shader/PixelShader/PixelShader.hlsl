@@ -88,7 +88,7 @@ float4 CalculatePointLight(PointLight light, float3 worldPos, float3 worldNormal
 
 float CalculateShadow(float4 worldPos)
 {
-    float4 lightSpacePos = mul(worldPos, lightVP);
+    float4 lightSpacePos = mul(lightVP, worldPos);
     lightSpacePos.xyz /= lightSpacePos.w;
     
     float2 shadowTexCoord;
