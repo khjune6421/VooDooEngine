@@ -89,6 +89,7 @@ float4 CalculatePointLight(PointLight light, float3 worldPos, float3 worldNormal
 float CalculateShadow(float4 worldPos)
 {
     float4 lightSpacePos = mul(lightVP, worldPos);
+    if (lightSpacePos.w <= 0.0f) return 1.0f;
     lightSpacePos.xyz /= lightSpacePos.w;
     
     float2 shadowTexCoord;
@@ -98,7 +99,7 @@ float CalculateShadow(float4 worldPos)
     if (shadowTexCoord.x < 0.0f || shadowTexCoord.x > 1.0f || shadowTexCoord.y < 0.0f || shadowTexCoord.y > 1.0f) return 1.0f; // Not in shadow
     
     // Bias to prevent shadow acne
-    float bias = 0.001f;
+    float bias = 1e-5f;
     float currentDepth = lightSpacePos.z - bias;
     
     float shadow = shadowMap.SampleCmpLevelZero(shadowSampler, shadowTexCoord, currentDepth);

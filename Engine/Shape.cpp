@@ -24,7 +24,7 @@ void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 {
 	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
 
-	renderer->m_deviceContext->VSSetShader((renderer->m_vertexShaderMap[m_vertexShaderId]).first.Get(), nullptr, 0);
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[m_vertexShaderId].first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[m_pixelShaderId].Get(), nullptr, 0);
 
 	matrixBuffer->world = XMMatrixTranspose(m_owner->GetWorldMatrix());
@@ -51,6 +51,8 @@ void Shape::RenderShadow(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffe
 
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, lightMatrixBuffer, 0, 0);
 	renderer->m_deviceContext->VSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::MatrixBuffer].GetAddressOf());
+	renderer->m_deviceContext->PSSetShaderResources(1, 1, renderer->m_textureMap[m_textureId].GetAddressOf());
+
 	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
 }
 

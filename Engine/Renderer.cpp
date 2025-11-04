@@ -701,7 +701,6 @@ void Renderer::UpdateRenderer()
 void Renderer::RenderShadowMap()
 {
 	XMMATRIX lightView = g_pointLights[1]->GetViewMatrix();
-
 	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, 1, 0.1f, 100.0f);
 
 	comPtr<ID3D11RenderTargetView> originalRTV;
@@ -734,7 +733,8 @@ void Renderer::RenderShadowMap()
 	// render
 	m_deviceContext->IASetInputLayout(m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
 	m_deviceContext->VSSetShader(m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
-	m_deviceContext->PSSetShader(nullptr, nullptr, 0);
+	m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
+	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
 
 	VDGM::g_currentScene->RenderShadows(this, &lightMatrixBuffer);
 
@@ -778,7 +778,7 @@ void Renderer::UpdatePSConstBuffers()
 	m_deviceContext->UpdateSubresource(m_constBuffers[ShadowMatrixBuffer].Get(), 0, nullptr, &transposedLightMatrix, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(3, 1, m_constBuffers[ShadowMatrixBuffer].GetAddressOf());
 
-	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
+	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
 	m_deviceContext->PSSetSamplers(1, 1, m_shadowSampler.GetAddressOf());
 
 	m_deviceContext->PSSetShaderResources(0, 1, m_shadowMapSRV.GetAddressOf());

@@ -58,7 +58,7 @@ void Scene::RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuff
 {
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	for (const auto& shape : m_renderShapes) shape->Render(renderer, lightMatrixBuffer);
+	for (const auto& shape : m_renderShapes) shape->RenderShadow(renderer, lightMatrixBuffer);
 }
 
 void Scene::Render(Renderer* renderer)
