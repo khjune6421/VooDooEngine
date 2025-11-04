@@ -29,7 +29,10 @@ struct PointLight
 };
 cbuffer PointLightConstBuffer : register(b2)
 {
-    PointLight pointLights[2];
+    PointLight pointLights[8];
+    
+    uint numPointLights;
+    uint padding[3];
 }
 
 struct PSInput
@@ -57,7 +60,7 @@ float4 main(PSInput input) : SV_TARGET
     float3 worldNormal = normalize(mul(normalMapSample, TBN));
     
     [unroll]
-    for (int i = 0; i < 2; i++)
+    for (uint i = 0; i < numPointLights; i++)
     {
         float3 vecToLight = pointLights[i].worldPos.xyz - input.posWorld.xyz;
         

@@ -2,8 +2,6 @@
 #include "pch.h"
 #include "Component.h"
 
-constexpr int MAX_POINT_LIGHTS = 2;
-
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
 constexpr float DEFAULT_LINEAR_ATTENUATION = 0.01f;
 constexpr float DEFAULT_QUADRATIC_ATTENUATION = 0.005f;
@@ -21,9 +19,13 @@ struct PointLightConstBuffer // Is also a SpotLightConstBuffer
 	float linear = DEFAULT_LINEAR_ATTENUATION;
 	float quadratic = DEFAULT_QUADRATIC_ATTENUATION;
 };
+constexpr int MAX_POINT_LIGHTS = 8;
 struct PointLightArrayConstBuffer
 {
 	PointLightConstBuffer pointLights[MAX_POINT_LIGHTS] = {};
+
+	UINT numPointLights = 0;
+	UINT padding[3] = {};
 };
 class PointLight;
 extern std::vector<PointLight*> g_pointLights;

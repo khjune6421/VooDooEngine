@@ -648,10 +648,10 @@ void Renderer::UpdatePSConstBuffers()
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientFog, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
-	// Point Lights // TODO: make it for loop
+	// Point Lights
 	PointLightArrayConstBuffer pointLightBufferData = {};
-	pointLightBufferData.pointLights[0] = g_pointLights[0]->GetLightData();
-	pointLightBufferData.pointLights[1] = g_pointLights[1]->GetLightData();
+	pointLightBufferData.numPointLights = static_cast<UINT>(g_pointLights.size());
+	for (UINT i = 0; i < pointLightBufferData.numPointLights; ++i) pointLightBufferData.pointLights[i] = g_pointLights[i]->GetLightData();
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
