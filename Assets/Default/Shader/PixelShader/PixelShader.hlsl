@@ -1,7 +1,9 @@
 SamplerState defaultTexSampler : register(s0);
+SamplerComparisonState shadowSampler : register(s1);
 
-Texture2D mainTex : register(t0);
-Texture2D normalMap : register(t1);
+Texture2D shadowMap : register(t0);
+Texture2D mainTex : register(t1);
+Texture2D normalMap : register(t2);
 
 cbuffer CameraConstBuffer : register(b0)
 {
@@ -33,6 +35,11 @@ cbuffer PointLightConstBuffer : register(b2)
     
     uint numPointLights;
     uint padding[3];
+}
+
+cbuffer ShadowConstBuffer : register(b3)
+{
+    matrix lightVP;
 }
 
 struct PSInput
@@ -79,10 +86,31 @@ float4 CalculatePointLight(PointLight light, float3 worldPos, float3 worldNormal
     return result * attenuation;
 }
 
+float CalculateShadow(float4 worldPos)
+{
+    float4 lightSpacePos = mul(worldPos, lightVP);
+    lightSpacePos.xyz /= lightSpacePos.w;
+    
+    float2 shadowTexCoord;
+    shadowTexCoord.x = lightSpacePos.x * 0.5f + 0.5f;
+    shadowTexCoord.y = -lightSpacePos.y * 0.5f + 0.5f;
+    
+    if (shadowTexCoord.x < 0.0f || shadowTexCoord.x > 1.0f || shadowTexCoord.y < 0.0f || shadowTexCoord.y > 1.0f) return 1.0f; // Not in shadow
+    
+    // Bias to prevent shadow acne
+    float bias = 0.001f;
+    float currentDepth = lightSpacePos.z - bias;
+    
+    float shadow = shadowMap.SampleCmpLevelZero(shadowSampler, shadowTexCoord, currentDepth);
+    
+    return shadow;
+}
+
 float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(defaultTexSampler, input.uv);
     float3 normalMapSample = normalMap.Sample(defaultTexSampler, input.uv).xyz;
+    float shadowFactor = CalculateShadow(input.posWorld);
     
     normalMapSample = normalMapSample * 2.0f - 1.0f;
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
@@ -99,5 +127,8 @@ float4 main(PSInput input) : SV_TARGET
     float fogFactor = saturate(distanceFromCamera * rcp(ambientFog.w));
     float4 fogColor = float4(ambientFog.xyz, 1.0f);
     
-    return lerp(texColor * input.light, fogColor, fogFactor);
+    float4 finalColor = texColor * input.light;
+    finalColor.rgb *= shadowFactor;
+    
+    return lerp(finalColor, fogColor, fogFactor);
 }
