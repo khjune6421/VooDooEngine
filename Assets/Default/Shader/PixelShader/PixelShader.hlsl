@@ -123,13 +123,10 @@ float4 main(PSInput input) : SV_TARGET
     float3 viewDirection = vecToCamera * rcp(distanceFromCamera);
     
     [loop]
-    for (uint i = 0; i < numPointLights; i++) input.light += CalculatePointLight(pointLights[i], input.posWorld.xyz, worldNormal, viewDirection);
+    for (uint i = 0; i < numPointLights; i++) input.light += CalculatePointLight(pointLights[i], input.posWorld.xyz, worldNormal, viewDirection) * shadowFactor;
     
     float fogFactor = saturate(distanceFromCamera * rcp(ambientFog.w));
     float4 fogColor = float4(ambientFog.xyz, 1.0f);
     
-    float4 finalColor = texColor * input.light;
-    finalColor.rgb *= shadowFactor;
-    
-    return lerp(finalColor, fogColor, fogFactor);
+    return lerp(texColor * input.light, fogColor, fogFactor);
 }

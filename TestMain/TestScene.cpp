@@ -26,10 +26,10 @@ TestScene::TestScene()
 	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 
-	m_lightObj = make_unique<Object>(this);
-	m_lightObj->SetPosition(XMVECTOR{ 5.0f, 5.0f, 0.0f, 1.0f });
-	m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 0.0f, 1.0f, 1.0f }, 5.0f, 60.0f);
-	m_lightObj->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", L"Eye");
+	//m_lightObj = make_unique<Object>(this);
+	//m_lightObj->SetPosition(XMVECTOR{ 5.0f, 5.0f, 0.0f, 1.0f });
+	//m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 0.0f, 1.0f, 1.0f }, 5.0f, 60.0f);
+	//m_lightObj->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", L"Eye");
 
 	const int treeCount = 1000;
 	for (int i = 0; i < treeCount; ++i)
@@ -50,7 +50,7 @@ TestScene::TestScene()
 	m_torch = make_unique<Object>(this);
 	m_torch->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", L"Eye");
 	m_torch->SetScale(XMFLOAT3{ 0.75f, 0.75f, 0.75f });
-	m_torch->SetPosition(XMVECTOR{ 0.0f, 5.0f, 0.0f, 1.0f });
+	m_torch->SetPosition(XMVECTOR{ 2.0f, 3.0f, 0.0f, 1.0f });
 	m_torch->LookAt(XMVECTOR{ 0.0f, 0.0f, 5.0f, 1.0f });
 	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 5.0f, 30.0f);
 	m_player->AddChild(m_torch.get());
@@ -60,7 +60,7 @@ void TestScene::Update(float deltaTime)
 {
 	m_player->Update(deltaTime);
 	m_windmill->Update(deltaTime);
-	m_lightObj->LookAt(m_player->GetWorldPosition());
+	//m_lightObj->LookAt(m_player->GetWorldPosition());
 
 	if (GetAsyncKeyState(VK_F6) & 0x0001)
 	{
