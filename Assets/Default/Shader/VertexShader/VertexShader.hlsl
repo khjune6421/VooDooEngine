@@ -67,7 +67,7 @@ VSOutput main(VSInput input)
         float3 viewDirection = normalize(cameraPos.xyz - output.posWorld.xyz);
         float3 blinnPhongHalfVector = normalize(-directionalLightNormal.xyz + viewDirection);
 
-        float specularFactor = dot(output.norm, blinnPhongHalfVector);
+        float specularFactor = pow(max(dot(output.norm, blinnPhongHalfVector), 0.0f), 32.0f); // pow value is shininess
         output.light += directionalLightColor * specularFactor;
     }
     

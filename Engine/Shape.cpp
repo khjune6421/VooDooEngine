@@ -24,11 +24,11 @@ void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 {
 	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
 
-	renderer->m_deviceContext->VSSetShader((renderer->m_vertexShaderMap[m_vertexShaderId]).first.Get(), nullptr, 0);
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[m_vertexShaderId].first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[m_pixelShaderId].Get(), nullptr, 0);
 
 	matrixBuffer->world = XMMatrixTranspose(m_owner->GetWorldMatrix());
-	matrixBuffer->WVP = XMMatrixTranspose(m_owner->GetWorldMatrix() * XMMatrixTranspose(matrixBuffer->view) * XMMatrixTranspose(matrixBuffer->projection));
+	matrixBuffer->WVP = matrixBuffer->projection * matrixBuffer->view * matrixBuffer->world;
 	matrixBuffer->normalMatrix = XMMatrixTranspose(m_owner->m_inverseScaleMatrix * m_owner->GetWorldMatrix());
 
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, matrixBuffer, 0, 0);
@@ -36,8 +36,22 @@ void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[m_vertexShaderId].second.Get());
 
-	renderer->m_deviceContext->PSSetShaderResources(0, 1, renderer->m_textureMap[m_textureId].GetAddressOf());
-	renderer->m_deviceContext->PSSetShaderResources(1, 1, renderer->m_textureMap[m_normalMapId].GetAddressOf());
+	renderer->m_deviceContext->PSSetShaderResources(1, 1, renderer->m_textureMap[m_textureId].GetAddressOf());
+	renderer->m_deviceContext->PSSetShaderResources(2, 1, renderer->m_textureMap[m_normalMapId].GetAddressOf());
+
+	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
+}
+
+void Shape::RenderShadow(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer)
+{
+	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
+
+	lightMatrixBuffer->world = XMMatrixTranspose(m_owner->GetWorldMatrix());
+	lightMatrixBuffer->WVP = lightMatrixBuffer->projection * lightMatrixBuffer->view * lightMatrixBuffer->world;
+
+	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, lightMatrixBuffer, 0, 0);
+	renderer->m_deviceContext->VSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::MatrixBuffer].GetAddressOf());
+	renderer->m_deviceContext->PSSetShaderResources(1, 1, renderer->m_textureMap[m_textureId].GetAddressOf());
 
 	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
 }

@@ -19,7 +19,7 @@ namespace VDGM
 class Renderer
 {
 	friend class Shape;
-	friend void Scene::Render(Renderer* renderer);
+	friend class Scene;
 
 	// Device
 	struct HardwareInfo
@@ -49,6 +49,7 @@ class Renderer
 		AmbientFogBuffer,
 		DirectionalLightBuffer,
 		PointLightBuffer,
+		ShadowMatrixBuffer,
 
 		ConstBufferCount
 	};
@@ -124,12 +125,16 @@ class Renderer
 	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
 	RasterState m_currentRasterState = RasterState::Solid;
 
+	static constexpr UINT SHADOW_MAP_SIZE = 2048;
+	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
+	comPtr<ID3D11DepthStencilView> m_shadowMapDSV = nullptr;
+	comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
+	comPtr<ID3D11SamplerState> m_shadowSampler = nullptr;
+	DirectX::XMMATRIX m_lightViewProjection = DirectX::XMMatrixIdentity();
+
 	// Functions
 
 	// Device
-	void CreateDeviceSwapChain();
-	void CreateRenderTarget();
-	void CreateDepthStencil();
 	void SetScissorRect(LONG width, LONG height);
 	void LoadFonts(const std::filesystem::path fontPath);
 	void GetHardwareInfo();
@@ -143,6 +148,7 @@ class Renderer
 	void DisplayDeviceInfo();
 
 	// Shader
+	void InitializeConstBuffers();
 	void LoadAllShaders(const std::filesystem::path shaderPath, const char* entryPoint, const char* shaderModel);
 	void LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
 	void LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel);
@@ -151,14 +157,20 @@ class Renderer
 	void LoadAllTextures(const std::filesystem::path texturePath);
 
 	// Render
+	void CreateDeviceSwapChain();
+	void CreateRenderTarget();
+	void CreateDepthStencil();
 	void CreateRasterState();
 	void CreateSamplerState();
 	void CreateBlendState();
+	void CreateShadowMap();
+	void CreateShadowSampler();
 
 	void LoadObjFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();
+	void RenderShadowMap();
 	void UpdateVSConstBuffers();
 	void UpdatePSConstBuffers();
 

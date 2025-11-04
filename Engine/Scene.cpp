@@ -23,28 +23,6 @@ void Scene::CheckCollisions()
 	}
 }
 
-void Scene::Update(float deltaTime)
-{
-	for (const auto& object : m_objects) object->Update(deltaTime);
-	m_directionalLight.direction = XMVector3Normalize(m_directionalLight.direction);
-
-	CheckCollisions();
-	UpdateCamera();
-}
-
-void Scene::Render(Renderer* renderer)
-{
-	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	renderer->m_deviceContext->OMSetBlendState(renderer->m_blendStates[Renderer::AlphaToCoverage].Get(), nullptr, 0xffffffff); // It just works // but only if it is sorted
-	for (const auto& shape : m_renderShapes) shape->Render(renderer, &m_matrixConstBuffer);
-
-#ifdef _DEBUG
-	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-	for (const auto& shape : m_renderShapes) shape->DebugRender(renderer, &m_matrixConstBuffer);
-#endif
-}
-
 void Scene::UpdateCamera()
 {
 	if (!m_mainCamera) return;
@@ -65,4 +43,33 @@ void Scene::UpdateCamera()
 			return aDist < bDist;
 		}
 	);
+}
+
+void Scene::Update(float deltaTime)
+{
+	for (const auto& object : m_objects) object->Update(deltaTime);
+	m_directionalLight.direction = XMVector3Normalize(m_directionalLight.direction);
+
+	CheckCollisions();
+	UpdateCamera();
+}
+
+void Scene::RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer)
+{
+	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	for (const auto& shape : m_renderShapes) shape->RenderShadow(renderer, lightMatrixBuffer);
+}
+
+void Scene::Render(Renderer* renderer)
+{
+	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	renderer->m_deviceContext->OMSetBlendState(renderer->m_blendStates[Renderer::AlphaToCoverage].Get(), nullptr, 0xffffffff); // It just works // but only if it is sorted
+	for (const auto& shape : m_renderShapes) shape->Render(renderer, &m_matrixConstBuffer);
+
+#ifdef _DEBUG
+	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+	for (const auto& shape : m_renderShapes) shape->DebugRender(renderer, &m_matrixConstBuffer);
+#endif
 }

@@ -113,5 +113,11 @@
     <FxCompile Include="..\Assets\Default\Shader\VertexShader\VSShowNormal.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\VertexShader\DepthOnlyVertexShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\PixelShader\DepthOnlyPixelShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

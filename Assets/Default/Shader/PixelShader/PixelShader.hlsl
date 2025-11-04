@@ -1,7 +1,9 @@
-SamplerState mainTexSampler : register(s0);
+SamplerState defaultTexSampler : register(s0);
+SamplerComparisonState shadowSampler : register(s1);
 
-Texture2D mainTex : register(t0);
-Texture2D normalMap : register(t1);
+Texture2D shadowMap : register(t0);
+Texture2D mainTex : register(t1);
+Texture2D normalMap : register(t2);
 
 cbuffer CameraConstBuffer : register(b0)
 {
@@ -29,7 +31,15 @@ struct PointLight
 };
 cbuffer PointLightConstBuffer : register(b2)
 {
-    PointLight pointLights[2];
+    PointLight pointLights[8];
+    
+    uint numPointLights;
+    uint padding[3];
+}
+
+cbuffer ShadowConstBuffer : register(b3)
+{
+    matrix lightVP;
 }
 
 struct PSInput
@@ -44,47 +54,82 @@ struct PSInput
     float3 bitangent : BITANGENT0;
 };
 
+float4 CalculatePointLight(PointLight light, float3 worldPos, float3 worldNormal, float3 viewDirection)
+{
+    float3 vecToLight = light.worldPos.xyz - worldPos;
+    float distanceSq = dot(vecToLight, vecToLight);
+    float distance = sqrt(distanceSq);
+    
+    if (distance > light.range) return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    
+    float rcpDistance = rcp(distance);
+    vecToLight *= rcpDistance;
+    
+    float spotDot = dot(-vecToLight, light.directionAndAngle.xyz);
+    if (spotDot < 1e-5f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    
+    float spot = pow(spotDot, light.directionAndAngle.w);
+    
+    float diffuseFactor = dot(worldNormal, vecToLight);
+    if (diffuseFactor < 1e-5f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    
+    diffuseFactor = saturate(diffuseFactor);
+    
+    float attenuation = spot * rcp(light.aConstant + light.aLinear * distance + light.aQuadratic * distanceSq);
+    float4 result = light.color * diffuseFactor;
+    
+    float3 halfVector = normalize(vecToLight + viewDirection);
+    float specularFactor = pow(saturate(dot(worldNormal, halfVector)), 32.0f); // pow value is shininess
+    
+    result += light.color * specularFactor;
+    
+    return result * attenuation;
+}
+
+float CalculateShadow(float4 worldPos)
+{
+    float4 lightSpacePos = mul(lightVP, worldPos);
+    if (lightSpacePos.w <= 0.0f) return 1.0f;
+    lightSpacePos.xyz /= lightSpacePos.w;
+    
+    float2 shadowTexCoord;
+    shadowTexCoord.x = lightSpacePos.x * 0.5f + 0.5f;
+    shadowTexCoord.y = -lightSpacePos.y * 0.5f + 0.5f;
+    
+    if (shadowTexCoord.x < 0.0f || shadowTexCoord.x > 1.0f || shadowTexCoord.y < 0.0f || shadowTexCoord.y > 1.0f) return 1.0f; // Not in shadow
+    
+    // Bias to prevent shadow acne
+    float bias = 1e-3f; // Need to find a sweetspot
+    float currentDepth = lightSpacePos.z - bias;
+    
+    float shadow = shadowMap.SampleCmpLevelZero(shadowSampler, shadowTexCoord, currentDepth);
+    
+    return shadow;
+}
+
 float4 main(PSInput input) : SV_TARGET
 {
-    float4 texColor = mainTex.Sample(mainTexSampler, input.uv);
+    float4 texColor = mainTex.Sample(defaultTexSampler, input.uv);
+    float3 normalMapSample = normalMap.Sample(defaultTexSampler, input.uv).xyz;
+    float shadowFactor = CalculateShadow(input.posWorld);
     
-    float distanceFromCamera = length(cameraPos.xyz - input.posWorld.xyz);
-    float fogFactor = saturate(distanceFromCamera / ambientFog.w);
-    float4 fogColor = float4(ambientFog.xyz, 1.0f);
-    
-    float3 normalMapSample = normalMap.Sample(mainTexSampler, input.uv).xyz * 2.0f - 1.0f;
+    normalMapSample = normalMapSample * 2.0f - 1.0f;
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
     float3 worldNormal = normalize(mul(normalMapSample, TBN));
     
-    [unroll]
-    for (int i = 0; i < 2; i++)
-    {
-        float3 vecToLight = pointLights[i].worldPos.xyz - input.posWorld.xyz;
-        
-        float distance = length(vecToLight);
-        if (distance > pointLights[i].range) continue;
-        
-        vecToLight = vecToLight / distance;
-        
-        float spot = pow(max(dot(-vecToLight, pointLights[i].directionAndAngle.xyz), 1e-5f), pointLights[i].directionAndAngle.w);
-        if (spot < 1e-5f) continue;
-        
-        float3 attenuateConstants = float3(pointLights[i].aConstant, pointLights[i].aLinear, pointLights[i].aQuadratic);
-        float attenuation = spot / dot(attenuateConstants, float3(1.0f, distance, distance * distance));
-        
-        float diffuseFactor = saturate(dot(worldNormal, vecToLight));
-        if (diffuseFactor < 1e-5f) continue;
-        
-        float4 diffuseColor = pointLights[i].color * diffuseFactor;
-        
-        float3 viewDirection = normalize(cameraPos.xyz - input.posWorld.xyz);
-        float3 blinnPhongHalfVector = normalize(vecToLight + viewDirection);
-        float specularFactor = dot(worldNormal, blinnPhongHalfVector);
-        
-        diffuseColor += pointLights[i].color * specularFactor;
-        
-        input.light += diffuseColor * attenuation;
-    }
+    float3 vecToCamera = cameraPos.xyz - input.posWorld.xyz;
+    float distanceFromCameraSq = dot(vecToCamera, vecToCamera);
+    float distanceFromCamera = sqrt(distanceFromCameraSq);
+    float3 viewDirection = vecToCamera * rcp(distanceFromCamera);
     
-    return lerp(texColor * input.light, fogColor, fogFactor);
+    [loop]
+    for (uint i = 0; i < numPointLights; i++) input.light += CalculatePointLight(pointLights[i], input.posWorld.xyz, worldNormal, viewDirection);
+    
+    float fogFactor = saturate(distanceFromCamera * rcp(ambientFog.w));
+    float4 fogColor = float4(ambientFog.xyz, 1.0f);
+    
+    float4 finalColor = texColor * input.light;
+    finalColor.rgb *= shadowFactor;
+    
+    return lerp(finalColor, fogColor, fogFactor);
 }

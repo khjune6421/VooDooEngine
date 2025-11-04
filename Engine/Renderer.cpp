@@ -142,6 +142,153 @@ void Renderer::CreateDepthStencil()
 	}
 }
 
+void Renderer::CreateRasterState()
+{
+	D3D11_RASTERIZER_DESC rasterDesc = {};
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.ScissorEnable = TRUE;
+	rasterDesc.MultisampleEnable = TRUE;
+	rasterDesc.AntialiasedLineEnable = TRUE;
+	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Solid].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
+		return;
+	}
+
+	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
+	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Wireframe].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
+		return;
+	}
+
+#ifdef _DEBUG
+	m_deviceContext->RSSetState(g_rasterState[1].Get());
+	m_currentRasterState = RasterState::Wireframe;
+#else
+	m_deviceContext->RSSetState(g_rasterState[0].Get());
+	m_currentRasterState = RasterState::Solid;
+#endif
+}
+
+void Renderer::CreateSamplerState()
+{
+	if (FAILED(m_device->CreateSamplerState(&s_defaultSamplerDesc, m_samplers[0].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create sampler state", L"Error", MB_OK);
+		return;
+	}
+}
+
+void Renderer::CreateBlendState()
+{
+	// No blend
+	D3D11_BLEND_DESC noBlendDesc = {};
+	noBlendDesc.RenderTarget[0].BlendEnable = FALSE;
+	noBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(m_device->CreateBlendState(&noBlendDesc, m_blendStates[NoBlend].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create no blend state", L"Error", MB_OK);
+		return;
+	}
+
+	// Alpha blend
+	D3D11_BLEND_DESC alphaBlendDesc = {};
+	alphaBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	alphaBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	alphaBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	alphaBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	alphaBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	alphaBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	alphaBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	alphaBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(m_device->CreateBlendState(&alphaBlendDesc, m_blendStates[AlphaBlend].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create alpha blend state", L"Error", MB_OK);
+		return;
+	}
+
+	// Alpha to coverage
+	D3D11_BLEND_DESC alphaToCoverageDesc = {};
+	alphaToCoverageDesc.AlphaToCoverageEnable = TRUE;
+	alphaToCoverageDesc.IndependentBlendEnable = FALSE;
+	alphaToCoverageDesc.RenderTarget[0].BlendEnable = FALSE;
+	alphaToCoverageDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(m_device->CreateBlendState(&alphaToCoverageDesc, m_blendStates[AlphaToCoverage].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create alpha-to-coverage blend state", L"Error", MB_OK);
+		return;
+	}
+
+	m_deviceContext->OMSetBlendState(m_blendStates[NoBlend].Get(), nullptr, 0xffffffff);
+}
+
+void Renderer::CreateShadowMap()
+{
+	D3D11_TEXTURE2D_DESC shadowMapDesc = {};
+	shadowMapDesc.Width = SHADOW_MAP_SIZE;
+	shadowMapDesc.Height = SHADOW_MAP_SIZE;
+	shadowMapDesc.MipLevels = 1;
+	shadowMapDesc.ArraySize = 1;
+	shadowMapDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	shadowMapDesc.SampleDesc.Count = 1;
+	shadowMapDesc.Usage = D3D11_USAGE_DEFAULT;
+	shadowMapDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+
+	if (FAILED(m_device->CreateTexture2D(&shadowMapDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map texture", L"Error", MB_OK);
+		return;
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Texture2D.MipSlice = 0;
+
+	if (FAILED(m_device->CreateDepthStencilView(m_shadowMapTexture.Get(), &dsvDesc, m_shadowMapDSV.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map DSV", L"Error", MB_OK);
+		return;
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	if (FAILED(m_device->CreateShaderResourceView(m_shadowMapTexture.Get(), &srvDesc, m_shadowMapSRV.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map SRV", L"Error", MB_OK);
+		return;
+	}
+}
+
+void Renderer::CreateShadowSampler()
+{
+	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
+	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	shadowSamplerDesc.BorderColor[0] = 1.0f;
+	shadowSamplerDesc.BorderColor[1] = 1.0f;
+	shadowSamplerDesc.BorderColor[2] = 1.0f;
+	shadowSamplerDesc.BorderColor[3] = 1.0f;
+
+	if (FAILED(m_device->CreateSamplerState(&shadowSamplerDesc, m_shadowSampler.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow sampler", L"Error", MB_OK);
+		return;
+	}
+}
+
 void Renderer::SetScissorRect(LONG width, LONG height)
 {
 	D3D11_RECT scissorRect = {};
@@ -345,6 +492,17 @@ void Renderer::DisplayDeviceInfo()
 	}
 }
 
+void Renderer::InitializeConstBuffers()
+{
+	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[MatrixBuffer]);
+	CreateConstBuffer(sizeof(XMVECTOR), &m_constBuffers[CameraBuffer]); // Camera buffer
+	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientLightBuffer]); // Ambient light buffer
+	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientFogBuffer]); // Ambient fog buffer
+	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
+	CreateConstBuffer(sizeof(PointLightArrayConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
+	CreateConstBuffer(sizeof(DirectX::XMMATRIX), &m_constBuffers[ShadowMatrixBuffer]); // Shadow matrix buffer
+}
+
 void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel)
 {
 	const filesystem::path vertexShaderPath = shaderPath / L"VertexShader/";
@@ -494,92 +652,6 @@ void Renderer::LoadAllTextures(const std::filesystem::path texturePath)
 	}
 }
 
-void Renderer::CreateRasterState()
-{
-	D3D11_RASTERIZER_DESC rasterDesc = {};
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.CullMode = D3D11_CULL_BACK;
-	rasterDesc.ScissorEnable = TRUE;
-	rasterDesc.MultisampleEnable = TRUE;
-	rasterDesc.AntialiasedLineEnable = TRUE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Solid].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
-		return;
-	}
-
-	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
-	rasterDesc.CullMode = D3D11_CULL_NONE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Wireframe].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
-		return;
-	}
-
-#ifdef _DEBUG
-	m_deviceContext->RSSetState(g_rasterState[1].Get());
-	m_currentRasterState = RasterState::Wireframe;
-#else
-	m_deviceContext->RSSetState(g_rasterState[0].Get());
-	m_currentRasterState = RasterState::Solid;
-#endif
-}
-
-void Renderer::CreateSamplerState()
-{
-	if (FAILED(m_device->CreateSamplerState(&s_defaultSamplerDesc, m_samplers[0].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create sampler state", L"Error", MB_OK);
-		return;
-	}
-}
-
-void Renderer::CreateBlendState()
-{
-	// No blend
-	D3D11_BLEND_DESC noBlendDesc = {};
-	noBlendDesc.RenderTarget[0].BlendEnable = FALSE;
-	noBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	if (FAILED(m_device->CreateBlendState(&noBlendDesc, m_blendStates[NoBlend].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create no blend state", L"Error", MB_OK);
-		return;
-	}
-
-	// Alpha blend
-	D3D11_BLEND_DESC alphaBlendDesc = {};
-	alphaBlendDesc.RenderTarget[0].BlendEnable = TRUE;
-	alphaBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	alphaBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	alphaBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	alphaBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	alphaBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	alphaBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	alphaBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	if (FAILED(m_device->CreateBlendState(&alphaBlendDesc, m_blendStates[AlphaBlend].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create alpha blend state", L"Error", MB_OK);
-		return;
-	}
-
-	// Alpha to coverage
-	D3D11_BLEND_DESC alphaToCoverageDesc = {};
-	alphaToCoverageDesc.AlphaToCoverageEnable = TRUE;
-	alphaToCoverageDesc.IndependentBlendEnable = FALSE;
-	alphaToCoverageDesc.RenderTarget[0].BlendEnable = FALSE;
-	alphaToCoverageDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	if (FAILED(m_device->CreateBlendState(&alphaToCoverageDesc, m_blendStates[AlphaToCoverage].GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create alpha-to-coverage blend state", L"Error", MB_OK);
-		return;
-	}
-
-	m_deviceContext->OMSetBlendState(m_blendStates[NoBlend].Get(), nullptr, 0xffffffff);
-}
-
 void Renderer::LoadObjFile(const filesystem::path filePath)
 {
 	ObjFileParser objects(filePath.c_str());
@@ -616,12 +688,58 @@ void Renderer::LoadDefaultShapes(const filesystem::path folderPath)
 
 void Renderer::UpdateRenderer()
 {
+	RenderShadowMap();
+
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
 	UpdateVSConstBuffers();
 	UpdatePSConstBuffers();
 
 	UpdateRenderMode();
+}
+
+void Renderer::RenderShadowMap()
+{
+	XMMATRIX lightView = g_pointLights[1]->GetViewMatrix();
+	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, 1, 0.1f, 100.0f);
+
+	comPtr<ID3D11RenderTargetView> originalRTV;
+	comPtr<ID3D11DepthStencilView> originalDSV;
+	m_deviceContext->OMGetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.GetAddressOf());
+
+	ID3D11RenderTargetView* nullRTV = nullptr;
+	m_deviceContext->OMSetRenderTargets(1, &nullRTV, m_shadowMapDSV.Get());
+	m_deviceContext->ClearDepthStencilView(m_shadowMapDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	D3D11_VIEWPORT originalViewport;
+	UINT numViewports = 1;
+	m_deviceContext->RSGetViewports(&numViewports, &originalViewport);
+
+	D3D11_VIEWPORT shadowViewport = {};
+	shadowViewport.TopLeftX = 0.0f;
+	shadowViewport.TopLeftY = 0.0f;
+	shadowViewport.Width = static_cast<FLOAT>(SHADOW_MAP_SIZE);
+	shadowViewport.Height = static_cast<FLOAT>(SHADOW_MAP_SIZE);
+	shadowViewport.MinDepth = 0.0f;
+	shadowViewport.MaxDepth = 1.0f;
+	m_deviceContext->RSSetViewports(1, &shadowViewport);
+
+	MatrixConstBuffer lightMatrixBuffer = {};
+	lightMatrixBuffer.view = XMMatrixTranspose(lightView);
+	lightMatrixBuffer.projection = XMMatrixTranspose(lightProjection);
+
+	m_lightViewProjection = lightMatrixBuffer.projection * lightMatrixBuffer.view;
+
+	// render
+	m_deviceContext->IASetInputLayout(m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
+	m_deviceContext->VSSetShader(m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
+	m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
+	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
+
+	VDGM::g_currentScene->RenderShadows(this, &lightMatrixBuffer);
+
+	m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
+	m_deviceContext->RSSetViewports(1, &originalViewport);
 }
 
 void Renderer::UpdateVSConstBuffers()
@@ -648,14 +766,22 @@ void Renderer::UpdatePSConstBuffers()
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientFog, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
-	// Point Lights // TODO: make it for loop
+	// Point Lights
 	PointLightArrayConstBuffer pointLightBufferData = {};
-	pointLightBufferData.pointLights[0] = g_pointLights[0]->GetLightData();
-	pointLightBufferData.pointLights[1] = g_pointLights[1]->GetLightData();
+	pointLightBufferData.numPointLights = static_cast<UINT>(g_pointLights.size());
+	for (UINT i = 0; i < pointLightBufferData.numPointLights; ++i) pointLightBufferData.pointLights[i] = g_pointLights[i]->GetLightData();
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
-	m_deviceContext->PSSetSamplers(0, 1, m_samplers[0].GetAddressOf());
+	// Shadow matrix
+	XMMATRIX transposedLightMatrix = XMMatrixTranspose(m_lightViewProjection);
+	m_deviceContext->UpdateSubresource(m_constBuffers[ShadowMatrixBuffer].Get(), 0, nullptr, &transposedLightMatrix, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(3, 1, m_constBuffers[ShadowMatrixBuffer].GetAddressOf());
+
+	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
+
+	m_deviceContext->PSSetSamplers(1, 1, m_shadowSampler.GetAddressOf());
+	m_deviceContext->PSSetShaderResources(0, 1, m_shadowMapSRV.GetAddressOf());
 }
 
 void Renderer::UpdateRenderMode()
@@ -673,9 +799,16 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	//m_deviceInfo.displayMode.Width = width;
 	//m_deviceInfo.displayMode.Height = height;
 
+	// Initialize render
 	CreateDeviceSwapChain();
 	CreateRenderTarget();
 	CreateDepthStencil();
+	CreateRasterState();
+	CreateSamplerState();
+	CreateBlendState();
+	CreateShadowMap();
+	CreateShadowSampler();
+
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 	SetViewport();
 	SetScissorRect(width, height);
@@ -683,18 +816,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	m_DXVersion = (m_deviceInfo.featureLevels & 0xf000) >> 12;
 	m_DXSubVersion = (m_deviceInfo.featureLevels & 0x0f00) >> 8;
 
-	// Initialize render
-	CreateRasterState();
-	CreateSamplerState();
-	CreateBlendState();
-
-	// Initialize constant buffers
-	CreateConstBuffer(sizeof(MatrixConstBuffer), &m_constBuffers[MatrixBuffer]);
-	CreateConstBuffer(sizeof(XMVECTOR), &m_constBuffers[CameraBuffer]); // Camera buffer
-	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientLightBuffer]); // Ambient light buffer
-	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientFogBuffer]); // Ambient fog buffer
-	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
-	CreateConstBuffer(sizeof(PointLightArrayConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
+	InitializeConstBuffers();
 
 	static const filesystem::path defaultPath(L"../Assets/Default/");
 	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");

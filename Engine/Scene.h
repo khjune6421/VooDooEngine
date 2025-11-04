@@ -51,6 +51,7 @@ public:
 	DirectX::XMFLOAT4 m_ambientFog = { 0.5f, 0.5f, 0.5f, 100.0f }; // w value is range
 
 	virtual void Update(float deltaTime);
+	void RenderShadows(class Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer);
 	virtual void Render(class Renderer* renderer);
 
 	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}
