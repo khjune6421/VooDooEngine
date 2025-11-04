@@ -779,8 +779,8 @@ void Renderer::UpdatePSConstBuffers()
 	m_deviceContext->PSSetConstantBuffers(3, 1, m_constBuffers[ShadowMatrixBuffer].GetAddressOf());
 
 	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
-	m_deviceContext->PSSetSamplers(1, 1, m_shadowSampler.GetAddressOf());
 
+	m_deviceContext->PSSetSamplers(1, 1, m_shadowSampler.GetAddressOf());
 	m_deviceContext->PSSetShaderResources(0, 1, m_shadowMapSRV.GetAddressOf());
 }
 
