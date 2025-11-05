@@ -78,5 +78,5 @@ public:
 	void SetQuadraticAttenuation(float quadratic) { m_lightData.quadratic = quadratic; }
 
 	PointLightConstBuffer& GetLightData();
-	DirectX::XMVECTOR GetWorldPosition();
+	void CreateShadowMap(class Renderer* renderer) const;
 };

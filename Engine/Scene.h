@@ -17,6 +17,7 @@ struct DirectionalLightConstBuffer
 
 class Collider;
 class PointLight;
+class Renderer;
 
 class Scene
 {
@@ -32,6 +33,9 @@ class Scene
 
 	void CheckCollisions();
 	void UpdateCamera();
+	void UpdateLight(Renderer* renderer);
+	void CreateShadowMap(Renderer* renderer);
+	void RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer);
 
 protected:
 	std::vector<std::unique_ptr<class Object>> m_objects;
@@ -56,8 +60,8 @@ public:
 	DirectX::XMFLOAT4 m_ambientFog = { 0.5f, 0.5f, 0.5f, 100.0f }; // w value is range
 
 	virtual void Update(float deltaTime);
-	void RenderShadows(class Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer);
-	virtual void Render(class Renderer* renderer);
+	virtual void PreRender(Renderer* renderer);
+	virtual void Render(Renderer* renderer);
 
 	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}
 };

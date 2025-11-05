@@ -3,6 +3,7 @@
 
 #include "Object.h"
 #include "Scene.h"
+#include "Renderer.h"
 
 using namespace std;
 using namespace DirectX;
@@ -36,8 +37,64 @@ PointLightConstBuffer& PointLight::GetLightData()
 	return m_lightData;
 }
 
-XMVECTOR PointLight::GetWorldPosition()
+void PointLight::CreateShadowMap(Renderer* renderer) const
 {
-	m_lightData.position = m_owner->GetWorldPosition();
-	return m_lightData.position;
+	XMVECTOR lightPos = m_lightData.position;
+	float lightRange = m_lightData.range;
+
+	D3D11_VIEWPORT shadowViewport = {};
+	shadowViewport.TopLeftX = 0.0f;
+	shadowViewport.TopLeftY = 0.0f;
+	shadowViewport.Width = static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE);
+	shadowViewport.Height = static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE);
+	shadowViewport.MinDepth = 0.0f;
+	shadowViewport.MaxDepth = 1.0f;
+	renderer->m_deviceContext->RSSetViewports(1, &shadowViewport);
+
+	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.0f, 0.1f, lightRange);
+
+	XMVECTOR targets[6] =
+	{
+		XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f),   // +X
+		XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f),  // -X
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +Y
+		XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f),  // -Y
+		XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),   // +Z
+		XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f)   // -Z
+	};
+	XMVECTOR ups[6] =
+	{
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +X
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // -X
+		XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f),  // +Y
+		XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),   // -Y
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +Z
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)    // -Z
+	};
+
+	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
+	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
+	renderer->m_deviceContext->PSSetSamplers(0, 1, renderer->m_samplers[Renderer::DefaultSampler].GetAddressOf());
+
+
+	XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPos), XMVectorGetY(lightPos), XMVectorGetZ(lightPos), lightRange);
+	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
+	renderer->m_deviceContext->PSSetConstantBuffers(1, 1, renderer->m_constBuffers[Renderer::LightPosBuffer].GetAddressOf());
+
+	for (UINT face = 0; face < 6; ++face)
+	{
+		ID3D11RenderTargetView* nullRTV = nullptr;
+		renderer->m_deviceContext->OMSetRenderTargets(1, &nullRTV, renderer->m_shadowMapDSVs[face].Get());
+		renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSVs[face].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		XMVECTOR target = XMVectorAdd(lightPos, targets[face]);
+		XMMATRIX lightView = XMMatrixLookAtLH(lightPos, target, ups[face]);
+
+		MatrixConstBuffer lightMatrixBuffer = {};
+		lightMatrixBuffer.view = XMMatrixTranspose(lightView);
+		lightMatrixBuffer.projection = XMMatrixTranspose(lightProjection);
+
+		VDGM::g_currentScene->RenderShadows(renderer, &lightMatrixBuffer);
+	}
 }

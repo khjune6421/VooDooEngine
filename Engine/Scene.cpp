@@ -5,6 +5,7 @@
 #include "Collider.h"
 #include "Camera.h"
 #include "Object.h"
+#include "Light.h"
 
 using namespace DirectX;
 using namespace std;
@@ -45,6 +46,29 @@ void Scene::UpdateCamera()
 	);
 }
 
+void Scene::UpdateLight(Renderer* renderer)
+{
+	PointLightArrayConstBuffer pointLightBufferData = {};
+	pointLightBufferData.numPointLights = static_cast<UINT>(m_pointLights.size());
+	for (UINT i = 0; i < pointLightBufferData.numPointLights; ++i) pointLightBufferData.pointLights[i] = m_pointLights[i]->GetLightData();
+	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
+	renderer->m_deviceContext->PSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::PointLightBuffer].GetAddressOf());
+
+	CreateShadowMap(renderer);
+}
+
+void Scene::CreateShadowMap(Renderer* renderer)
+{
+	m_pointLights[0]->CreateShadowMap(renderer);
+}
+
+void Scene::RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer)
+{
+	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	for (const auto& shape : m_renderShapes) shape->RenderShadow(renderer, lightMatrixBuffer);
+}
+
 void Scene::Update(float deltaTime)
 {
 	for (const auto& object : m_objects) object->Update(deltaTime);
@@ -54,11 +78,9 @@ void Scene::Update(float deltaTime)
 	UpdateCamera();
 }
 
-void Scene::RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer)
+void Scene::PreRender(Renderer* renderer)
 {
-	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	for (const auto& shape : m_renderShapes) shape->RenderShadow(renderer, lightMatrixBuffer);
+	UpdateLight(renderer);
 }
 
 void Scene::Render(Renderer* renderer)

@@ -16,8 +16,9 @@ namespace VDGM
 
 class Renderer
 {
-	friend class Shape;
 	friend class Scene;
+	friend class Shape;
+	friend class PointLight;
 
 	// Device
 	struct HardwareInfo
@@ -167,7 +168,6 @@ class Renderer
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();
-	void RenderShadowMap();
 	void UpdateVSConstBuffers();
 	void UpdatePSConstBuffers();
 

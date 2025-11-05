@@ -5,16 +5,6 @@ TextureCube shadowMap : register(t0);
 Texture2D mainTex : register(t1);
 Texture2D normalMap : register(t2);
 
-cbuffer CameraConstBuffer : register(b0)
-{
-    float4 cameraPos;
-}
-
-cbuffer AmbientFogConstBuffer : register(b1)
-{
-    float4 ambientFog; // w value is range
-}
-
 struct PointLight
 {
     float4 worldPos;
@@ -29,13 +19,23 @@ struct PointLight
     float aLinear;
     float aQuadratic;
 };
-cbuffer PointLightConstBuffer : register(b2)
+
+cbuffer PointLightConstBuffer : register(b0)
 {
     PointLight pointLights[8];
     
     uint numPointLights;
     uint padding[3];
 }
+cbuffer CameraConstBuffer : register(b1)
+{
+    float4 cameraPos;
+}
+cbuffer AmbientFogConstBuffer : register(b2)
+{
+    float4 ambientFog; // w value is range
+}
+
 
 struct PSInput
 {

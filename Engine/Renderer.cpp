@@ -695,87 +695,12 @@ void Renderer::LoadDefaultShapes(const filesystem::path folderPath)
 
 void Renderer::UpdateRenderer()
 {
-	RenderShadowMap();
-
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
 	UpdateVSConstBuffers();
 	UpdatePSConstBuffers();
 
 	UpdateRenderMode();
-}
-
-void Renderer::RenderShadowMap()
-{
-	XMVECTOR lightPos = VDGM::g_currentScene->m_pointLights[0]->GetWorldPosition();
-	float lightRange = VDGM::g_currentScene->m_pointLights[0]->GetRange();
-
-	comPtr<ID3D11RenderTargetView> originalRTV;
-	comPtr<ID3D11DepthStencilView> originalDSV;
-	m_deviceContext->OMGetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.GetAddressOf());
-
-	D3D11_VIEWPORT originalViewport;
-	UINT numViewports = 1;
-	m_deviceContext->RSGetViewports(&numViewports, &originalViewport);
-
-	D3D11_VIEWPORT shadowViewport = {};
-	shadowViewport.TopLeftX = 0.0f;
-	shadowViewport.TopLeftY = 0.0f;
-	shadowViewport.Width = static_cast<FLOAT>(SHADOW_MAP_SIZE);
-	shadowViewport.Height = static_cast<FLOAT>(SHADOW_MAP_SIZE);
-	shadowViewport.MinDepth = 0.0f;
-	shadowViewport.MaxDepth = 1.0f;
-	m_deviceContext->RSSetViewports(1, &shadowViewport);
-
-	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.0f, 0.1f, lightRange);
-
-	XMVECTOR targets[6] =
-	{
-		XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f),   // +X
-		XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f),  // -X
-		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +Y
-		XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f),  // -Y
-		XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),   // +Z
-		XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f)   // -Z
-	};
-	XMVECTOR ups[6] =
-	{
-		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +X
-		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // -X
-		XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f),  // +Y
-		XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),   // -Y
-		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +Z
-		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)    // -Z
-	};
-
-	m_deviceContext->IASetInputLayout(m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
-	m_deviceContext->VSSetShader(m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
-	m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
-	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
-
-
-	XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPos), XMVectorGetY(lightPos), XMVectorGetZ(lightPos), lightRange);
-	m_deviceContext->UpdateSubresource(m_constBuffers[LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[LightPosBuffer].GetAddressOf());
-
-	for (UINT face = 0; face < 6; ++face)
-	{
-		ID3D11RenderTargetView* nullRTV = nullptr;
-		m_deviceContext->OMSetRenderTargets(1, &nullRTV, m_shadowMapDSVs[face].Get());
-		m_deviceContext->ClearDepthStencilView(m_shadowMapDSVs[face].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-		XMVECTOR target = XMVectorAdd(lightPos, targets[face]);
-		XMMATRIX lightView = XMMatrixLookAtLH(lightPos, target, ups[face]);
-
-		MatrixConstBuffer lightMatrixBuffer = {};
-		lightMatrixBuffer.view = XMMatrixTranspose(lightView);
-		lightMatrixBuffer.projection = XMMatrixTranspose(lightProjection);
-
-		VDGM::g_currentScene->RenderShadows(this, &lightMatrixBuffer);
-	}
-
-	m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
-	m_deviceContext->RSSetViewports(1, &originalViewport);
 }
 
 void Renderer::UpdateVSConstBuffers()
@@ -796,18 +721,11 @@ void Renderer::UpdatePSConstBuffers()
 {
 	// Camera
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[CameraBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
 
 	// Ambient Fog
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientFog, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
-
-	// Point Lights
-	PointLightArrayConstBuffer pointLightBufferData = {};
-	pointLightBufferData.numPointLights = static_cast<UINT>(VDGM::g_currentScene->m_pointLights.size());
-	for (UINT i = 0; i < pointLightBufferData.numPointLights; ++i) pointLightBufferData.pointLights[i] = VDGM::g_currentScene->m_pointLights[i]->GetLightData();
-	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
 	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
 
@@ -934,6 +852,19 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 
 void Renderer::Render()
 {
+	comPtr<ID3D11RenderTargetView> originalRTV;
+	comPtr<ID3D11DepthStencilView> originalDSV;
+	m_deviceContext->OMGetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.GetAddressOf());
+
+	D3D11_VIEWPORT originalViewport;
+	UINT numViewports = 1;
+	m_deviceContext->RSGetViewports(&numViewports, &originalViewport);
+
+	VDGM::g_currentScene->PreRender(this);
+
+	m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
+	m_deviceContext->RSSetViewports(1, &originalViewport);
+
 	UpdateRenderer();
 
 	VDGM::g_currentScene->Render(this);
