@@ -60,7 +60,7 @@ float4 CalculatePointLight(PointLight light, float3 worldPos, float3 worldNormal
     float rcpDistance = rcp(distance);
     vecToLight *= rcpDistance;
     
-    float spotDot = dot(-vecToLight, light.directionAndAngle.xyz);
+    float spotDot = abs(dot(-vecToLight, light.directionAndAngle.xyz));
     if (spotDot < 0.0f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     float spot = pow(spotDot, light.directionAndAngle.w);
