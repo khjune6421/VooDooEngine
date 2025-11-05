@@ -125,7 +125,7 @@ class Renderer
 	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
 	RasterState m_currentRasterState = RasterState::Solid;
 
-	static constexpr UINT SHADOW_MAP_SIZE = 2048;
+	static constexpr UINT SHADOW_MAP_SIZE = 1024;
 	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
 	comPtr<ID3D11DepthStencilView> m_shadowMapDSV = nullptr;
 	comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
