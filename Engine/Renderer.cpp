@@ -701,7 +701,7 @@ void Renderer::UpdateRenderer()
 void Renderer::RenderShadowMap()
 {
 	XMMATRIX lightView = g_pointLights[0]->GetViewMatrix();
-	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV4, 1, 0.1f, 100.0f);
+	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1, 0.1f, g_pointLights[0]->GetRange());
 
 	comPtr<ID3D11RenderTargetView> originalRTV;
 	comPtr<ID3D11DepthStencilView> originalDSV;

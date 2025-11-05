@@ -59,7 +59,7 @@ public:
 		m_lightData.quadratic = quadraticAttenuation;
 	}
 
-	void OnAttached(class Object* owner) override { Component::OnAttached(owner); g_pointLights.push_back(this); }
+	void OnAttached(Object* owner) override { Component::OnAttached(owner); g_pointLights.push_back(this); }
 	void OnDetached() override;
 
 	DirectX::XMFLOAT3 GetColor() const { return m_color; }

@@ -41,6 +41,6 @@ public:
 	void SetTexture(const std::wstring& texture);
 	void SetNormalMap(const std::wstring& normalMap);
 
-	void OnAttached(class Object* owner) override;
+	void OnAttached(Object* owner) override;
 	void OnDetached() override;
 };
