@@ -20,6 +20,7 @@ struct VSOutput
 {
     float4 pos : SV_POSITION0;
     float2 uv : TEXCOORD0;
+    float3 worldPos : TEXCOORD1;
 };
 
 VSOutput main(VSInput input)
@@ -29,6 +30,7 @@ VSOutput main(VSInput input)
     input.pos0.w = 1.0f;
     output.pos = mul(input.pos0, WVP);
     output.uv = input.uv0;
+    output.worldPos = mul(input.pos0, world).xyz;
     
     return output;
 }

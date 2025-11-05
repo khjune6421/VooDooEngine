@@ -1,7 +1,7 @@
 SamplerState defaultTexSampler : register(s0);
 SamplerComparisonState shadowSampler : register(s1);
 
-Texture2D shadowMap : register(t0);
+TextureCube shadowMap : register(t0);
 Texture2D mainTex : register(t1);
 Texture2D normalMap : register(t2);
 
@@ -35,11 +35,6 @@ cbuffer PointLightConstBuffer : register(b2)
     
     uint numPointLights;
     uint padding[3];
-}
-
-cbuffer ShadowConstBuffer : register(b3)
-{
-    matrix lightVP;
 }
 
 struct PSInput
@@ -86,32 +81,23 @@ float4 CalculatePointLight(PointLight light, float3 worldPos, float3 worldNormal
     return result * attenuation;
 }
 
-float CalculateShadow(float4 worldPos)
+float CalculateShadow(float3 worldPos, float3 lightPos, float lightRange)
 {
-    float4 lightSpacePos = mul(lightVP, worldPos);
-    if (lightSpacePos.w <= 0.0f) return 1.0f;
-    lightSpacePos.xyz /= lightSpacePos.w;
+    float3 lightToPixel = worldPos - lightPos;
+    float currentDistance = length(lightToPixel);
     
-    float2 shadowTexCoord;
-    shadowTexCoord.x = lightSpacePos.x * 0.5f + 0.5f;
-    shadowTexCoord.y = -lightSpacePos.y * 0.5f + 0.5f;
+    float normalizedDistance = currentDistance / lightRange;
     
-    if (shadowTexCoord.x < 0.0f || shadowTexCoord.x > 1.0f || shadowTexCoord.y < 0.0f || shadowTexCoord.y > 1.0f) return 1.0f; // Not in shadow
+    float shadowFactor = shadowMap.SampleCmpLevelZero(shadowSampler, lightToPixel, normalizedDistance - 0.001f);
     
-    // Bias to prevent shadow acne
-    float bias = 1e-4f; // Need to find a sweetspot
-    float currentDepth = lightSpacePos.z - bias;
-    
-    float shadow = shadowMap.SampleCmpLevelZero(shadowSampler, shadowTexCoord, currentDepth);
-    
-    return shadow;
+    return shadowFactor;
 }
 
 float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(defaultTexSampler, input.uv);
     float3 normalMapSample = normalMap.Sample(defaultTexSampler, input.uv).xyz;
-    float shadowFactor = CalculateShadow(input.posWorld);
+    float shadowFactor = CalculateShadow(input.posWorld.xyz, pointLights[0].worldPos.xyz, pointLights[0].range);
     
     normalMapSample = normalMapSample * 2.0f - 1.0f;
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
