@@ -66,12 +66,12 @@ float4 CalculatePointLight(PointLight light, float3 worldPos, float3 worldNormal
     vecToLight *= rcpDistance;
     
     float spotDot = dot(-vecToLight, light.directionAndAngle.xyz);
-    if (spotDot < 1e-5f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    if (spotDot < 0.0f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     float spot = pow(spotDot, light.directionAndAngle.w);
     
     float diffuseFactor = dot(worldNormal, vecToLight);
-    if (diffuseFactor < 1e-5f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    if (diffuseFactor < 0.0f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     diffuseFactor = saturate(diffuseFactor);
     
