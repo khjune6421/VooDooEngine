@@ -88,7 +88,7 @@ float CalculateShadow(float3 worldPos, float3 lightPos, float lightRange)
     
     float normalizedDistance = currentDistance / lightRange;
     
-    float shadowFactor = shadowMap.SampleCmpLevelZero(shadowSampler, lightToPixel, normalizedDistance - 0.001f);
+    float shadowFactor = shadowMap.SampleCmpLevelZero(shadowSampler, lightToPixel, normalizedDistance - 1e-3f);
     
     return shadowFactor;
 }

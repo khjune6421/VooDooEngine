@@ -50,9 +50,9 @@ TestScene::TestScene()
 	m_torch = make_unique<Object>(this);
 	m_torch->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", L"Eye");
 	m_torch->SetScale(XMFLOAT3{ 0.75f, 0.75f, 0.75f });
-	m_torch->SetPosition(XMVECTOR{ 2.0f, 3.0f, 0.0f, 1.0f });
+	m_torch->SetPosition(XMVECTOR{ 0.0f, 5.0f, 0.0f, 1.0f });
 	m_torch->LookAt(XMVECTOR{ 0.0f, 0.0f, 5.0f, 1.0f });
-	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 5.0f, 30.0f);
+	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.5f, 0.0f }, 10.0f, 30.0f);
 	m_player->AddChild(m_torch.get());
 }
 
