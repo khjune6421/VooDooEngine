@@ -97,7 +97,6 @@ float4 main(PSInput input) : SV_TARGET
 {
     float4 texColor = mainTex.Sample(defaultTexSampler, input.uv);
     float3 normalMapSample = normalMap.Sample(defaultTexSampler, input.uv).xyz;
-    float shadowFactor = CalculateShadow(input.posWorld.xyz, pointLights[0].worldPos.xyz, pointLights[0].range);
     
     normalMapSample = normalMapSample * 2.0f - 1.0f;
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
@@ -109,7 +108,10 @@ float4 main(PSInput input) : SV_TARGET
     float3 viewDirection = vecToCamera * rcp(distanceFromCamera);
     
     [loop]
-    for (uint i = 0; i < numPointLights; i++) input.light += CalculatePointLight(pointLights[i], input.posWorld.xyz, worldNormal, viewDirection) * shadowFactor;
+    for (uint i = 0; i < numPointLights; i++)
+    {
+        input.light += CalculatePointLight(pointLights[i], input.posWorld.xyz, worldNormal, viewDirection) * CalculateShadow(input.posWorld.xyz, pointLights[i].worldPos.xyz, pointLights[i].range);
+    }
     
     float fogFactor = saturate(distanceFromCamera * rcp(ambientFog.w));
     float4 fogColor = float4(ambientFog.xyz, 1.0f);
