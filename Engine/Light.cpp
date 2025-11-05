@@ -30,15 +30,8 @@ PointLightConstBuffer& PointLight::GetLightData()
 	return m_lightData;
 }
 
-XMMATRIX PointLight::GetViewMatrix()
+XMVECTOR PointLight::GetWorldPosition()
 {
 	m_lightData.position = m_owner->GetWorldPosition();
-	const XMVECTOR forward = m_owner->GetWorldDirection(Directions::Forward);
-	static const XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	return XMMatrixLookAtLH(m_lightData.position, XMVectorAdd(m_lightData.position, forward), up);
-}
-
-XMMATRIX PointLight::GetProjectionMatrix()
-{
+	return m_lightData.position;
 }

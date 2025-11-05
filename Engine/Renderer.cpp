@@ -230,41 +230,48 @@ void Renderer::CreateBlendState()
 
 void Renderer::CreateShadowMap()
 {
-	D3D11_TEXTURE2D_DESC shadowMapDesc = {};
-	shadowMapDesc.Width = SHADOW_MAP_SIZE;
-	shadowMapDesc.Height = SHADOW_MAP_SIZE;
-	shadowMapDesc.MipLevels = 1;
-	shadowMapDesc.ArraySize = 1;
-	shadowMapDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-	shadowMapDesc.SampleDesc.Count = 1;
-	shadowMapDesc.Usage = D3D11_USAGE_DEFAULT;
-	shadowMapDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	D3D11_TEXTURE2D_DESC shadowCubeDesc = {};
+	shadowCubeDesc.Width = SHADOW_MAP_SIZE;
+	shadowCubeDesc.Height = SHADOW_MAP_SIZE;
+	shadowCubeDesc.MipLevels = 1;
+	shadowCubeDesc.ArraySize = 6; // Cube map
+	shadowCubeDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	shadowCubeDesc.SampleDesc.Count = 1;
+	shadowCubeDesc.Usage = D3D11_USAGE_DEFAULT;
+	shadowCubeDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	shadowCubeDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
-	if (FAILED(m_device->CreateTexture2D(&shadowMapDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
+	if (FAILED(m_device->CreateTexture2D(&shadowCubeDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
 	{
-		MessageBoxW(nullptr, L"Failed to create shadow map texture", L"Error", MB_OK);
+		MessageBoxW(nullptr, L"Failed to create shadow cube map texture", L"Error", MB_OK);
 		return;
 	}
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	dsvDesc.Texture2D.MipSlice = 0;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+	dsvDesc.Texture2DArray.MipSlice = 0;
+	dsvDesc.Texture2DArray.ArraySize = 1;
 
-	if (FAILED(m_device->CreateDepthStencilView(m_shadowMapTexture.Get(), &dsvDesc, m_shadowMapDSV.GetAddressOf())))
+	for (UINT i = 0; i < 6; ++i)
 	{
-		MessageBoxW(nullptr, L"Failed to create shadow map DSV", L"Error", MB_OK);
-		return;
+		dsvDesc.Texture2DArray.FirstArraySlice = i;
+		if (FAILED(m_device->CreateDepthStencilView(m_shadowMapTexture.Get(), &dsvDesc, m_shadowMapDSVs[i].GetAddressOf())))
+		{
+			MessageBoxW(nullptr, L"Failed to create shadow cube map DSV", L"Error", MB_OK);
+			return;
+		}
 	}
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc.TextureCube.MipLevels = 1;
+	srvDesc.TextureCube.MostDetailedMip = 0;
 
 	if (FAILED(m_device->CreateShaderResourceView(m_shadowMapTexture.Get(), &srvDesc, m_shadowMapSRV.GetAddressOf())))
 	{
-		MessageBoxW(nullptr, L"Failed to create shadow map SRV", L"Error", MB_OK);
+		MessageBoxW(nullptr, L"Failed to create shadow cube map SRV", L"Error", MB_OK);
 		return;
 	}
 }
@@ -500,7 +507,7 @@ void Renderer::InitializeConstBuffers()
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientFogBuffer]); // Ambient fog buffer
 	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
 	CreateConstBuffer(sizeof(PointLightArrayConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
-	CreateConstBuffer(sizeof(DirectX::XMMATRIX), &m_constBuffers[ShadowMatrixBuffer]); // Shadow matrix buffer
+	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[LightPosBuffer]); // Light position buffer
 }
 
 void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* entryPoint, const char* shaderModel)
@@ -700,16 +707,13 @@ void Renderer::UpdateRenderer()
 
 void Renderer::RenderShadowMap()
 {
-	XMMATRIX lightView = g_pointLights[0]->GetViewMatrix();
-	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1, 0.1f, g_pointLights[0]->GetRange());
+
+	XMVECTOR lightPos = g_pointLights[0]->GetWorldPosition();
+	float lightRange = g_pointLights[0]->GetRange();
 
 	comPtr<ID3D11RenderTargetView> originalRTV;
 	comPtr<ID3D11DepthStencilView> originalDSV;
 	m_deviceContext->OMGetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.GetAddressOf());
-
-	ID3D11RenderTargetView* nullRTV = nullptr;
-	m_deviceContext->OMSetRenderTargets(1, &nullRTV, m_shadowMapDSV.Get());
-	m_deviceContext->ClearDepthStencilView(m_shadowMapDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	D3D11_VIEWPORT originalViewport;
 	UINT numViewports = 1;
@@ -724,19 +728,52 @@ void Renderer::RenderShadowMap()
 	shadowViewport.MaxDepth = 1.0f;
 	m_deviceContext->RSSetViewports(1, &shadowViewport);
 
-	MatrixConstBuffer lightMatrixBuffer = {};
-	lightMatrixBuffer.view = XMMatrixTranspose(lightView);
-	lightMatrixBuffer.projection = XMMatrixTranspose(lightProjection);
+	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.0f, 0.1f, lightRange);
 
-	m_lightViewProjection = lightMatrixBuffer.projection * lightMatrixBuffer.view;
+	XMVECTOR targets[6] =
+	{
+		XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f),   // +X
+		XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f),  // -X
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +Y
+		XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f),  // -Y
+		XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),   // +Z
+		XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f)   // -Z
+	};
+	XMVECTOR ups[6] =
+	{
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +X
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // -X
+		XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f),  // +Y
+		XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),   // -Y
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +Z
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)    // -Z
+	};
 
-	// render
 	m_deviceContext->IASetInputLayout(m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
 	m_deviceContext->VSSetShader(m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
 	m_deviceContext->PSSetShader(m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
 	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
 
-	VDGM::g_currentScene->RenderShadows(this, &lightMatrixBuffer);
+
+	XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPos), XMVectorGetY(lightPos), XMVectorGetZ(lightPos), lightRange);
+	m_deviceContext->UpdateSubresource(m_constBuffers[LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[LightPosBuffer].GetAddressOf());
+
+	for (UINT face = 0; face < 6; ++face)
+	{
+		ID3D11RenderTargetView* nullRTV = nullptr;
+		m_deviceContext->OMSetRenderTargets(1, &nullRTV, m_shadowMapDSVs[face].Get());
+		m_deviceContext->ClearDepthStencilView(m_shadowMapDSVs[face].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		XMVECTOR target = XMVectorAdd(lightPos, targets[face]);
+		XMMATRIX lightView = XMMatrixLookAtLH(lightPos, target, ups[face]);
+
+		MatrixConstBuffer lightMatrixBuffer = {};
+		lightMatrixBuffer.view = XMMatrixTranspose(lightView);
+		lightMatrixBuffer.projection = XMMatrixTranspose(lightProjection);
+
+		VDGM::g_currentScene->RenderShadows(this, &lightMatrixBuffer);
+	}
 
 	m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
 	m_deviceContext->RSSetViewports(1, &originalViewport);
@@ -772,11 +809,6 @@ void Renderer::UpdatePSConstBuffers()
 	for (UINT i = 0; i < pointLightBufferData.numPointLights; ++i) pointLightBufferData.pointLights[i] = g_pointLights[i]->GetLightData();
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
-
-	// Shadow matrix
-	XMMATRIX transposedLightMatrix = XMMatrixTranspose(m_lightViewProjection);
-	m_deviceContext->UpdateSubresource(m_constBuffers[ShadowMatrixBuffer].Get(), 0, nullptr, &transposedLightMatrix, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(3, 1, m_constBuffers[ShadowMatrixBuffer].GetAddressOf());
 
 	m_deviceContext->PSSetSamplers(0, 1, m_samplers[DefaultSampler].GetAddressOf());
 

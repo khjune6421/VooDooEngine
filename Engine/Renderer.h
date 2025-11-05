@@ -49,7 +49,7 @@ class Renderer
 		AmbientFogBuffer,
 		DirectionalLightBuffer,
 		PointLightBuffer,
-		ShadowMatrixBuffer,
+		LightPosBuffer,
 
 		ConstBufferCount
 	};
@@ -127,10 +127,9 @@ class Renderer
 
 	static constexpr UINT SHADOW_MAP_SIZE = 1024;
 	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
-	comPtr<ID3D11DepthStencilView> m_shadowMapDSV = nullptr;
+	comPtr<ID3D11DepthStencilView> m_shadowMapDSVs[6] = {};
 	comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
 	comPtr<ID3D11SamplerState> m_shadowSampler = nullptr;
-	DirectX::XMMATRIX m_lightViewProjection = DirectX::XMMatrixIdentity();
 
 	// Functions
 
