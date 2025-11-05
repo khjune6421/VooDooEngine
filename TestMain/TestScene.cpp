@@ -26,10 +26,10 @@ TestScene::TestScene()
 	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 
-	//m_lightObj = make_unique<Object>(this);
-	//m_lightObj->SetPosition(XMVECTOR{ 5.0f, 5.0f, 0.0f, 1.0f });
-	//m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 0.0f, 1.0f, 1.0f }, 5.0f, 60.0f);
-	//m_lightObj->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", L"Eye");
+	m_lightObj = make_unique<Object>(this);
+	m_lightObj->SetPosition(XMVECTOR{ 5.0f, 5.0f, 0.0f, 1.0f });
+	m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 0.0f, 1.0f, 1.0f }, 5.0f, 0.0f);
+	m_lightObj->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", L"Eye");
 
 	const int treeCount = 1000;
 	for (int i = 0; i < treeCount; ++i)
@@ -59,7 +59,6 @@ void TestScene::Update(float deltaTime)
 {
 	m_player->Update(deltaTime);
 	m_windmill->Update(deltaTime);
-	//m_lightObj->LookAt(m_player->GetWorldPosition());
 
 	if (GetAsyncKeyState(VK_F6) & 0x0001)
 	{

@@ -1,9 +1,9 @@
-SamplerState defaultTexSampler : register(s0);
-SamplerComparisonState shadowSampler : register(s1);
+SamplerComparisonState shadowSampler : register(s0);
+SamplerState defaultTexSampler : register(s1);
 
-TextureCube shadowMap : register(t0);
-Texture2D mainTex : register(t1);
-Texture2D normalMap : register(t2);
+TextureCube shadowMap[8] : register(t0);
+Texture2D mainTex : register(t9);
+Texture2D normalMap : register(t10);
 
 struct PointLight
 {
@@ -49,8 +49,21 @@ struct PSInput
     float3 bitangent : BITANGENT0;
 };
 
-float4 CalculatePointLight(PointLight light, float3 worldPos, float3 worldNormal, float3 viewDirection)
+float CalculateShadow(uint index, float3 worldPos, float3 lightPos, float lightRange)
 {
+    float3 lightToPixel = worldPos - lightPos;
+    float currentDistance = length(lightToPixel);
+    
+    float normalizedDistance = currentDistance / lightRange;
+    
+    float shadowFactor = shadowMap[index].SampleCmpLevelZero(shadowSampler, lightToPixel, normalizedDistance - 1e-3f);
+    
+    return shadowFactor;
+}
+
+float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, float3 viewDirection)
+{
+    PointLight light = pointLights[index];
     float3 vecToLight = light.worldPos.xyz - worldPos;
     float distanceSq = dot(vecToLight, vecToLight);
     float distance = sqrt(distanceSq);
@@ -78,19 +91,7 @@ float4 CalculatePointLight(PointLight light, float3 worldPos, float3 worldNormal
     
     result += light.color * specularFactor;
     
-    return result * attenuation;
-}
-
-float CalculateShadow(float3 worldPos, float3 lightPos, float lightRange)
-{
-    float3 lightToPixel = worldPos - lightPos;
-    float currentDistance = length(lightToPixel);
-    
-    float normalizedDistance = currentDistance / lightRange;
-    
-    float shadowFactor = shadowMap.SampleCmpLevelZero(shadowSampler, lightToPixel, normalizedDistance - 1e-3f);
-    
-    return shadowFactor;
+    return result * attenuation * CalculateShadow(index, worldPos, light.worldPos.xyz, light.range);
 }
 
 float4 main(PSInput input) : SV_TARGET
@@ -107,10 +108,10 @@ float4 main(PSInput input) : SV_TARGET
     float distanceFromCamera = sqrt(distanceFromCameraSq);
     float3 viewDirection = vecToCamera * rcp(distanceFromCamera);
     
-    [loop]
+    //[loop]
     for (uint i = 0; i < numPointLights; i++)
     {
-        input.light += CalculatePointLight(pointLights[i], input.posWorld.xyz, worldNormal, viewDirection) * CalculateShadow(input.posWorld.xyz, pointLights[i].worldPos.xyz, pointLights[i].range);
+        input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
     }
     
     float fogFactor = saturate(distanceFromCamera * rcp(ambientFog.w));

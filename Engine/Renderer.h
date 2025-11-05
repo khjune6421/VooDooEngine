@@ -66,6 +66,7 @@ class Renderer
 		SamplerCount
 	};
 	comPtr<ID3D11SamplerState> m_samplers[SamplerCount] = {};
+	comPtr<ID3D11SamplerState> m_shadowSampler = nullptr;
 
 	enum BlendState
 	{
@@ -124,12 +125,6 @@ class Renderer
 	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
 	RasterState m_currentRasterState = RasterState::Solid;
 
-	static constexpr UINT SHADOW_MAP_SIZE = 1024;
-	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
-	comPtr<ID3D11DepthStencilView> m_shadowMapDSVs[6] = {};
-	comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
-	comPtr<ID3D11SamplerState> m_shadowSampler = nullptr;
-
 	// Functions
 
 	// Device
@@ -161,7 +156,6 @@ class Renderer
 	void CreateRasterState();
 	void CreateSamplerState();
 	void CreateBlendState();
-	void CreateShadowMap();
 	void CreateShadowSampler();
 
 	void LoadObjFile(const std::filesystem::path filePath);

@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Component.h"
 
+#define comPtr Microsoft::WRL::ComPtr
+
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
 constexpr float DEFAULT_LINEAR_ATTENUATION = 0.01f;
 constexpr float DEFAULT_QUADRATIC_ATTENUATION = 0.005f;
@@ -31,9 +33,18 @@ struct PointLightArrayConstBuffer
 
 class PointLight : public Component
 {
+	friend class Scene;
+
 	DirectX::XMFLOAT3 m_color = { 0.0f, 0.0f, 0.0f };
 	float m_intensity = 1.0f;
+
 	PointLightConstBuffer m_lightData = {};
+
+	static constexpr UINT SHADOW_MAP_SIZE = 1024;
+
+	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
+	comPtr<ID3D11DepthStencilView> m_shadowMapDSVs[6] = {};
+	comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
 
 	void UpdateColor() { m_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f }; }
 
@@ -78,5 +89,7 @@ public:
 	void SetQuadraticAttenuation(float quadratic) { m_lightData.quadratic = quadratic; }
 
 	PointLightConstBuffer& GetLightData();
-	void CreateShadowMap(class Renderer* renderer) const;
+	void CreateShadowMap(class Renderer* renderer);
 };
+
+#undef comPtr
