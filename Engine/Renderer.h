@@ -6,8 +6,6 @@
 // I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
-extern std::vector<class PointLight*> g_pointLights;
-
 namespace VDGM
 {
 	extern float g_deltaTime;

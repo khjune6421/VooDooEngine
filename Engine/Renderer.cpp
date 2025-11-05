@@ -707,9 +707,8 @@ void Renderer::UpdateRenderer()
 
 void Renderer::RenderShadowMap()
 {
-
-	XMVECTOR lightPos = g_pointLights[0]->GetWorldPosition();
-	float lightRange = g_pointLights[0]->GetRange();
+	XMVECTOR lightPos = VDGM::g_currentScene->m_pointLights[0]->GetWorldPosition();
+	float lightRange = VDGM::g_currentScene->m_pointLights[0]->GetRange();
 
 	comPtr<ID3D11RenderTargetView> originalRTV;
 	comPtr<ID3D11DepthStencilView> originalDSV;
@@ -805,8 +804,8 @@ void Renderer::UpdatePSConstBuffers()
 
 	// Point Lights
 	PointLightArrayConstBuffer pointLightBufferData = {};
-	pointLightBufferData.numPointLights = static_cast<UINT>(g_pointLights.size());
-	for (UINT i = 0; i < pointLightBufferData.numPointLights; ++i) pointLightBufferData.pointLights[i] = g_pointLights[i]->GetLightData();
+	pointLightBufferData.numPointLights = static_cast<UINT>(VDGM::g_currentScene->m_pointLights.size());
+	for (UINT i = 0; i < pointLightBufferData.numPointLights; ++i) pointLightBufferData.pointLights[i] = VDGM::g_currentScene->m_pointLights[i]->GetLightData();
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &pointLightBufferData, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 

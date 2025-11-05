@@ -16,16 +16,21 @@ struct DirectionalLightConstBuffer
 };
 
 class Collider;
+class PointLight;
 
 class Scene
 {
+	friend class Renderer;
 	friend class Shape;
-	std::vector<Shape*> m_renderShapes = {};
-
 	friend class Collider;
-	std::unordered_map<UINT, std::pair<std::vector<Collider*>, std::vector<Collider*>>> m_collidersMap;
-	void CheckCollisions();
+	friend class PointLight;
 
+	std::vector<Shape*> m_renderShapes = {};
+	std::unordered_map<UINT, std::pair<std::vector<Collider*>, std::vector<Collider*>>> m_collidersMap;
+
+	std::vector<PointLight*> m_pointLights = {};
+
+	void CheckCollisions();
 	void UpdateCamera();
 
 protected:

@@ -2,18 +2,24 @@
 #include "Light.h"
 
 #include "Object.h"
+#include "Scene.h"
 
 using namespace std;
 using namespace DirectX;
 
-vector<PointLight*> g_pointLights;
+void PointLight::OnAttached(Object* owner)
+{
+	Component::OnAttached(owner);
+
+	owner->m_scene->m_pointLights.push_back(this);
+}
 
 void PointLight::OnDetached()
 {
-	if (!g_pointLights.empty())
+	if (!m_owner->m_scene->m_pointLights.empty())
 	{
-		auto it = find(g_pointLights.begin(), g_pointLights.end(), this);
-		if (it != g_pointLights.end()) g_pointLights.erase(it);
+		auto it = find(m_owner->m_scene->m_pointLights.begin(), m_owner->m_scene->m_pointLights.end(), this);
+		if (it != m_owner->m_scene->m_pointLights.end()) m_owner->m_scene->m_pointLights.erase(it);
 	}
 	Component::OnDetached();
 }

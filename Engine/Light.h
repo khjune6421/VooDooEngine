@@ -19,6 +19,7 @@ struct PointLightConstBuffer // Is also a SpotLightConstBuffer
 	float linear = DEFAULT_LINEAR_ATTENUATION;
 	float quadratic = DEFAULT_QUADRATIC_ATTENUATION;
 };
+
 constexpr int MAX_POINT_LIGHTS = 8;
 struct PointLightArrayConstBuffer
 {
@@ -27,8 +28,7 @@ struct PointLightArrayConstBuffer
 	UINT numPointLights = 0;
 	UINT padding[3] = {};
 };
-class PointLight;
-extern std::vector<PointLight*> g_pointLights;
+
 class PointLight : public Component
 {
 	DirectX::XMFLOAT3 m_color = { 0.0f, 0.0f, 0.0f };
@@ -59,7 +59,7 @@ public:
 		m_lightData.quadratic = quadraticAttenuation;
 	}
 
-	void OnAttached(Object* owner) override { Component::OnAttached(owner); g_pointLights.push_back(this); }
+	void OnAttached(Object* owner) override;
 	void OnDetached() override;
 
 	DirectX::XMFLOAT3 GetColor() const { return m_color; }
