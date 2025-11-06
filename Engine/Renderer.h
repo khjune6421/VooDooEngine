@@ -6,8 +6,6 @@
 // I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
 #define comPtr Microsoft::WRL::ComPtr
 
-extern std::vector<class PointLight*> g_pointLights;
-
 namespace VDGM
 {
 	extern float g_deltaTime;
@@ -18,8 +16,9 @@ namespace VDGM
 
 class Renderer
 {
-	friend class Shape;
 	friend class Scene;
+	friend class Shape;
+	friend class PointLight;
 
 	// Device
 	struct HardwareInfo
@@ -49,7 +48,7 @@ class Renderer
 		AmbientFogBuffer,
 		DirectionalLightBuffer,
 		PointLightBuffer,
-		ShadowMatrixBuffer,
+		LightPosBuffer,
 
 		ConstBufferCount
 	};
@@ -67,6 +66,7 @@ class Renderer
 		SamplerCount
 	};
 	comPtr<ID3D11SamplerState> m_samplers[SamplerCount] = {};
+	comPtr<ID3D11SamplerState> m_shadowSampler = nullptr;
 
 	enum BlendState
 	{
@@ -125,13 +125,6 @@ class Renderer
 	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
 	RasterState m_currentRasterState = RasterState::Solid;
 
-	static constexpr UINT SHADOW_MAP_SIZE = 1024;
-	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
-	comPtr<ID3D11DepthStencilView> m_shadowMapDSV = nullptr;
-	comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
-	comPtr<ID3D11SamplerState> m_shadowSampler = nullptr;
-	DirectX::XMMATRIX m_lightViewProjection = DirectX::XMMatrixIdentity();
-
 	// Functions
 
 	// Device
@@ -163,14 +156,12 @@ class Renderer
 	void CreateRasterState();
 	void CreateSamplerState();
 	void CreateBlendState();
-	void CreateShadowMap();
 	void CreateShadowSampler();
 
 	void LoadObjFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();
-	void RenderShadowMap();
 	void UpdateVSConstBuffers();
 	void UpdatePSConstBuffers();
 

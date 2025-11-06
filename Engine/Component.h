@@ -1,5 +1,6 @@
 #pragma once
 
+class Object;
 class Component
 {
 public:
@@ -13,6 +14,6 @@ public:
 	class Object* m_owner = nullptr;
 
 	virtual void Update(float deltaTime) {}
-	virtual void OnAttached(class Object* owner) { m_owner = owner; }
+	virtual void OnAttached(Object* owner) { m_owner = owner; }
 	virtual void OnDetached() { m_owner = nullptr; }
 };

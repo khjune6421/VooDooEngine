@@ -35,6 +35,6 @@ public:
 	void GetCollideFrom(std::vector<UINT>& groups) const { groups = m_collideFrom; }
 	void SetCollideFrom(const std::vector<UINT>& groups) { m_collideFrom = groups; }
 
-	void OnAttached(class Object* owner) override;
+	void OnAttached(Object* owner) override;
 	void OnDetached() override;
 };

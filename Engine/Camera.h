@@ -31,6 +31,6 @@ public:
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() const { return m_projectionMatrix; }
 
-	void OnAttached(class Object* owner) override;
+	void OnAttached(Object* owner) override;
 	void OnDetached() override;
 };
