@@ -49,26 +49,18 @@ struct PSInput
     float3 bitangent : BITANGENT0;
 };
 
-float CalculateShadow(uint index, float3 worldPos, float3 lightPos, float lightRange)
-{
-    float3 lightToPixel = worldPos - lightPos;
-    float currentDistance = length(lightToPixel);
-    
-    float normalizedDistance = currentDistance / lightRange;
-    
-    float shadowFactor = shadowMap[index].SampleCmpLevelZero(shadowSampler, lightToPixel, normalizedDistance - 1e-3f);
-    
-    return shadowFactor;
-}
-
 float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, float3 viewDirection)
 {
     PointLight light = pointLights[index];
+    
     float3 vecToLight = light.worldPos.xyz - worldPos;
     float distanceSq = dot(vecToLight, vecToLight);
     float distance = sqrt(distanceSq);
-    
     if (distance > light.range) return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    
+    // Shadow calculation
+    float normalizedDistance = distance / light.range;
+    float shadowFactor = shadowMap[index].SampleCmpLevelZero(shadowSampler, -vecToLight, normalizedDistance - 1e-3f);
     
     float rcpDistance = rcp(distance);
     vecToLight *= rcpDistance;
@@ -91,7 +83,7 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     
     result += light.color * specularFactor;
     
-    return result * attenuation * CalculateShadow(index, worldPos, light.worldPos.xyz, light.range);
+    return result * attenuation * shadowFactor;
 }
 
 float4 main(PSInput input) : SV_TARGET
