@@ -2,8 +2,8 @@ SamplerComparisonState shadowSampler : register(s0);
 SamplerState defaultTexSampler : register(s1);
 
 TextureCubeArray shadowMapArray : register(t0);
-Texture2D mainTex : register(t9);
-Texture2D normalMap : register(t10);
+Texture2D mainTex : register(t1);
+Texture2D normalMap : register(t2);
 
 struct PointLight
 {

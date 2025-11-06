@@ -708,8 +708,6 @@ void Renderer::UpdateRenderer()
 	UpdatePixelShader();
 
 	UpdateRenderMode();
-
-	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 }
 
 void Renderer::UpdateVertexShader()
@@ -867,11 +865,12 @@ void Renderer::Render()
 {
 	VDGM::g_currentScene->PreRender(this);
 
-	UpdateRenderer();
+	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 
+	UpdateRenderer();
 	VDGM::g_currentScene->Render(this);
 
-	ShowFPS();
+	//ShowFPS();
 
 #ifdef _DEBUG
 	DisplayDeviceInfo();
