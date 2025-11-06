@@ -68,7 +68,7 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 
 	XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPos), XMVectorGetY(lightPos), XMVectorGetZ(lightPos), lightRange);
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
-	renderer->m_deviceContext->PSSetConstantBuffers(1, 1, renderer->m_constBuffers[Renderer::LightPosBuffer].GetAddressOf());
+	renderer->m_deviceContext->PSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::LightPosBuffer].GetAddressOf());
 
 	for (UINT face = 0; face < 6; ++face)
 	{

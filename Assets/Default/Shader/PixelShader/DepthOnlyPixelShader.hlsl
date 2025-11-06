@@ -1,7 +1,7 @@
 SamplerState defaultTexSampler : register(s0);
-Texture2D mainTex : register(t1);
+Texture2D mainTex : register(t0);
 
-cbuffer LightPosBuffer : register(b1)
+cbuffer LightPosBuffer : register(b0)
 {
     float4 lightPositionAndRange; // xyz = position, w = range
 }

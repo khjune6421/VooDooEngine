@@ -22,15 +22,6 @@ struct PointLightConstBuffer // Is also a SpotLightConstBuffer
 	float quadratic = DEFAULT_QUADRATIC_ATTENUATION;
 };
 
-constexpr int MAX_POINT_LIGHTS = 8;
-struct PointLightArrayConstBuffer
-{
-	PointLightConstBuffer pointLights[MAX_POINT_LIGHTS] = {};
-
-	UINT numPointLights = 0;
-	UINT padding[3] = {};
-};
-
 class PointLight : public Component
 {
 	friend class Scene;

@@ -1,4 +1,10 @@
 #pragma once
+#include "pch.h"
+#include "Light.h"
+
+class Collider;
+class PointLight;
+class Renderer;
 
 struct MatrixConstBuffer
 {
@@ -15,9 +21,14 @@ struct DirectionalLightConstBuffer
 	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
 
-class Collider;
-class PointLight;
-class Renderer;
+constexpr int MAX_POINT_LIGHTS = 8;
+struct PointLightArrayConstBuffer
+{
+	PointLightConstBuffer pointLights[MAX_POINT_LIGHTS] = {};
+
+	UINT numPointLights = 0;
+	UINT padding[3] = {};
+};
 
 class Scene
 {
@@ -39,6 +50,9 @@ class Scene
 
 protected:
 	std::vector<std::unique_ptr<class Object>> m_objects;
+
+	PointLightArrayConstBuffer m_pointLightBufferData = {};
+	bool m_lightsNeedUpdate = true;
 
 public:
 	Scene() = default;

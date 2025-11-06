@@ -728,6 +728,10 @@ void Renderer::UpdateVertexShader()
 
 void Renderer::UpdatePixelShader()
 {
+	// Point Lights
+	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_pointLightBufferData, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
+
 	// Camera
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
