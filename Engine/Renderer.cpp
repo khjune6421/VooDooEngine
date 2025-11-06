@@ -228,7 +228,7 @@ void Renderer::CreateBlendState()
 	m_deviceContext->OMSetBlendState(m_blendStates[NoBlend].Get(), nullptr, 0xffffffff);
 }
 
-void Renderer::CreateShadowResources()
+void Renderer::CreateShadowMap()
 {
 	D3D11_TEXTURE2D_DESC shadowArrayDesc = {};
 	shadowArrayDesc.Width = SHADOW_MAP_SIZE;
@@ -550,12 +550,17 @@ void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* ent
 	}
 }
 
+
+#ifdef _DEBUG
+constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
+#endif
+
 void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
 {
 	comPtr<ID3DBlob> VSCode;
 	comPtr<ID3DBlob> errorBlob;
-
-	constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("vs_" + string(shaderModel)).c_str(), compileFlags, 0, VSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -590,8 +595,6 @@ void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, c
 	comPtr<ID3DBlob> GSCode;
 	comPtr<ID3DBlob> errorBlob;
 
-	constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
-
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("gs_" + string(shaderModel)).c_str(), compileFlags, 0, GSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
@@ -617,8 +620,6 @@ void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, cons
 {
 	comPtr<ID3DBlob> PSCode;
 	comPtr<ID3DBlob> errorBlob;
-
-	constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("ps_" + string(shaderModel)).c_str(), compileFlags, 0, PSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -768,7 +769,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	CreateRasterState();
 	CreateSamplerState();
 	CreateBlendState();
-	CreateShadowResources();
+	CreateShadowMap();
 	CreateShadowSampler();
 
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
@@ -827,8 +828,6 @@ void Renderer::Resize(UINT width, UINT height)
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }
 
-constexpr UINT VEWPORT_NUM = 1;
-
 void Renderer::SetViewport(float topLeftX, float topLeftY)
 {
 	D3D11_VIEWPORT viewport = {};
@@ -839,7 +838,7 @@ void Renderer::SetViewport(float topLeftX, float topLeftY)
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
-	m_deviceContext->RSSetViewports(VEWPORT_NUM, &viewport);
+	m_deviceContext->RSSetViewports(1, &viewport);
 }
 
 void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)
@@ -888,7 +887,7 @@ void Renderer::ChangeState()
 void Renderer::ScreenPointToWorld(POINT screenPos) const
 {
 	D3D11_VIEWPORT vp;
-	UINT numViewports = VEWPORT_NUM;
+	UINT numViewports = 1;
 	m_deviceContext->RSGetViewports(&numViewports, &vp);
 
 	XMVECTOR rayOrigin = XMVectorSet(static_cast<float>(screenPos.x), static_cast<float>(screenPos.y), 0.0f, 1.0f);

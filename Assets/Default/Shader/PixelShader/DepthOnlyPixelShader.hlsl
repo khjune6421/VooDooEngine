@@ -1,5 +1,5 @@
-SamplerState defaultTexSampler : register(s0);
-Texture2D mainTex : register(t0);
+SamplerState defaultTexSampler : register(s1);
+Texture2D mainTex : register(t1);
 
 cbuffer LightPosBuffer : register(b0)
 {

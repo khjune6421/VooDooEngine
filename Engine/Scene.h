@@ -45,7 +45,7 @@ class Scene
 	void CheckCollisions();
 	void UpdateCamera();
 	void UpdateLight(Renderer* renderer);
-	void CreateShadowMap(Renderer* renderer);
+	void UpdateShadowMap(Renderer* renderer);
 	void RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer);
 
 protected:

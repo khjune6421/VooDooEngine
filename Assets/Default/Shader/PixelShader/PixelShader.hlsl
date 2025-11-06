@@ -2,8 +2,8 @@ SamplerComparisonState shadowSampler : register(s0);
 SamplerState defaultTexSampler : register(s1);
 
 TextureCubeArray shadowMapArray : register(t0);
-Texture2D mainTex : register(t9);
-Texture2D normalMap : register(t10);
+Texture2D mainTex : register(t1);
+Texture2D normalMap : register(t2);
 
 struct PointLight
 {
@@ -100,7 +100,7 @@ float4 main(PSInput input) : SV_TARGET
     float distanceFromCamera = sqrt(distanceFromCameraSq);
     float3 viewDirection = vecToCamera * rcp(distanceFromCamera);
     
-    //[loop]
+    [loop]
     for (uint i = 0; i < numPointLights; i++)
     {
         input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
