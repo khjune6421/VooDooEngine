@@ -230,46 +230,53 @@ void Renderer::CreateBlendState()
 
 void Renderer::CreateShadowResources()
 {
-	D3D11_TEXTURE2D_DESC shadowCubeDesc = {};
-	shadowCubeDesc.Width = SHADOW_MAP_SIZE;
-	shadowCubeDesc.Height = SHADOW_MAP_SIZE;
-	shadowCubeDesc.MipLevels = 1;
-	shadowCubeDesc.ArraySize = 6; // Cube map
-	shadowCubeDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-	shadowCubeDesc.SampleDesc.Count = 1;
-	shadowCubeDesc.Usage = D3D11_USAGE_DEFAULT;
-	shadowCubeDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	shadowCubeDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
-	if (FAILED(m_device->CreateTexture2D(&shadowCubeDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
+	for (UINT i = 0; i < MAX_POINT_LIGHTS; ++i)
 	{
-		MessageBoxW(nullptr, L"Failed to create shadow cube map texture", L"Error", MB_OK);
-		return;
-	}
+		ShadowMapResource shadowResource = {};
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-	dsvDesc.Texture2DArray.MipSlice = 0;
-	dsvDesc.Texture2DArray.ArraySize = 1;
-	for (UINT i = 0; i < 6; ++i)
-	{
-		dsvDesc.Texture2DArray.FirstArraySlice = i;
-		if (FAILED(m_device->CreateDepthStencilView(m_shadowMapTexture.Get(), &dsvDesc, m_shadowMapDSVs[i].GetAddressOf())))
+		D3D11_TEXTURE2D_DESC shadowCubeDesc = {};
+		shadowCubeDesc.Width = SHADOW_MAP_SIZE;
+		shadowCubeDesc.Height = SHADOW_MAP_SIZE;
+		shadowCubeDesc.MipLevels = 1;
+		shadowCubeDesc.ArraySize = 6; // Cube map
+		shadowCubeDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+		shadowCubeDesc.SampleDesc.Count = 1;
+		shadowCubeDesc.Usage = D3D11_USAGE_DEFAULT;
+		shadowCubeDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+		shadowCubeDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+		if (FAILED(m_device->CreateTexture2D(&shadowCubeDesc, nullptr, shadowResource.m_shadowMapTexture.GetAddressOf())))
 		{
-			MessageBoxW(nullptr, L"Failed to create shadow cube map DSV", L"Error", MB_OK);
+			MessageBoxW(nullptr, L"Failed to create shadow cube map texture", L"Error", MB_OK);
 			return;
 		}
-	}
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
-	srvDesc.TextureCube.MipLevels = 1;
-	srvDesc.TextureCube.MostDetailedMip = 0;
-	if (FAILED(m_device->CreateShaderResourceView(m_shadowMapTexture.Get(), &srvDesc, m_shadowMapSRV.GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create shadow cube map SRV", L"Error", MB_OK);
-		return;
+		D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+		dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+		dsvDesc.Texture2DArray.MipSlice = 0;
+		dsvDesc.Texture2DArray.ArraySize = 1;
+		for (UINT j = 0; j < 6; ++j)
+		{
+			dsvDesc.Texture2DArray.FirstArraySlice = j;
+			if (FAILED(m_device->CreateDepthStencilView(shadowResource.m_shadowMapTexture.Get(), &dsvDesc, shadowResource.m_shadowMapDSVs[j].GetAddressOf())))
+			{
+				MessageBoxW(nullptr, L"Failed to create shadow cube map DSV", L"Error", MB_OK);
+				return;
+			}
+		}
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+		srvDesc.TextureCube.MipLevels = 1;
+		srvDesc.TextureCube.MostDetailedMip = 0;
+		if (FAILED(m_device->CreateShaderResourceView(shadowResource.m_shadowMapTexture.Get(), &srvDesc, shadowResource.m_shadowMapSRV.GetAddressOf())))
+		{
+			MessageBoxW(nullptr, L"Failed to create shadow cube map SRV", L"Error", MB_OK);
+			return;
+		}
+
+		m_shadowResourcesList.push_back(move(shadowResource));
 	}
 }
 
@@ -692,15 +699,15 @@ void Renderer::LoadDefaultShapes(const filesystem::path folderPath)
 
 void Renderer::UpdateRenderer()
 {
-	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
-
-	UpdateVSConstBuffers();
-	UpdatePSConstBuffers();
+	UpdateVertexShader();
+	UpdatePixelShader();
 
 	UpdateRenderMode();
+
+	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 }
 
-void Renderer::UpdateVSConstBuffers()
+void Renderer::UpdateVertexShader()
 {
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
@@ -714,7 +721,7 @@ void Renderer::UpdateVSConstBuffers()
 	m_deviceContext->VSSetConstantBuffers(3, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
 }
 
-void Renderer::UpdatePSConstBuffers()
+void Renderer::UpdatePixelShader()
 {
 	// Camera
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
@@ -724,6 +731,7 @@ void Renderer::UpdatePSConstBuffers()
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientFog, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
+	m_deviceContext->PSSetSamplers(0, 1, m_shadowSampler.GetAddressOf());
 	m_deviceContext->PSSetSamplers(1, 1, m_samplers[DefaultSampler].GetAddressOf());
 }
 

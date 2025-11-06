@@ -83,7 +83,7 @@ public:
 	void SetQuadraticAttenuation(float quadratic) { m_lightData.quadratic = quadratic; }
 
 	PointLightConstBuffer& GetLightData();
-	void CreateShadowMap(class Renderer* renderer);
+	void CreateShadowMap(class Renderer* renderer, UINT index) const;
 };
 
 #undef comPtr

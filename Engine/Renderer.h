@@ -126,9 +126,15 @@ class Renderer
 	RasterState m_currentRasterState = RasterState::Solid;
 
 	static constexpr UINT SHADOW_MAP_SIZE = 1024;
-	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
-	comPtr<ID3D11DepthStencilView> m_shadowMapDSVs[6] = {};
-	comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
+
+	struct ShadowMapResource
+	{
+		comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
+		comPtr<ID3D11DepthStencilView> m_shadowMapDSVs[6] = {};
+		comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
+	};
+
+	std::vector<ShadowMapResource> m_shadowResourcesList = {};
 
 	// Functions
 
@@ -168,8 +174,8 @@ class Renderer
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();
-	void UpdateVSConstBuffers();
-	void UpdatePSConstBuffers();
+	void UpdateVertexShader();
+	void UpdatePixelShader();
 
 	void UpdateRenderMode();
 
