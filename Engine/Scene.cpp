@@ -50,12 +50,12 @@ void Scene::UpdateLight(Renderer* renderer)
 	m_pointLightBufferData.numPointLights = static_cast<UINT>(m_pointLights.size());
 	for (UINT i = 0; i < m_pointLightBufferData.numPointLights && i < MAX_POINT_LIGHTS; ++i) m_pointLightBufferData.pointLights[i] = m_pointLights[i]->GetLightData();
 
-	CreateShadowMap(renderer);
+	UpdateShadowMap(renderer);
 }
 
 #define comPtr Microsoft::WRL::ComPtr
 
-void Scene::CreateShadowMap(Renderer* renderer)
+void Scene::UpdateShadowMap(Renderer* renderer)
 {
 	comPtr<ID3D11RenderTargetView> originalRTV;
 	comPtr<ID3D11DepthStencilView> originalDSV;
@@ -77,7 +77,7 @@ void Scene::CreateShadowMap(Renderer* renderer)
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
 	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
-	renderer->m_deviceContext->PSSetSamplers(0, 1, renderer->m_samplers[Renderer::DefaultSampler].GetAddressOf());
+	renderer->m_deviceContext->PSSetSamplers(1, 1, renderer->m_samplers[Renderer::DefaultSampler].GetAddressOf());
 
 	for (UINT i = 0; i < static_cast<UINT>(m_pointLights.size()) && i < MAX_POINT_LIGHTS; ++i) m_pointLights[i]->CreateShadowMap(renderer, 6 * i);
 

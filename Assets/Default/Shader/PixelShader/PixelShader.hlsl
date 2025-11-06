@@ -100,7 +100,7 @@ float4 main(PSInput input) : SV_TARGET
     float distanceFromCamera = sqrt(distanceFromCameraSq);
     float3 viewDirection = vecToCamera * rcp(distanceFromCamera);
     
-    //[loop]
+    [loop]
     for (uint i = 0; i < numPointLights; i++)
     {
         input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);

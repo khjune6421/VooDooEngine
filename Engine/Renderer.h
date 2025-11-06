@@ -161,7 +161,7 @@ class Renderer
 	void CreateRasterState();
 	void CreateSamplerState();
 	void CreateBlendState();
-	void CreateShadowResources();
+	void CreateShadowMap();
 	void CreateShadowSampler();
 
 	void LoadObjFile(const std::filesystem::path filePath);
