@@ -41,55 +41,14 @@ PointLightConstBuffer& PointLight::GetLightData()
 
 void PointLight::CreateShadowMap(Renderer* renderer)
 {
-	D3D11_TEXTURE2D_DESC shadowCubeDesc = {};
-	shadowCubeDesc.Width = SHADOW_MAP_SIZE;
-	shadowCubeDesc.Height = SHADOW_MAP_SIZE;
-	shadowCubeDesc.MipLevels = 1;
-	shadowCubeDesc.ArraySize = 6; // Cube map
-	shadowCubeDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-	shadowCubeDesc.SampleDesc.Count = 1;
-	shadowCubeDesc.Usage = D3D11_USAGE_DEFAULT;
-	shadowCubeDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	shadowCubeDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
-	if (FAILED(renderer->m_device->CreateTexture2D(&shadowCubeDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create shadow cube map texture", L"Error", MB_OK);
-		return;
-	}
-
-	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-	dsvDesc.Texture2DArray.MipSlice = 0;
-	dsvDesc.Texture2DArray.ArraySize = 1;
-	for (UINT i = 0; i < 6; ++i)
-	{
-		dsvDesc.Texture2DArray.FirstArraySlice = i;
-		if (FAILED(renderer->m_device->CreateDepthStencilView(m_shadowMapTexture.Get(), &dsvDesc, m_shadowMapDSVs[i].GetAddressOf())))
-		{
-			MessageBoxW(nullptr, L"Failed to create shadow cube map DSV", L"Error", MB_OK);
-			return;
-		}
-	}
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
-	srvDesc.TextureCube.MipLevels = 1;
-	srvDesc.TextureCube.MostDetailedMip = 0;
-	if (FAILED(renderer->m_device->CreateShaderResourceView(m_shadowMapTexture.Get(), &srvDesc, m_shadowMapSRV.GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create shadow cube map SRV", L"Error", MB_OK);
-		return;
-	}
 	XMVECTOR lightPos = m_lightData.position;
 	float lightRange = m_lightData.range;
 
 	D3D11_VIEWPORT shadowViewport = {};
 	shadowViewport.TopLeftX = 0.0f;
 	shadowViewport.TopLeftY = 0.0f;
-	shadowViewport.Width = static_cast<FLOAT>(SHADOW_MAP_SIZE);
-	shadowViewport.Height = static_cast<FLOAT>(SHADOW_MAP_SIZE);
+	shadowViewport.Width = static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE);
+	shadowViewport.Height = static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE);
 	shadowViewport.MinDepth = 0.0f;
 	shadowViewport.MaxDepth = 1.0f;
 	renderer->m_deviceContext->RSSetViewports(1, &shadowViewport);
@@ -128,8 +87,8 @@ void PointLight::CreateShadowMap(Renderer* renderer)
 	for (UINT face = 0; face < 6; ++face)
 	{
 		ID3D11RenderTargetView* nullRTV = nullptr;
-		renderer->m_deviceContext->OMSetRenderTargets(1, &nullRTV, m_shadowMapDSVs[face].Get());
-		renderer->m_deviceContext->ClearDepthStencilView(m_shadowMapDSVs[face].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+		renderer->m_deviceContext->OMSetRenderTargets(1, &nullRTV, renderer->m_shadowMapDSVs[face].Get());
+		renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSVs[face].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 		XMVECTOR target = XMVectorAdd(lightPos, targets[face]);
 		XMMATRIX lightView = XMMatrixLookAtLH(lightPos, target, ups[face]);

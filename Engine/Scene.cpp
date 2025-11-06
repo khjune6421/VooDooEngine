@@ -77,7 +77,7 @@ void Scene::CreateShadowMap(Renderer* renderer)
 		renderer->m_deviceContext->RSSetViewports(1, &originalViewport);
 
 		renderer->m_deviceContext->PSSetSamplers(0, 1, renderer->m_shadowSampler.GetAddressOf());
-		renderer->m_deviceContext->PSSetShaderResources(i, 1, m_pointLights[i]->m_shadowMapSRV.GetAddressOf());
+		renderer->m_deviceContext->PSSetShaderResources(i, 1, renderer->m_shadowMapSRV.GetAddressOf());
 	}
 }
 

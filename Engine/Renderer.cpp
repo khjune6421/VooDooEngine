@@ -228,6 +228,51 @@ void Renderer::CreateBlendState()
 	m_deviceContext->OMSetBlendState(m_blendStates[NoBlend].Get(), nullptr, 0xffffffff);
 }
 
+void Renderer::CreateShadowResources()
+{
+	D3D11_TEXTURE2D_DESC shadowCubeDesc = {};
+	shadowCubeDesc.Width = SHADOW_MAP_SIZE;
+	shadowCubeDesc.Height = SHADOW_MAP_SIZE;
+	shadowCubeDesc.MipLevels = 1;
+	shadowCubeDesc.ArraySize = 6; // Cube map
+	shadowCubeDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	shadowCubeDesc.SampleDesc.Count = 1;
+	shadowCubeDesc.Usage = D3D11_USAGE_DEFAULT;
+	shadowCubeDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	shadowCubeDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+	if (FAILED(m_device->CreateTexture2D(&shadowCubeDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow cube map texture", L"Error", MB_OK);
+		return;
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+	dsvDesc.Texture2DArray.MipSlice = 0;
+	dsvDesc.Texture2DArray.ArraySize = 1;
+	for (UINT i = 0; i < 6; ++i)
+	{
+		dsvDesc.Texture2DArray.FirstArraySlice = i;
+		if (FAILED(m_device->CreateDepthStencilView(m_shadowMapTexture.Get(), &dsvDesc, m_shadowMapDSVs[i].GetAddressOf())))
+		{
+			MessageBoxW(nullptr, L"Failed to create shadow cube map DSV", L"Error", MB_OK);
+			return;
+		}
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc.TextureCube.MipLevels = 1;
+	srvDesc.TextureCube.MostDetailedMip = 0;
+	if (FAILED(m_device->CreateShaderResourceView(m_shadowMapTexture.Get(), &srvDesc, m_shadowMapSRV.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow cube map SRV", L"Error", MB_OK);
+		return;
+	}
+}
+
 void Renderer::CreateShadowSampler()
 {
 	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
@@ -704,6 +749,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	CreateRasterState();
 	CreateSamplerState();
 	CreateBlendState();
+	CreateShadowResources();
 	CreateShadowSampler();
 
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());

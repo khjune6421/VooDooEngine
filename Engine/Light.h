@@ -40,12 +40,6 @@ class PointLight : public Component
 
 	PointLightConstBuffer m_lightData = {};
 
-	static constexpr UINT SHADOW_MAP_SIZE = 1024;
-
-	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
-	comPtr<ID3D11DepthStencilView> m_shadowMapDSVs[6] = {};
-	comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
-
 	void UpdateColor() { m_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f }; }
 
 public:
