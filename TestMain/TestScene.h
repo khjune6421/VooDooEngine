@@ -20,7 +20,7 @@ class TestScene : public Scene
 		Night,
 
 		TimeOfDayCount
-	} m_timeOfDay = Dawn;
+	} m_timeOfDay = Noon;
 	DirectX::XMFLOAT3 m_timeColors[TimeOfDayCount] =
 	{
 		m_morningColor,
