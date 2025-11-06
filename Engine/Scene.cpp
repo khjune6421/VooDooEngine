@@ -114,6 +114,11 @@ void Scene::Render(Renderer* renderer)
 	renderer->m_deviceContext->OMSetBlendState(renderer->m_blendStates[Renderer::AlphaToCoverage].Get(), nullptr, 0xffffffff); // It just works // but only if it is sorted
 	for (const auto& shape : m_renderShapes) shape->Render(renderer, &m_matrixConstBuffer);
 
+	ID3D11ShaderResourceView* nullSRV = nullptr;
+	renderer->m_deviceContext->PSSetShaderResources(0, 1, &nullSRV);
+	renderer->m_deviceContext->PSSetShaderResources(1, 1, &nullSRV);
+	renderer->m_deviceContext->PSSetShaderResources(2, 1, &nullSRV);
+
 #ifdef _DEBUG
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 	for (const auto& shape : m_renderShapes) shape->DebugRender(renderer, &m_matrixConstBuffer);
