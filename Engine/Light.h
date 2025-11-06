@@ -22,15 +22,6 @@ struct PointLightConstBuffer // Is also a SpotLightConstBuffer
 	float quadratic = DEFAULT_QUADRATIC_ATTENUATION;
 };
 
-constexpr int MAX_POINT_LIGHTS = 8;
-struct PointLightArrayConstBuffer
-{
-	PointLightConstBuffer pointLights[MAX_POINT_LIGHTS] = {};
-
-	UINT numPointLights = 0;
-	UINT padding[3] = {};
-};
-
 class PointLight : public Component
 {
 	friend class Scene;
@@ -39,12 +30,6 @@ class PointLight : public Component
 	float m_intensity = 1.0f;
 
 	PointLightConstBuffer m_lightData = {};
-
-	static constexpr UINT SHADOW_MAP_SIZE = 1024;
-
-	comPtr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
-	comPtr<ID3D11DepthStencilView> m_shadowMapDSVs[6] = {};
-	comPtr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
 
 	void UpdateColor() { m_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f }; }
 
@@ -89,7 +74,7 @@ public:
 	void SetQuadraticAttenuation(float quadratic) { m_lightData.quadratic = quadratic; }
 
 	PointLightConstBuffer& GetLightData();
-	void CreateShadowMap(class Renderer* renderer);
+	void CreateShadowMap(class Renderer* renderer, UINT index) const;
 };
 
 #undef comPtr

@@ -47,13 +47,12 @@ namespace VDGM
 
 	void Update(float deltaTime)
 	{
-		// TODO: See if this can be optimized with multithreading
 		if (g_currentScene) g_currentScene->Update(deltaTime);
 	}
 
 	void Render()
 	{
-		// This too
+		// TODO: See if this can be optimized with multithreading
 		for (auto& renderer : VDW::g_renderers) renderer->Render();
 	}
 }

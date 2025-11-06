@@ -125,6 +125,11 @@ class Renderer
 	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
 	RasterState m_currentRasterState = RasterState::Solid;
 
+	static constexpr UINT SHADOW_MAP_SIZE = 1024;
+	comPtr<ID3D11Texture2D> m_shadowMapArrayTexture = nullptr;
+	std::vector<comPtr<ID3D11DepthStencilView>> m_shadowMapDSVs = {};
+	comPtr<ID3D11ShaderResourceView> m_shadowMapArraySRV = nullptr;
+
 	// Functions
 
 	// Device
@@ -156,14 +161,15 @@ class Renderer
 	void CreateRasterState();
 	void CreateSamplerState();
 	void CreateBlendState();
+	void CreateShadowMap();
 	void CreateShadowSampler();
 
 	void LoadObjFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);
 
 	void UpdateRenderer();
-	void UpdateVSConstBuffers();
-	void UpdatePSConstBuffers();
+	void UpdateVertexShader();
+	void UpdatePixelShader();
 
 	void UpdateRenderMode();
 
