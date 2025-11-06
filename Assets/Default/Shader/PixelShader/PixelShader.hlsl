@@ -1,7 +1,7 @@
 SamplerComparisonState shadowSampler : register(s0);
 SamplerState defaultTexSampler : register(s1);
 
-TextureCube shadowMap[8] : register(t0);
+TextureCubeArray shadowMapArray : register(t0);
 Texture2D mainTex : register(t9);
 Texture2D normalMap : register(t10);
 
@@ -60,7 +60,7 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     
     // Shadow calculation
     float normalizedDistance = distance / light.range;
-    float shadowFactor = shadowMap[index].SampleCmpLevelZero(shadowSampler, -vecToLight, normalizedDistance - 1e-3f);
+    float shadowFactor = shadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), normalizedDistance - 1e-3f);
     
     float rcpDistance = rcp(distance);
     vecToLight *= rcpDistance;
