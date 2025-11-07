@@ -2,8 +2,6 @@
 #include "pch.h"
 #include "Component.h"
 
-#define comPtr Microsoft::WRL::ComPtr
-
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
 constexpr float DEFAULT_LINEAR_ATTENUATION = 0.01f;
 constexpr float DEFAULT_QUADRATIC_ATTENUATION = 0.005f;
@@ -76,5 +74,3 @@ public:
 	PointLightConstBuffer& GetLightData();
 	void CreateShadowMap(class Renderer* renderer, UINT index) const;
 };
-
-#undef comPtr

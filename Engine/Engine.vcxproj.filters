@@ -7,7 +7,6 @@
     <ClCompile Include="WindowManager.cpp">
       <Filter>Window</Filter>
     </ClCompile>
-    <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Scene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -33,6 +32,12 @@
       <Filter>Component</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="GameManager.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomNumberGenerator.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">
@@ -59,6 +64,9 @@
     <Filter Include="Component\RenderingRelated">
       <UniqueIdentifier>{ad776b06-b34b-4ec4-9c8d-a1cc3b4ee379}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{4a85e406-59ed-4989-98f1-5cb1121c66b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h">
@@ -67,7 +75,6 @@
     <ClInclude Include="WindowManager.h">
       <Filter>Window</Filter>
     </ClInclude>
-    <ClInclude Include="GameManager.h" />
     <ClInclude Include="Scene.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -93,6 +100,15 @@
       <Filter>Component</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="GameManager.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomNumberGenerator.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Singleton.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

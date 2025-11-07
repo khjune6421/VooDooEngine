@@ -58,12 +58,10 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     float distance = sqrt(distanceSq);
     if (distance > light.range) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
-    // Shadow calculation
-    float normalizedDistance = distance / light.range;
-    float shadowFactor = shadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), normalizedDistance - 1e-3f);
+    // Shadow
+    float shadowFactor = shadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), distance / light.range - 1e-3f);
     
-    float rcpDistance = rcp(distance);
-    vecToLight *= rcpDistance;
+    vecToLight /= distance;
     
     float spotDot = abs(dot(-vecToLight, light.directionAndAngle.xyz));
     if (spotDot < 0.0f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -75,7 +73,7 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     
     diffuseFactor = saturate(diffuseFactor);
     
-    float attenuation = spot * rcp(light.aConstant + light.aLinear * distance + light.aQuadratic * distanceSq);
+    float attenuation = spot / (light.aConstant + light.aLinear * distance + light.aQuadratic * distanceSq);
     float4 result = light.color * diffuseFactor;
     
     float3 halfVector = normalize(vecToLight + viewDirection);
@@ -98,13 +96,10 @@ float4 main(PSInput input) : SV_TARGET
     float3 vecToCamera = cameraPos.xyz - input.posWorld.xyz;
     float distanceFromCameraSq = dot(vecToCamera, vecToCamera);
     float distanceFromCamera = sqrt(distanceFromCameraSq);
-    float3 viewDirection = vecToCamera * rcp(distanceFromCamera);
+    float3 viewDirection = vecToCamera / distanceFromCamera;
     
     [loop]
-    for (uint i = 0; i < numPointLights; i++)
-    {
-        input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
-    }
+    for (uint i = 0; i < numPointLights; i++) input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
     
     float fogFactor = saturate(distanceFromCamera * rcp(ambientFog.w));
     float4 fogColor = float4(ambientFog.xyz, 1.0f);

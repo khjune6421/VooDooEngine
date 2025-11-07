@@ -37,8 +37,6 @@ PointLightConstBuffer& PointLight::GetLightData()
 	return m_lightData;
 }
 
-#define comPtr Microsoft::WRL::ComPtr
-
 void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 {
 	XMVECTOR lightPos = m_lightData.position;
@@ -72,8 +70,8 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 
 	for (UINT face = 0; face < 6; ++face)
 	{
- 		renderer->m_deviceContext->OMSetRenderTargets(1, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_shadowMapDSVs[static_cast<vector<comPtr<ID3D11DepthStencilView>, allocator<comPtr<ID3D11DepthStencilView>>>::size_type>(index + face)].Get());
-		renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSVs[static_cast<vector<comPtr<ID3D11DepthStencilView>, allocator<comPtr<ID3D11DepthStencilView>>>::size_type>(index + face)].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+ 		renderer->m_deviceContext->OMSetRenderTargets(1, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_shadowMapDSVs[static_cast<vector<com_ptr<ID3D11DepthStencilView>, allocator<com_ptr<ID3D11DepthStencilView>>>::size_type>(index) + face].Get());
+		renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSVs[static_cast<vector<com_ptr<ID3D11DepthStencilView>, allocator<com_ptr<ID3D11DepthStencilView>>>::size_type>(index) + face].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 		XMVECTOR target = XMVectorAdd(lightPos, targets[face]);
 		XMMATRIX lightView = XMMatrixLookAtLH(lightPos, target, ups[face]);
@@ -85,5 +83,3 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 		VDGM::g_currentScene->RenderShadows(renderer, &lightMatrixBuffer);
 	}
 }
-
-#undef comPtr

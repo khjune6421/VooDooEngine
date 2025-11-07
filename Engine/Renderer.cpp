@@ -7,8 +7,6 @@
 using namespace std;
 using namespace DirectX;
 
-#define comPtr Microsoft::WRL::ComPtr
-
 UINT Renderer::s_nextMeshId = 0;
 unordered_map<wstring, UINT> g_meshIdMap;
 
@@ -86,7 +84,7 @@ void Renderer::CreateDeviceSwapChain()
 
 void Renderer::CreateRenderTarget()
 {
-	comPtr<ID3D11Texture2D> backBuffer;
+	com_ptr<ID3D11Texture2D> backBuffer;
 
 	if (FAILED(m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()))))
 	{
@@ -253,7 +251,7 @@ void Renderer::CreateShadowMap()
 	dsvDesc.Texture2DArray.MipSlice = 0;
 	dsvDesc.Texture2DArray.ArraySize = 1;
 
-	m_shadowMapDSVs.resize(static_cast<vector<comPtr<ID3D11DepthStencilView>, allocator<comPtr<ID3D11DepthStencilView>>>::size_type>(MAX_POINT_LIGHTS) * 6);
+	m_shadowMapDSVs.resize(static_cast<vector<com_ptr<ID3D11DepthStencilView>, allocator<com_ptr<ID3D11DepthStencilView>>>::size_type>(MAX_POINT_LIGHTS) * 6);
 
 	for (UINT lightIndex = 0; lightIndex < MAX_POINT_LIGHTS; ++lightIndex)
 	{
@@ -335,8 +333,8 @@ void Renderer::LoadFonts(const filesystem::path fontPath)
 
 void Renderer::GetHardwareInfo()
 {
-	comPtr<IDXGIAdapter1> padapter;
-	comPtr<IDXGIFactory1> pfactory;
+	com_ptr<IDXGIAdapter1> padapter;
+	com_ptr<IDXGIFactory1> pfactory;
 
 	if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), &pfactory)))
 	{
@@ -354,7 +352,7 @@ void Renderer::GetHardwareInfo()
 			return;
 		}
 
-		comPtr<IDXGIOutput> poutput;
+		com_ptr<IDXGIOutput> poutput;
 		for (UINT outputIndex = 0; padapter->EnumOutputs(outputIndex, &poutput) != DXGI_ERROR_NOT_FOUND; ++outputIndex)
 		{
 			DXGI_OUTPUT_DESC outputDesc = {};
@@ -384,7 +382,7 @@ void Renderer::ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth, 
 	}
 }
 
-void Renderer::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride)
+void Renderer::CreateVertexBuffer(UINT size, _Out_ com_ptr<ID3D11Buffer>* buffer, const void* initData, UINT stride)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
@@ -401,7 +399,7 @@ void Renderer::CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer,
 	}
 }
 
-void Renderer::CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer)
+void Renderer::CreateConstBuffer(UINT size, _Out_ com_ptr<ID3D11Buffer>* buffer)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = size;
@@ -558,8 +556,8 @@ constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 
 void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
 {
-	comPtr<ID3DBlob> VSCode;
-	comPtr<ID3DBlob> errorBlob;
+	com_ptr<ID3DBlob> VSCode;
+	com_ptr<ID3DBlob> errorBlob;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("vs_" + string(shaderModel)).c_str(), compileFlags, 0, VSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -569,7 +567,7 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 		return;
 	}
 
-	comPtr<ID3D11VertexShader> vertexShader;
+	com_ptr<ID3D11VertexShader> vertexShader;
 	hr = m_device->CreateVertexShader(VSCode.Get()->GetBufferPointer(), VSCode.Get()->GetBufferSize(), nullptr, vertexShader.GetAddressOf());
 	if (FAILED(hr))
 	{
@@ -577,7 +575,7 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 		return;
 	}
 
-	comPtr<ID3D11InputLayout> inputLayout;
+	com_ptr<ID3D11InputLayout> inputLayout;
 	if (FAILED(m_device->CreateInputLayout(s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE, VSCode->GetBufferPointer(), VSCode->GetBufferSize(), &inputLayout)))
 	{
 		MessageBoxW(nullptr, L"Failed to create input layout", L"Error", MB_OK);
@@ -591,8 +589,8 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 
 void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
 {
-	comPtr<ID3DBlob> GSCode;
-	comPtr<ID3DBlob> errorBlob;
+	com_ptr<ID3DBlob> GSCode;
+	com_ptr<ID3DBlob> errorBlob;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("gs_" + string(shaderModel)).c_str(), compileFlags, 0, GSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -602,7 +600,7 @@ void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, c
 		return;
 	}
 
-	comPtr<ID3D11GeometryShader> geometryShader;
+	com_ptr<ID3D11GeometryShader> geometryShader;
 	hr = m_device->CreateGeometryShader(GSCode->GetBufferPointer(), GSCode->GetBufferSize(), nullptr, geometryShader.GetAddressOf());
 	if (FAILED(hr))
 	{
@@ -617,8 +615,8 @@ void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, c
 
 void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, const char* shaderModel)
 {
-	comPtr<ID3DBlob> PSCode;
-	comPtr<ID3DBlob> errorBlob;
+	com_ptr<ID3DBlob> PSCode;
+	com_ptr<ID3DBlob> errorBlob;
 
 	HRESULT hr = D3DCompileFromFile(file, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, ("ps_" + string(shaderModel)).c_str(), compileFlags, 0, PSCode.GetAddressOf(), errorBlob.GetAddressOf());
 	if (FAILED(hr))
@@ -628,7 +626,7 @@ void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, cons
 		return;
 	}
 
-	comPtr<ID3D11PixelShader> pixelShader;
+	com_ptr<ID3D11PixelShader> pixelShader;
 	hr = m_device->CreatePixelShader(PSCode->GetBufferPointer(), PSCode->GetBufferSize(), nullptr, pixelShader.GetAddressOf());
 	if (FAILED(hr))
 	{
@@ -651,7 +649,7 @@ void Renderer::LoadAllTextures(const std::filesystem::path texturePath)
 			wstring textureName = entry.path().stem().wstring();
 			if (g_textureIdMap.find(textureName) == g_textureIdMap.end()) g_textureIdMap[textureName] = s_textureId++;
 
-			comPtr<ID3D11ShaderResourceView> texture;
+			com_ptr<ID3D11ShaderResourceView> texture;
 			HRESULT hr = DirectX::CreateWICTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, texture.GetAddressOf());
 			if (FAILED(hr))
 			{
@@ -857,7 +855,7 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 
 	if (m_SpriteFontMap.find(fontName) != m_SpriteFontMap.end())
 	{
-		comPtr<ID3D11DepthStencilState> currentDepthState;
+		com_ptr<ID3D11DepthStencilState> currentDepthState;
 		m_deviceContext->OMGetDepthStencilState(&currentDepthState, nullptr);
 
 		// This fuckes up depth testing // considering a different way to draw text
@@ -925,5 +923,3 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 
 	if (VDGM::g_currentScene) VDGM::g_currentScene->Raycast(rayOrigin, rayEnd);
 }
-
-#undef comPtr

@@ -1,6 +1,6 @@
 #pragma once
 
-// Utility header
+// Standard library header
 #include <Windows.h>
 #include <iostream>
 #include <vector>
@@ -11,6 +11,8 @@
 #include <filesystem>
 #include <fstream>
 #include <typeindex>
+#include <chrono>
+#include <random>
 
 // DirectX header
 #include <d3d11.h>
@@ -23,6 +25,9 @@
 #include <DDSTextureLoader.h>
 #include <WICTextureLoader.h>
 
+// Engine header
+#include "Singleton.h"
+
 // Windows libraries
 #pragma comment(lib, "winmm.lib")
 
@@ -33,3 +38,6 @@
 
 // DirectXTK libraries
 #pragma comment(lib, "DirectXTK.lib")
+
+// Macro definitions
+#define com_ptr Microsoft::WRL::ComPtr

@@ -53,12 +53,10 @@ void Scene::UpdateLight(Renderer* renderer)
 	UpdateShadowMap(renderer);
 }
 
-#define comPtr Microsoft::WRL::ComPtr
-
 void Scene::UpdateShadowMap(Renderer* renderer)
 {
-	comPtr<ID3D11RenderTargetView> originalRTV;
-	comPtr<ID3D11DepthStencilView> originalDSV;
+	com_ptr<ID3D11RenderTargetView> originalRTV;
+	com_ptr<ID3D11DepthStencilView> originalDSV;
 	renderer->m_deviceContext->OMGetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.GetAddressOf());
 
 	D3D11_VIEWPORT originalViewport;
@@ -96,8 +94,6 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 	renderer->m_deviceContext->RSSetViewports(1, &originalViewport);
 	renderer->m_deviceContext->RSSetScissorRects(1, &originalScissorRect);
 }
-
-#undef comPtr
 
 void Scene::RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer)
 {

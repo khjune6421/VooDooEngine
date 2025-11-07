@@ -159,6 +159,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjFileParser.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="RandomNumberGenerator.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shape.cpp" />
@@ -173,9 +174,11 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjFileParser.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RandomNumberGenerator.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shape.h" />
+    <ClInclude Include="Singleton.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>

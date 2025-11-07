@@ -3,9 +3,6 @@
 
 #include "Scene.h"
 
-// I usually don't use 'using namespace' or #define macro in header files but I'll make this one an exception
-#define comPtr Microsoft::WRL::ComPtr
-
 namespace VDGM
 {
 	extern float g_deltaTime;
@@ -54,7 +51,7 @@ class Renderer
 
 		ConstBufferCount
 	};
-	comPtr<ID3D11Buffer> m_constBuffers[ConstBufferCount] = {};
+	com_ptr<ID3D11Buffer> m_constBuffers[ConstBufferCount] = {};
 
 	// Input layouts // well this is cursed
 	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
@@ -67,8 +64,8 @@ class Renderer
 
 		SamplerCount
 	};
-	comPtr<ID3D11SamplerState> m_samplers[SamplerCount] = {};
-	comPtr<ID3D11SamplerState> m_shadowSampler = nullptr;
+	com_ptr<ID3D11SamplerState> m_samplers[SamplerCount] = {};
+	com_ptr<ID3D11SamplerState> m_shadowSampler = nullptr;
 
 	enum BlendState
 	{
@@ -78,7 +75,7 @@ class Renderer
 
 		BlendStateCount
 	};
-	comPtr<ID3D11BlendState> m_blendStates[BlendStateCount] = {};
+	com_ptr<ID3D11BlendState> m_blendStates[BlendStateCount] = {};
 
 	// Variables
 	HWND m_hWnd = nullptr;
@@ -86,12 +83,12 @@ class Renderer
 	// Device
 	DeviceInfo m_deviceInfo = {};
 
-	comPtr<ID3D11Device> m_device = nullptr;
-	comPtr<ID3D11DeviceContext> m_deviceContext = nullptr;
-	comPtr<IDXGISwapChain> m_swapChain = nullptr;
-	comPtr<ID3D11RenderTargetView> m_renderTargetView = nullptr;
-	comPtr<ID3D11Texture2D> m_depthStencilBuffer = nullptr;
-	comPtr<ID3D11DepthStencilView> m_depthStencilView = nullptr;
+	com_ptr<ID3D11Device> m_device = nullptr;
+	com_ptr<ID3D11DeviceContext> m_deviceContext = nullptr;
+	com_ptr<IDXGISwapChain> m_swapChain = nullptr;
+	com_ptr<ID3D11RenderTargetView> m_renderTargetView = nullptr;
+	com_ptr<ID3D11Texture2D> m_depthStencilBuffer = nullptr;
+	com_ptr<ID3D11DepthStencilView> m_depthStencilView = nullptr;
 
 	UINT m_DXVersion = 0;
 	UINT m_DXSubVersion = 0;
@@ -102,19 +99,19 @@ class Renderer
 
 	// Maps shape ID to its vertex buffer and vertex count
 	static UINT s_nextMeshId;
-	std::unordered_map<UINT, std::pair<comPtr<ID3D11Buffer>, UINT>> m_meshVertexBufferMap;
+	std::unordered_map<UINT, std::pair<com_ptr<ID3D11Buffer>, UINT>> m_meshVertexBufferMap;
 
 	static UINT s_vertexShaderId;
-	std::unordered_map<UINT, std::pair<comPtr<ID3D11VertexShader>, comPtr<ID3D11InputLayout>>> m_vertexShaderMap;
+	std::unordered_map<UINT, std::pair<com_ptr<ID3D11VertexShader>, com_ptr<ID3D11InputLayout>>> m_vertexShaderMap;
 
 	static UINT s_geometryShaderId;
-	std::unordered_map<UINT, comPtr<ID3D11GeometryShader>> m_geometryShaderMap;
+	std::unordered_map<UINT, com_ptr<ID3D11GeometryShader>> m_geometryShaderMap;
 
 	static UINT s_pixelShaderId;
-	std::unordered_map<UINT, comPtr<ID3D11PixelShader>> m_pixelShaderMap;
+	std::unordered_map<UINT, com_ptr<ID3D11PixelShader>> m_pixelShaderMap;
 
 	static UINT s_textureId;
-	std::unordered_map<UINT, comPtr<ID3D11ShaderResourceView>> m_textureMap;
+	std::unordered_map<UINT, com_ptr<ID3D11ShaderResourceView>> m_textureMap;
 
 	// Render
 	enum RasterState
@@ -124,14 +121,14 @@ class Renderer
 
 		RasterStateCount
 	};
-	comPtr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
+	com_ptr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
 	RasterState m_currentRasterState = RasterState::Solid;
 
 	static constexpr UINT SHADOW_MAP_SIZE = 1024;
-	comPtr<ID3D11Texture2D> m_shadowMapArrayTexture = nullptr;
-	comPtr<ID3D11RenderTargetView> m_shadowMapArrayRTV = nullptr;
-	std::vector<comPtr<ID3D11DepthStencilView>> m_shadowMapDSVs = {};
-	comPtr<ID3D11ShaderResourceView> m_shadowMapArraySRV = nullptr;
+	com_ptr<ID3D11Texture2D> m_shadowMapArrayTexture = nullptr;
+	com_ptr<ID3D11RenderTargetView> m_shadowMapArrayRTV = nullptr;
+	std::vector<com_ptr<ID3D11DepthStencilView>> m_shadowMapDSVs = {};
+	com_ptr<ID3D11ShaderResourceView> m_shadowMapArraySRV = nullptr;
 	bool m_shouldUpdateLights = true;
 
 	// Functions
@@ -143,8 +140,8 @@ class Renderer
 
 	void ClearBackBuffer(UINT flag, DirectX::XMFLOAT4 color, float depth = 1.0f, UINT8 stencil = 0);
 
-	void CreateVertexBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer, const void* initData, UINT stride);
-	void CreateConstBuffer(UINT size, _Out_ comPtr<ID3D11Buffer>* buffer);
+	void CreateVertexBuffer(UINT size, _Out_ com_ptr<ID3D11Buffer>* buffer, const void* initData, UINT stride);
+	void CreateConstBuffer(UINT size, _Out_ com_ptr<ID3D11Buffer>* buffer);
 
 	void ShowFPS();
 	void DisplayDeviceInfo();
@@ -197,5 +194,3 @@ public:
 
 	void ScreenPointToWorld(POINT screenPos) const;
 };
-
-#undef comPtr
