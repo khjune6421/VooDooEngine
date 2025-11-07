@@ -52,7 +52,6 @@ protected:
 	std::vector<std::unique_ptr<class Object>> m_objects;
 
 	PointLightArrayConstBuffer m_pointLightBufferData = {};
-	bool m_lightsNeedUpdate = true;
 
 public:
 	Scene() = default;

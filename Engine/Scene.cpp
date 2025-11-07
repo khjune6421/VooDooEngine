@@ -65,15 +65,26 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 	UINT numViewports = 1;
 	renderer->m_deviceContext->RSGetViewports(&numViewports, &originalViewport);
 
-	D3D11_VIEWPORT shadowViewport = {};
-	shadowViewport.TopLeftX = 0.0f;
-	shadowViewport.TopLeftY = 0.0f;
-	shadowViewport.Width = static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE);
-	shadowViewport.Height = static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE);
-	shadowViewport.MinDepth = 0.0f;
-	shadowViewport.MaxDepth = 1.0f;
+	D3D11_RECT originalScissorRect;
+	UINT numScissorRects = 1;
+	renderer->m_deviceContext->RSGetScissorRects(&numScissorRects, &originalScissorRect);
 
+	constexpr D3D11_VIEWPORT shadowViewport =
+	{
+		0.0f, 0.0f,
+		static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE),
+		static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE),
+		0.0f, 1.0f
+	};
 	renderer->m_deviceContext->RSSetViewports(1, &shadowViewport);
+	constexpr D3D11_RECT shadowScissorRect =
+	{
+		0, 0,
+		static_cast<LONG>(Renderer::SHADOW_MAP_SIZE),
+		static_cast<LONG>(Renderer::SHADOW_MAP_SIZE)
+	};
+	renderer->m_deviceContext->RSSetScissorRects(1, &shadowScissorRect);
+
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
 	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
@@ -83,6 +94,7 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 
 	renderer->m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
 	renderer->m_deviceContext->RSSetViewports(1, &originalViewport);
+	renderer->m_deviceContext->RSSetScissorRects(1, &originalScissorRect);
 }
 
 #undef comPtr
@@ -104,20 +116,14 @@ void Scene::Update(float deltaTime)
 
 void Scene::PreRender(Renderer* renderer)
 {
-	if (m_lightsNeedUpdate) UpdateLight(renderer);
+	if (renderer->m_shouldUpdateLights) UpdateLight(renderer);
 }
 
 void Scene::Render(Renderer* renderer)
 {
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 	renderer->m_deviceContext->OMSetBlendState(renderer->m_blendStates[Renderer::AlphaToCoverage].Get(), nullptr, 0xffffffff); // It just works // but only if it is sorted
 	for (const auto& shape : m_renderShapes) shape->Render(renderer, &m_matrixConstBuffer);
-
-	ID3D11ShaderResourceView* nullSRV = nullptr;
-	renderer->m_deviceContext->PSSetShaderResources(0, 1, &nullSRV);
-	renderer->m_deviceContext->PSSetShaderResources(1, 1, &nullSRV);
-	renderer->m_deviceContext->PSSetShaderResources(2, 1, &nullSRV);
 
 #ifdef _DEBUG
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);

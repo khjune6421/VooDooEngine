@@ -165,10 +165,10 @@ void Renderer::CreateRasterState()
 	}
 
 #ifdef _DEBUG
-	m_deviceContext->RSSetState(g_rasterState[1].Get());
+	m_deviceContext->RSSetState(g_rasterState[Wireframe].Get());
 	m_currentRasterState = RasterState::Wireframe;
 #else
-	m_deviceContext->RSSetState(g_rasterState[0].Get());
+	m_deviceContext->RSSetState(g_rasterState[Solid].Get());
 	m_currentRasterState = RasterState::Solid;
 #endif
 }
@@ -418,7 +418,6 @@ void Renderer::ShowFPS()
 {
 	static UINT frameCount = 0;
 	static float elapsedTime = 0.0f;
-	static float fps = 0.0f;
 
 	frameCount++;
 
@@ -426,13 +425,13 @@ void Renderer::ShowFPS()
 
 	if (elapsedTime >= 1.0)
 	{
-		fps = frameCount * elapsedTime;
+		m_deviceInfo.m_fps = static_cast<UINT>(frameCount * elapsedTime);
 		frameCount = 0;
 		elapsedTime = 0.0;
 	}
 
-	wstring fpsText = L"FPS: " + to_wstring(static_cast<int>(fps));
-	DrawText(fpsText.c_str(), XMFLOAT2(static_cast<float>(m_deviceInfo.displayMode.Width / 2), 20.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	wstring fpsText = L"FPS: " + to_wstring(m_deviceInfo.m_fps);
+	DrawText(fpsText.c_str(), XMFLOAT2(20.0f, 20.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 void Renderer::DisplayDeviceInfo()
@@ -703,6 +702,14 @@ void Renderer::LoadDefaultShapes(const filesystem::path folderPath)
 	}
 }
 
+void Renderer::ClearResources()
+{
+	constexpr ID3D11ShaderResourceView* nullSRV = nullptr;
+	m_deviceContext->PSSetShaderResources(0, 1, &nullSRV);
+	m_deviceContext->PSSetShaderResources(1, 1, &nullSRV);
+	m_deviceContext->PSSetShaderResources(2, 1, &nullSRV);
+}
+
 void Renderer::UpdateRenderer()
 {
 	UpdateVertexShader();
@@ -864,6 +871,8 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 
 void Renderer::Render()
 {
+	ClearResources();
+
 	VDGM::g_currentScene->PreRender(this);
 
 	UpdateRenderer();
