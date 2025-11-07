@@ -74,6 +74,7 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 	shadowViewport.MaxDepth = 1.0f;
 
 	renderer->m_deviceContext->RSSetViewports(1, &shadowViewport);
+	renderer->m_deviceContext->RSSetState(nullptr); // This is very important // otherwise shadows will be fucked up
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
 	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);

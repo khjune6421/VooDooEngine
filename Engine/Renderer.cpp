@@ -870,7 +870,7 @@ void Renderer::Render()
 
 	VDGM::g_currentScene->Render(this);
 
-	ShowFPS();
+	//ShowFPS();
 
 #ifdef _DEBUG
 	DisplayDeviceInfo();
