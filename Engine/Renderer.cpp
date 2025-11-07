@@ -165,10 +165,10 @@ void Renderer::CreateRasterState()
 	}
 
 #ifdef _DEBUG
-	m_deviceContext->RSSetState(g_rasterState[1].Get());
+	m_deviceContext->RSSetState(g_rasterState[Wireframe].Get());
 	m_currentRasterState = RasterState::Wireframe;
 #else
-	m_deviceContext->RSSetState(g_rasterState[0].Get());
+	m_deviceContext->RSSetState(g_rasterState[Solid].Get());
 	m_currentRasterState = RasterState::Solid;
 #endif
 }

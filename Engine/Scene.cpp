@@ -65,16 +65,26 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 	UINT numViewports = 1;
 	renderer->m_deviceContext->RSGetViewports(&numViewports, &originalViewport);
 
-	D3D11_VIEWPORT shadowViewport = {};
-	shadowViewport.TopLeftX = 0.0f;
-	shadowViewport.TopLeftY = 0.0f;
-	shadowViewport.Width = static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE);
-	shadowViewport.Height = static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE);
-	shadowViewport.MinDepth = 0.0f;
-	shadowViewport.MaxDepth = 1.0f;
+	D3D11_RECT originalScissorRect;
+	UINT numScissorRects = 1;
+	renderer->m_deviceContext->RSGetScissorRects(&numScissorRects, &originalScissorRect);
 
+	constexpr D3D11_VIEWPORT shadowViewport =
+	{
+		0.0f, 0.0f,
+		static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE),
+		static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE),
+		0.0f, 1.0f
+	};
 	renderer->m_deviceContext->RSSetViewports(1, &shadowViewport);
-	renderer->m_deviceContext->RSSetState(nullptr); // This is very important // otherwise shadows will be fucked up
+	constexpr D3D11_RECT shadowScissorRect =
+	{
+		0, 0,
+		static_cast<LONG>(Renderer::SHADOW_MAP_SIZE),
+		static_cast<LONG>(Renderer::SHADOW_MAP_SIZE)
+	};
+	renderer->m_deviceContext->RSSetScissorRects(1, &shadowScissorRect);
+
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
 	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
@@ -84,6 +94,7 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 
 	renderer->m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
 	renderer->m_deviceContext->RSSetViewports(1, &originalViewport);
+	renderer->m_deviceContext->RSSetScissorRects(1, &originalScissorRect);
 }
 
 #undef comPtr
