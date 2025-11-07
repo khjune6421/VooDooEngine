@@ -116,7 +116,7 @@ void Scene::Update(float deltaTime)
 
 void Scene::PreRender(Renderer* renderer)
 {
-	if (renderer->m_lightsNeedUpdate) UpdateLight(renderer);
+	if (renderer->m_shouldUpdateLights) UpdateLight(renderer);
 }
 
 void Scene::Render(Renderer* renderer)
