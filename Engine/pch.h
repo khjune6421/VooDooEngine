@@ -12,7 +12,6 @@
 #include <fstream>
 #include <typeindex>
 #include <chrono>
-#include <random>
 
 // DirectX header
 #include <d3d11.h>

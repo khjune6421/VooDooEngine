@@ -232,7 +232,7 @@ void Renderer::CreateShadowMap()
 	shadowArrayDesc.Width = SHADOW_MAP_SIZE;
 	shadowArrayDesc.Height = SHADOW_MAP_SIZE;
 	shadowArrayDesc.MipLevels = 1;
-	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6; // MAX_POINT_LIGHTS * 6 faces
+	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6; // MAX_POINT_LIGHTS * 6
 	shadowArrayDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 	shadowArrayDesc.SampleDesc.Count = 1;
 	shadowArrayDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -250,8 +250,6 @@ void Renderer::CreateShadowMap()
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 	dsvDesc.Texture2DArray.MipSlice = 0;
 	dsvDesc.Texture2DArray.ArraySize = 1;
-
-	m_shadowMapDSVs.resize(static_cast<vector<com_ptr<ID3D11DepthStencilView>, allocator<com_ptr<ID3D11DepthStencilView>>>::size_type>(MAX_POINT_LIGHTS) * 6);
 
 	for (UINT lightIndex = 0; lightIndex < MAX_POINT_LIGHTS; ++lightIndex)
 	{

@@ -1,5 +1,6 @@
 #pragma once
-#include "pch.h"
+#include <random>
+#include "Singleton.h"
 
 class RandomNumberGenerator : public Singleton<RandomNumberGenerator>
 {

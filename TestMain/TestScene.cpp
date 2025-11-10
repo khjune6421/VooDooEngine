@@ -30,7 +30,7 @@ TestScene::TestScene()
 	m_lightObj->SetPosition(XMVECTOR{ 2.5f, 1.5f, 2.5f, 1.0f });
 	m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.75f }, 5.0f, 0.0f, 20.0f, 1.0f, 0.25f, 0.25f);
 
-	const int treeCount = 1000;
+	constexpr int treeCount = 1000;
 	for (int i = 0; i < treeCount; ++i)
 	{
 		float x = static_cast<float>((rand() % 2000) - 1000) / 10.0f;

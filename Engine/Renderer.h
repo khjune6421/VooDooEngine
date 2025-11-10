@@ -127,7 +127,7 @@ class Renderer
 	static constexpr UINT SHADOW_MAP_SIZE = 1024;
 	com_ptr<ID3D11Texture2D> m_shadowMapArrayTexture = nullptr;
 	com_ptr<ID3D11RenderTargetView> m_shadowMapArrayRTV = nullptr;
-	std::vector<com_ptr<ID3D11DepthStencilView>> m_shadowMapDSVs = {};
+	std::vector<com_ptr<ID3D11DepthStencilView>> m_shadowMapDSVs{ SHADOW_MAP_SIZE * 6 };
 	com_ptr<ID3D11ShaderResourceView> m_shadowMapArraySRV = nullptr;
 	bool m_shouldUpdateLights = true;
 
