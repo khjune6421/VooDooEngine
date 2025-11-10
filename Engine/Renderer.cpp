@@ -674,10 +674,10 @@ void Renderer::LoadObjFile(const filesystem::path filePath)
 	for (const auto& [name, vertices] : objects.m_meshes)
 	{
 		wstring childName = parentName + L"_" + name; // Save child shapes as parentName_childName
-		if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextMeshId++;
+		if (g_meshIdMap.find(childName) == g_meshIdMap.end()) g_meshIdMap[childName] = s_nextMeshId++;
 
-		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_meshVertexBufferMap[g_meshIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
-		m_meshVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(vertices.size());
+		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_meshVertexBufferMap[g_meshIdMap[childName]].first, vertices.data(), sizeof(Vertex));
+		m_meshVertexBufferMap[g_meshIdMap[childName]].second = static_cast<UINT>(vertices.size());
 
 		combinedVertices.insert(combinedVertices.end(), vertices.begin(), vertices.end());
 	}
@@ -904,8 +904,8 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 		vp.TopLeftX, vp.TopLeftY,
 		vp.Width, vp.Height,
 		vp.MinDepth, vp.MaxDepth,
-		VDGM::g_currentScene->m_matrixConstBuffer.projection,
-		VDGM::g_currentScene->m_matrixConstBuffer.view,
+		XMMatrixTranspose(VDGM::g_currentScene->m_matrixConstBuffer.projection),
+		XMMatrixTranspose(VDGM::g_currentScene->m_matrixConstBuffer.view),
 		XMMatrixIdentity()
 	);
 	rayEnd = XMVector3Unproject
@@ -914,8 +914,8 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 		vp.TopLeftX, vp.TopLeftY,
 		vp.Width, vp.Height,
 		vp.MinDepth, vp.MaxDepth,
-		VDGM::g_currentScene->m_matrixConstBuffer.projection,
-		VDGM::g_currentScene->m_matrixConstBuffer.view,
+		XMMatrixTranspose(VDGM::g_currentScene->m_matrixConstBuffer.projection),
+		XMMatrixTranspose(VDGM::g_currentScene->m_matrixConstBuffer.view),
 		XMMatrixIdentity()
 	);
 

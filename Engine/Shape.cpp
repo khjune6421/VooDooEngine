@@ -22,6 +22,8 @@ constexpr UINT offset = 0;
 
 void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 {
+	if (m_owner->m_isActive == false) return;
+
 	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
 
 	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[m_vertexShaderId].first.Get(), nullptr, 0);
@@ -44,6 +46,8 @@ void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 
 void Shape::RenderShadow(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer)
 {
+	if (m_owner->m_isActive == false) return;
+
 	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
 
 	lightMatrixBuffer->world = XMMatrixTranspose(m_owner->GetWorldMatrix());

@@ -5,46 +5,67 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestMain.cpp" />
-    <ClCompile Include="TestScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Tree.cpp">
-      <Filter>Object</Filter>
+      <Filter>Scene\TestScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>Object</Filter>
+      <Filter>Scene\TestScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="Windmill.cpp">
-      <Filter>Object</Filter>
+      <Filter>Scene\TestScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="Bullet.cpp">
-      <Filter>Object</Filter>
+      <Filter>Scene\TestScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="TestScene.cpp">
+      <Filter>Scene\TestScene</Filter>
+    </ClCompile>
+    <ClCompile Include="PathFindingScene.cpp">
+      <Filter>Scene\PathFindingScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Scene\PathFindingScene\Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">
       <UniqueIdentifier>{5da4eda0-d8dd-467b-b1ee-bf1d941c9d2b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object">
+    <Filter Include="Scene\TestScene">
+      <UniqueIdentifier>{70ea8d81-21bc-4b53-8624-80a9b78a9d87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\TestScene\Object">
       <UniqueIdentifier>{d1220df3-322f-4305-b0c9-7a6cc43490dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\PathFindingScene">
+      <UniqueIdentifier>{9fee72d2-c9b8-4ea0-b881-5456ef62d6a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\PathFindingScene\Object">
+      <UniqueIdentifier>{2acb3654-bdf0-4568-9c93-a8b03ff943cc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TestScene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Tree.h">
-      <Filter>Object</Filter>
+      <Filter>Scene\TestScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>Object</Filter>
+      <Filter>Scene\TestScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="Windmill.h">
-      <Filter>Object</Filter>
+      <Filter>Scene\TestScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="Bullet.h">
-      <Filter>Object</Filter>
+      <Filter>Scene\TestScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="TestScene.h">
+      <Filter>Scene\TestScene</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFindingScene.h">
+      <Filter>Scene\PathFindingScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Scene\PathFindingScene\Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

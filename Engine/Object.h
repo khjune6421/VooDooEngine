@@ -39,8 +39,6 @@ protected:
 	DirectX::XMVECTOR m_rotation = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	DirectX::XMFLOAT3 m_scale = { 1.0f, 1.0f, 1.0f };
 
-	bool m_isActive = true;
-
 	Object* m_parent = nullptr;
 	std::vector<Object*> m_childrens;
 
@@ -53,6 +51,7 @@ public:
 	Object& operator=(Object&& other) noexcept = default;
 
 	Scene* m_scene = nullptr;
+	bool m_isActive = true;
 
 	void SetPosition(const DirectX::XMVECTOR& pos);
 	void MovePosition(const DirectX::XMVECTOR& delta);

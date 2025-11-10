@@ -1,12 +1,14 @@
 #include "Engine.h"
 
 #include "TestScene.h"
+#include "PathFindingScene.h"
 
 using namespace std;
 
 unordered_map<wstring, function<unique_ptr<Scene>()>> VDGM::g_sceneFactory =
 {
-	{ L"TestScene", []() { return make_unique<TestScene>(); } }
+	{ L"TestScene", []() { return make_unique<TestScene>(); } },
+	{ L"PathFindingScene", []() { return make_unique<PathFindingScene>(); }  }
 };
 
 #ifdef _DEBUG
@@ -28,9 +30,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	VDW::CreateWindowAndRenderer(L"VooDoo Class4", L"VooDoo Engine2", 1280, 720, 0, 720, L"../Assets/Imposter/");
 
 	// Create and set the test scene
-	VDGM::g_currentScene = make_unique<TestScene>();
+	VDGM::g_currentScene = make_unique<PathFindingScene>();
 
-	while (VDGM::GameLoop()) if (GetAsyncKeyState(VK_TAB) & 0x0001) VDGM::ChangeScene(L"TestScene");
+	while (VDGM::GameLoop())
+	{
+		if (GetAsyncKeyState('1') & 0x0001) VDGM::ChangeScene(L"TestScene");
+		else if (GetAsyncKeyState('2') & 0x0001) VDGM::ChangeScene(L"PathFindingScene");
+	}
 
 	VDW::g_windows.clear();
 	for (auto& renderer : VDW::g_renderers) delete renderer;
