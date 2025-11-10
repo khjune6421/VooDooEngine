@@ -35,9 +35,6 @@
     <ClCompile Include="GameManager.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="RandomNumberGenerator.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shader">

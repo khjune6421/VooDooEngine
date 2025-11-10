@@ -44,7 +44,7 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 
 	XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.0f, 0.1f, lightRange);
 
-	XMVECTOR targets[6] =
+	static const XMVECTOR targets[6] =
 	{
 		XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f),   // +X
 		XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f),  // -X
@@ -53,7 +53,7 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 		XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),   // +Z
 		XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f)   // -Z
 	};
-	XMVECTOR ups[6] =
+	static const XMVECTOR ups[6] =
 	{
 		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // +X
 		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),   // -X

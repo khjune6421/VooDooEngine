@@ -132,6 +132,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="PathFindingScene.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="TestMain.cpp" />
     <ClCompile Include="TestScene.cpp" />
@@ -149,6 +151,8 @@
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="PathFindingScene.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="TestScene.h" />
     <ClInclude Include="Tree.h" />

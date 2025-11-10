@@ -67,7 +67,7 @@ public:
 	MatrixConstBuffer m_matrixConstBuffer = {};
 
 	DirectX::XMFLOAT4 m_backgroundColor = { 0.5f, 0.5f, 0.5f, 1.0f };
-	DirectX::XMFLOAT4 m_ambientLight = { 0.25f, 0.25f, 0.25f, 1.0f }; // The w value(1) is important // it's the only value that does not get multiplied in shader
+	DirectX::XMFLOAT4 m_ambientLight = { 0.75f, 0.75f, 0.75f, 1.0f }; // The w value(1) is important // it's the only value that does not get multiplied in shader
 	DirectionalLightConstBuffer m_directionalLight = {};
 
 	DirectX::XMFLOAT4 m_ambientFog = { 0.5f, 0.5f, 0.5f, 100.0f }; // w value is range

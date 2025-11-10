@@ -232,7 +232,7 @@ void Renderer::CreateShadowMap()
 	shadowArrayDesc.Width = SHADOW_MAP_SIZE;
 	shadowArrayDesc.Height = SHADOW_MAP_SIZE;
 	shadowArrayDesc.MipLevels = 1;
-	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6; // MAX_POINT_LIGHTS * 6 faces
+	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6; // MAX_POINT_LIGHTS * 6
 	shadowArrayDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 	shadowArrayDesc.SampleDesc.Count = 1;
 	shadowArrayDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -250,8 +250,6 @@ void Renderer::CreateShadowMap()
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 	dsvDesc.Texture2DArray.MipSlice = 0;
 	dsvDesc.Texture2DArray.ArraySize = 1;
-
-	m_shadowMapDSVs.resize(static_cast<vector<com_ptr<ID3D11DepthStencilView>, allocator<com_ptr<ID3D11DepthStencilView>>>::size_type>(MAX_POINT_LIGHTS) * 6);
 
 	for (UINT lightIndex = 0; lightIndex < MAX_POINT_LIGHTS; ++lightIndex)
 	{
@@ -439,12 +437,12 @@ void Renderer::DisplayDeviceInfo()
 
 	// System Information
 	DrawText(L"SYSTEM", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-
 	posIndex++;
+
 	wstring dxVersion = L"DX Version: " + to_wstring(m_DXVersion) + L"." + to_wstring(m_DXSubVersion);
 	DrawText(dxVersion.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
-
 	posIndex++;
+
 	wstring resolution = L"Resolution: " + to_wstring(m_deviceInfo.displayMode.Width) + L"x" + to_wstring(m_deviceInfo.displayMode.Height);
 	DrawText(resolution.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 	posIndex++;
@@ -676,10 +674,10 @@ void Renderer::LoadObjFile(const filesystem::path filePath)
 	for (const auto& [name, vertices] : objects.m_meshes)
 	{
 		wstring childName = parentName + L"_" + name; // Save child shapes as parentName_childName
-		if (g_meshIdMap.find(parentName) == g_meshIdMap.end()) g_meshIdMap[parentName] = s_nextMeshId++;
+		if (g_meshIdMap.find(childName) == g_meshIdMap.end()) g_meshIdMap[childName] = s_nextMeshId++;
 
-		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_meshVertexBufferMap[g_meshIdMap[parentName]].first, vertices.data(), sizeof(Vertex));
-		m_meshVertexBufferMap[g_meshIdMap[parentName]].second = static_cast<UINT>(vertices.size());
+		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_meshVertexBufferMap[g_meshIdMap[childName]].first, vertices.data(), sizeof(Vertex));
+		m_meshVertexBufferMap[g_meshIdMap[childName]].second = static_cast<UINT>(vertices.size());
 
 		combinedVertices.insert(combinedVertices.end(), vertices.begin(), vertices.end());
 	}
@@ -858,7 +856,7 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 		com_ptr<ID3D11DepthStencilState> currentDepthState;
 		m_deviceContext->OMGetDepthStencilState(&currentDepthState, nullptr);
 
-		// This fuckes up depth testing // considering a different way to draw text
+		// This resets many thing without telling me
 		m_SpriteBatchMap[fontName]->Begin();
 		m_SpriteFontMap[fontName]->DrawString(m_SpriteBatchMap[fontName].get(), buffer, position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
 		m_SpriteBatchMap[fontName]->End();
@@ -906,8 +904,8 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 		vp.TopLeftX, vp.TopLeftY,
 		vp.Width, vp.Height,
 		vp.MinDepth, vp.MaxDepth,
-		VDGM::g_currentScene->m_matrixConstBuffer.projection,
-		VDGM::g_currentScene->m_matrixConstBuffer.view,
+		XMMatrixTranspose(VDGM::g_currentScene->m_matrixConstBuffer.projection),
+		XMMatrixTranspose(VDGM::g_currentScene->m_matrixConstBuffer.view),
 		XMMatrixIdentity()
 	);
 	rayEnd = XMVector3Unproject
@@ -916,8 +914,8 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 		vp.TopLeftX, vp.TopLeftY,
 		vp.Width, vp.Height,
 		vp.MinDepth, vp.MaxDepth,
-		VDGM::g_currentScene->m_matrixConstBuffer.projection,
-		VDGM::g_currentScene->m_matrixConstBuffer.view,
+		XMMatrixTranspose(VDGM::g_currentScene->m_matrixConstBuffer.projection),
+		XMMatrixTranspose(VDGM::g_currentScene->m_matrixConstBuffer.view),
 		XMMatrixIdentity()
 	);
 

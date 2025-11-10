@@ -12,7 +12,6 @@
 #include <fstream>
 #include <typeindex>
 #include <chrono>
-#include <random>
 
 // DirectX header
 #include <d3d11.h>
@@ -27,6 +26,7 @@
 
 // Engine header
 #include "Singleton.h"
+#include "RandomNumberGenerator.h"
 
 // Windows libraries
 #pragma comment(lib, "winmm.lib")
