@@ -76,5 +76,5 @@ public:
 	virtual void PreRender(Renderer* renderer);
 	virtual void Render(Renderer* renderer);
 
-	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) {}
+	virtual void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd, int key) {}
 };

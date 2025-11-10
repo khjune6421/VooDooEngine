@@ -116,9 +116,11 @@ deque<pair<int, int>> PathFindingScene::FindPath(pair<int, int> start, pair<int,
 
 PathFindingScene::PathFindingScene()
 {
+	m_ambientLight = XMFLOAT4{ 0.5f, 0.5f, 0.5f, 1.0f };
+
 	m_camera->SetPosition(XMVECTOR{ 0.0f, 40.0f, -60.0f, 1.0f });
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
-	m_camera->AddComponent<Camera>(3400, 1440, 0.1f, 200.0f, XM_PIDIV4);
+	m_camera->AddComponent<Camera>(1280, 720, 0.1f, 200.0f, XM_PIDIV4);
 	m_ambientFog.w = 200.0f;
 
 	m_camRotator->AddChild(m_camera.get());
@@ -140,6 +142,7 @@ PathFindingScene::PathFindingScene()
 			1.0f
 		}
 	);
+	m_player->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.5f }, 5.0f, 0.0f);
 
 	CreateRandomObstacles();
 }
@@ -150,8 +153,6 @@ void PathFindingScene::Update(float deltaTime)
 	if (GetAsyncKeyState('S') & 0x8000) m_camRotator->Rotate(XMVECTOR{ 1.0f * deltaTime, 0.0f, 0.0f, 0.0f });
 	if (GetAsyncKeyState('A') & 0x8000) m_camRotator->Rotate(XMVECTOR{ 0.0f, -1.0f * deltaTime, 0.0f, 0.0f });
 	if (GetAsyncKeyState('D') & 0x8000) m_camRotator->Rotate(XMVECTOR{ 0.0f, 1.0f * deltaTime, 0.0f, 0.0f });
-
-	if (GetAsyncKeyState(VK_SPACE) & 0x0001) m_isPlaceMode = !m_isPlaceMode;
 
 	m_camera->Update(deltaTime);
 	m_player->Update(deltaTime);
@@ -192,7 +193,7 @@ void PathFindingScene::Update(float deltaTime)
 	Scene::Update(deltaTime);
 }
 
-void PathFindingScene::Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd)
+void PathFindingScene::Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd, int key)
 {
 	XMVECTOR planePoint = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	XMVECTOR planeNormal = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -214,12 +215,12 @@ void PathFindingScene::Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR ra
 	int gridZ = WorldPosToGridPos(hitZ);
 	if (gridX < 0 || gridX >= GRID_SIZE || gridZ < 0 || gridZ >= GRID_SIZE) return;
 
-	if (m_isPlaceMode)
+	if (key == WM_LBUTTONUP)
 	{
 		m_grid[gridX][gridZ]->m_isActive = !m_grid[gridX][gridZ]->m_isActive;
 		m_grid[gridX][gridZ]->m_isWalkable = !m_grid[gridX][gridZ]->m_isWalkable;
 	}
-	else
+	else if (key == WM_RBUTTONUP)
 	{
 		pair<int, int> targetPos = { gridX, gridZ };
 		if (m_playerGridPos == targetPos) return;

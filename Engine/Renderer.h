@@ -192,5 +192,5 @@ public:
 
 	void ChangeState();
 
-	void ScreenPointToWorld(POINT screenPos) const;
+	void ScreenPointToWorld(POINT screenPos, int key = WM_LBUTTONUP) const;
 };

@@ -759,11 +759,11 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 {
 	// Initialize device
 	GetHardwareInfo();
-	m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
-	m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
+	//m_deviceInfo.displayMode.Width = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.right - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.left;
+	//m_deviceInfo.displayMode.Height = m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.bottom - m_deviceInfo.hardwareInfos[0].outputDescs[0].second.DesktopCoordinates.top;
 
-	//m_deviceInfo.displayMode.Width = width;
-	//m_deviceInfo.displayMode.Height = height;
+	m_deviceInfo.displayMode.Width = width;
+	m_deviceInfo.displayMode.Height = height;
 
 	// Initialize render
 	CreateDeviceSwapChain();
@@ -889,7 +889,7 @@ void Renderer::ChangeState()
 	m_currentRasterState = static_cast<RasterState>((static_cast<int>(m_currentRasterState) + 1) % RasterStateCount);
 }
 
-void Renderer::ScreenPointToWorld(POINT screenPos) const
+void Renderer::ScreenPointToWorld(POINT screenPos, int key) const
 {
 	D3D11_VIEWPORT vp;
 	UINT numViewports = 1;
@@ -919,5 +919,5 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 		XMMatrixIdentity()
 	);
 
-	if (VDGM::g_currentScene) VDGM::g_currentScene->Raycast(rayOrigin, rayEnd);
+	if (VDGM::g_currentScene) VDGM::g_currentScene->Raycast(rayOrigin, rayEnd, key);
 }

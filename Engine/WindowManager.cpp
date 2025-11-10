@@ -20,39 +20,45 @@ namespace VDW
 			PostQuitMessage(0);
 			return 0;
 
-		case WM_SIZE:
-			if (wParam != SIZE_MINIMIZED)
-			{
-				LONG width = LOWORD(lParam);
-				LONG height = HIWORD(lParam);
-				if (width != 0 && height != 0) ResizeWindow(hWnd, width, height);
-			}
-			return 0;
+		//case WM_SIZE:
+		//	if (wParam != SIZE_MINIMIZED)
+		//	{
+		//		LONG width = LOWORD(lParam);
+		//		LONG height = HIWORD(lParam);
+		//		if (width != 0 && height != 0) ResizeWindow(hWnd, width, height);
+		//	}
+		//	return 0;
 
-		case WM_MOVE:
-			if (g_windows[hWnd])
-			{
-				RECT rect = {};
-				GetWindowRect(hWnd, &rect);
-				g_windows[hWnd]->SetViewport(static_cast<float>(rect.left), static_cast<float>(rect.top));
-			}
-			return 0;
+		//case WM_MOVE:
+		//	if (g_windows[hWnd])
+		//	{
+		//		RECT rect = {};
+		//		GetWindowRect(hWnd, &rect);
+		//		g_windows[hWnd]->SetViewport(static_cast<float>(rect.left), static_cast<float>(rect.top));
+		//	}
+		//	return 0;
 
-		case WM_LBUTTONDOWN:
-			isDragging = true;
-			GetCursorPos(&lastMousePos);
-			SetCapture(hWnd);
-			return 0;
+		//case WM_LBUTTONDOWN:
+		//	isDragging = true;
+		//	GetCursorPos(&lastMousePos);
+		//	SetCapture(hWnd);
+		//	return 0;
+
+		//case WM_LBUTTONUP:
+		//	isDragging = false;
+		//	ReleaseCapture();
+		//	return 0;
 
 		case WM_LBUTTONUP:
-			isDragging = false;
-			ReleaseCapture();
+		{
+			POINT mousePos = { LOWORD(lParam), HIWORD(lParam) };
+			g_windows[hWnd]->ScreenPointToWorld(mousePos, WM_LBUTTONUP);
 			return 0;
-
+		}
 		case WM_RBUTTONUP:
 		{
 			POINT mousePos = { LOWORD(lParam), HIWORD(lParam) };
-			g_windows[hWnd]->ScreenPointToWorld(mousePos);
+			g_windows[hWnd]->ScreenPointToWorld(mousePos, WM_RBUTTONUP);
 			return 0;
 		}
 
@@ -146,7 +152,7 @@ namespace VDW
 		(
 			className.c_str(),
 			windowName.c_str(),
-			WS_POPUPWINDOW,
+			WS_OVERLAPPEDWINDOW,
 			posX, posY,
 			width, height,
 			GetDesktopWindow(),
@@ -198,7 +204,7 @@ namespace VDW
 		if (g_windows[hWnd])
 		{
 			g_windows[hWnd]->Resize(width, height);
-			g_windows[hWnd]->SetViewport(static_cast<float>(oldRect.left), static_cast<float>(oldRect.top));
+			//g_windows[hWnd]->SetViewport(static_cast<float>(oldRect.left), static_cast<float>(oldRect.top));
 		}
 	}
 }

@@ -14,8 +14,6 @@ class PathFindingScene : public Scene
 	std::pair<int, int> m_playerGridPos = { 0, 0 };
 	std::deque<std::pair<int, int>> m_currentPath = {};
 
-	bool m_isPlaceMode = true;
-
 	void CreateRandomObstacles();
 	float GridPosToWorldPos(int gridPos);
 	int WorldPosToGridPos(float worldPos);
@@ -25,5 +23,5 @@ class PathFindingScene : public Scene
 public:
 	PathFindingScene();
 	void Update(float deltaTime) override;
-	void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd) override;
+	void Raycast(DirectX::XMVECTOR rayOrigin, DirectX::XMVECTOR rayEnd, int key) override;
 };
