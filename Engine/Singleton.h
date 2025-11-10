@@ -13,5 +13,5 @@ protected:
 	~Singleton() = default;
 
 public:
-	static T& instance() { static T _instance; return _instance; }
+	static T& GetInstance() { static T instance; return instance; }
 };

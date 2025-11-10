@@ -27,6 +27,7 @@
 
 // Engine header
 #include "Singleton.h"
+#include "RandomNumberGenerator.h"
 
 // Windows libraries
 #pragma comment(lib, "winmm.lib")
