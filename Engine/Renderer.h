@@ -7,7 +7,7 @@ namespace VDGM
 {
 	extern float g_deltaTime;
 
-	// this is so cursed // TODO: not this
+	// this is so cursed
 	extern std::unique_ptr<class Scene> g_currentScene;
 }
 
