@@ -100,7 +100,7 @@ float4 main(PSInput input) : SV_TARGET
     [loop]
     for (uint i = 0; i < numPointLights; i++) input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
     
-    float fogFactor = saturate(distanceFromCamera * rcp(ambientFog.w));
+    float fogFactor = pow(saturate(distanceFromCamera * rcp(ambientFog.w)), 2.0f);
     float4 fogColor = float4(ambientFog.xyz, 1.0f);
     
     return lerp(texColor * input.light, fogColor, fogFactor);

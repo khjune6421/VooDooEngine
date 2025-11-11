@@ -856,7 +856,7 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 		com_ptr<ID3D11DepthStencilState> currentDepthState;
 		m_deviceContext->OMGetDepthStencilState(&currentDepthState, nullptr);
 
-		// This resets many thing without telling me
+		// This resets many param things without telling me
 		m_SpriteBatchMap[fontName]->Begin();
 		m_SpriteFontMap[fontName]->DrawString(m_SpriteBatchMap[fontName].get(), buffer, position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
 		m_SpriteBatchMap[fontName]->End();
