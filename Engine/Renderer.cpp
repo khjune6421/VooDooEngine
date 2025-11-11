@@ -30,7 +30,7 @@ const D3D11_INPUT_ELEMENT_DESC Renderer::s_defaultInputLayoutDesc[DEFAULT_LAYOUT
 	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 
-D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
+const D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
 {
 	D3D11_FILTER_ANISOTROPIC,
 	D3D11_TEXTURE_ADDRESS_WRAP,
@@ -580,7 +580,7 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 		return;
 	}
 
-	wstring shaderName = filesystem::path(file).stem().wstring();
+	const wstring shaderName = filesystem::path(file).stem().wstring();
 	if (g_vertexShaderIdMap.find(shaderName) == g_vertexShaderIdMap.end()) g_vertexShaderIdMap[shaderName] = s_vertexShaderId++;
 	m_vertexShaderMap[g_vertexShaderIdMap[shaderName]] = make_pair(vertexShader, inputLayout);
 }
@@ -606,7 +606,7 @@ void Renderer::LoadGeometryShader(const wchar_t* file, const char* entryPoint, c
 		return;
 	}
 
-	wstring shaderName = filesystem::path(file).stem().wstring();
+	const wstring shaderName = filesystem::path(file).stem().wstring();
 	if (g_geometryShaderIdMap.find(shaderName) == g_geometryShaderIdMap.end()) g_geometryShaderIdMap[shaderName] = s_geometryShaderId++;
 	m_geometryShaderMap[g_geometryShaderIdMap[shaderName]] = geometryShader;
 }
@@ -632,8 +632,7 @@ void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, cons
 		return;
 	}
 
-	wstring shaderName = filesystem::path(file).stem().wstring();
-
+	const wstring shaderName = filesystem::path(file).stem().wstring();
 	if (g_pixelShaderIdMap.find(shaderName) == g_pixelShaderIdMap.end()) g_pixelShaderIdMap[shaderName] = s_pixelShaderId++;
 	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
 }
@@ -644,7 +643,7 @@ void Renderer::LoadAllTextures(const std::filesystem::path texturePath)
 	{
 		for (const auto& entry : filesystem::directory_iterator(texturePath))
 		{
-			wstring textureName = entry.path().stem().wstring();
+			const wstring textureName = entry.path().stem().wstring();
 			if (g_textureIdMap.find(textureName) == g_textureIdMap.end()) g_textureIdMap[textureName] = s_textureId++;
 
 			com_ptr<ID3D11ShaderResourceView> texture;
@@ -668,12 +667,12 @@ void Renderer::LoadObjFile(const filesystem::path filePath)
 {
 	ObjFileParser objects(filePath.c_str());
 
-	wstring parentName = filePath.stem().wstring();
+	const wstring parentName = filePath.stem().wstring();
 	vector<Vertex> combinedVertices;
 
 	for (const auto& [name, vertices] : objects.m_meshes)
 	{
-		wstring childName = parentName + L"_" + name; // Save child shapes as parentName_childName
+		const wstring childName = parentName + L"_" + name; // Save child shapes as parentName_childName
 		if (g_meshIdMap.find(childName) == g_meshIdMap.end()) g_meshIdMap[childName] = s_nextMeshId++;
 
 		CreateVertexBuffer(static_cast<UINT>(sizeof(Vertex) * vertices.size()), &m_meshVertexBufferMap[g_meshIdMap[childName]].first, vertices.data(), sizeof(Vertex));

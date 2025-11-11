@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "TestScene.h"
 
 using namespace std;
