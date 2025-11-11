@@ -28,7 +28,7 @@ class Renderer
 	// Device information structure containing Direct3D device, context, hardware, etc
 	struct DeviceInfo
 	{
-		DXGI_MODE_DESC displayMode = { 1920, 1080, { 0, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM };
+		DXGI_MODE_DESC displayMode = { 1920, 1080, { 0, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 		D3D_FEATURE_LEVEL featureLevels = D3D_FEATURE_LEVEL_11_0;
 
 		bool isFullscreen = false;
