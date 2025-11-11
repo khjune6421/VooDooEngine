@@ -9,10 +9,10 @@ using namespace DirectX;
 
 void Collider::CheckCollision(Collider* other)
 {
-	XMVECTOR posA = m_owner->GetWorldPosition();
-	XMVECTOR posB = other->m_owner->GetWorldPosition();
-	XMVECTOR delta = XMVectorSubtract(posA, posB);
-	float distance = XMVectorGetX(XMVector3Length(delta));
+	const XMVECTOR posA = m_owner->GetWorldPosition();
+	const XMVECTOR posB = other->m_owner->GetWorldPosition();
+	const XMVECTOR delta = XMVectorSubtract(posA, posB);
+	const float distance = XMVectorGetX(XMVector3Length(delta));
 
 	if (distance <= (m_radius + other->m_radius))
 	{
@@ -40,18 +40,18 @@ void Collider::OnAttached(Object* owner)
 {
 	Component::OnAttached(owner);
 
-	for (UINT group : m_collideTo) m_owner->m_scene->m_collidersMap[group].first.push_back(this);
-	for (UINT group : m_collideFrom) m_owner->m_scene->m_collidersMap[group].second.push_back(this);
+	for (const UINT group : m_collideTo) m_owner->m_scene->m_collidersMap[group].first.push_back(this);
+	for (const UINT group : m_collideFrom) m_owner->m_scene->m_collidersMap[group].second.push_back(this);
 }
 
 void Collider::OnDetached()
 {
-	for (UINT group : m_collideTo)
+	for (const UINT group : m_collideTo)
 	{
 		auto& vec = m_owner->m_scene->m_collidersMap[group].first;
 		vec.erase(remove(vec.begin(), vec.end(), this), vec.end());
 	}
-	for (UINT group : m_collideFrom)
+	for (const UINT group : m_collideFrom)
 	{
 		auto& vec = m_owner->m_scene->m_collidersMap[group].second;
 		vec.erase(remove(vec.begin(), vec.end(), this), vec.end());

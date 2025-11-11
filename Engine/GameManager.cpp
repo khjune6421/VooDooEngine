@@ -14,7 +14,7 @@ namespace VDGM
 
 	void ChangeScene(const wstring& sceneName)
 	{
-		auto it = g_sceneFactory.find(sceneName);
+		const auto it = g_sceneFactory.find(sceneName);
 		if (it != g_sceneFactory.end())
 		{
 			g_currentScene.reset();
@@ -38,8 +38,8 @@ namespace VDGM
 	float GetdeltaTime()
 	{
 		static DWORD previousTime = timeGetTime();
-		DWORD currentTime = timeGetTime();
-		float deltaTime = static_cast<float>(currentTime - previousTime) / 1000.0f;
+		const DWORD currentTime = timeGetTime();
+		const float deltaTime = static_cast<float>(currentTime - previousTime) / 1000.0f;
 		previousTime = currentTime;
 
 		return deltaTime;

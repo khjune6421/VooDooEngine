@@ -8,7 +8,7 @@ using namespace DirectX;
 
 static UINT s_idCounter = 0;
 
-XMVECTOR Object::QuaternionToEuler(const DirectX::XMVECTOR& quat) const // Do I know how this works? No. Does it work? As far as I know, yes but even if it doesn't how would I know?
+XMVECTOR Object::QuaternionToEuler(const XMVECTOR& quat) const // Do I know how this works? No. Does it work? As far as I know, yes but even if it doesn't how would I know?
 {
 	XMFLOAT4 fQuat = {};
 	XMStoreFloat4(&fQuat, quat);
@@ -17,28 +17,28 @@ XMVECTOR Object::QuaternionToEuler(const DirectX::XMVECTOR& quat) const // Do I 
 	const float test = fQuat.x * fQuat.y + fQuat.z * fQuat.w;
 	if (test > 0.499f)
 	{
-		float yaw = 2.0f * atan2f(fQuat.x, fQuat.w);
-		float pitch = XM_PIDIV2;
-		float roll = 0.0f;
+		const float yaw = 2.0f * atan2f(fQuat.x, fQuat.w);
+		const float pitch = XM_PIDIV2;
+		const float roll = 0.0f;
 
 		return XMVectorSet(roll, pitch, yaw, 0.0f);
 	}
 	if (test < -0.499f)
 	{
-		float yaw = -2.0f * atan2f(fQuat.x, fQuat.w);
-		float pitch = -XM_PIDIV2;
-		float roll = 0.0f;
+		const float yaw = -2.0f * atan2f(fQuat.x, fQuat.w);
+		const float pitch = -XM_PIDIV2;
+		const float roll = 0.0f;
 
 		return XMVectorSet(roll, pitch, yaw, 0.0f);
 	}
 
-	float roll = atan2f
+	const float roll = atan2f
 	(
 		2.0f * (fQuat.w * fQuat.x + fQuat.y * fQuat.z),
 		1.0f - 2.0f * (fQuat.x * fQuat.x + fQuat.y * fQuat.y)
 	);
-	float pitch = asinf(2.0f * (fQuat.w * fQuat.y - fQuat.z * fQuat.x));
-	float yaw = atan2f
+	const float pitch = asinf(2.0f * (fQuat.w * fQuat.y - fQuat.z * fQuat.x));
+	const float yaw = atan2f
 	(
 		2.0f * (fQuat.w * fQuat.z + fQuat.x * fQuat.y),
 		1.0f - 2.0f * (fQuat.y * fQuat.y + fQuat.z * fQuat.z)
@@ -147,9 +147,9 @@ void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this 
 	const float dirY = XMVectorGetY(direction);
 	const float dirZ = XMVectorGetZ(direction);
 
-	float pitch = asinf(clamp(-dirY, -1.0f, 1.0f));
-	float yaw = atan2f(dirX, dirZ);
-	float roll = 0.0f; // No roll
+	const float pitch = asinf(clamp(-dirY, -1.0f, 1.0f));
+	const float yaw = atan2f(dirX, dirZ);
+	const float roll = 0.0f; // No roll
 
 	m_rotation = XMVectorSet(pitch, yaw, roll, 0.0f);
 	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
@@ -158,10 +158,10 @@ void Object::LookAt(const XMVECTOR& target) // I have no idea how the hell this 
 }
 void Object::LerpRotation(const XMVECTOR& start, const XMVECTOR& target, float t)
 {
-	XMVECTOR startQuat = XMQuaternionRotationRollPitchYawFromVector(start);
-	XMVECTOR targetQuat = XMQuaternionRotationRollPitchYawFromVector(target);
+	const XMVECTOR startQuat = XMQuaternionRotationRollPitchYawFromVector(start);
+	const XMVECTOR targetQuat = XMQuaternionRotationRollPitchYawFromVector(target);
 
-	XMVECTOR resultQuat = XMQuaternionSlerp(startQuat, targetQuat, t);
+	const XMVECTOR resultQuat = XMQuaternionSlerp(startQuat, targetQuat, t);
 
 	m_rotation = QuaternionToEuler(resultQuat);
 	m_rotationMatrix = XMMatrixRotationRollPitchYawFromVector(m_rotation);
@@ -236,7 +236,7 @@ XMMATRIX Object::GetWorldMatrix() const // TODO: upgrade to get scale excluded w
 	{
 		m_worldMatrix = m_scaleMatrix * m_rotationMatrix * m_positionMatrix;
 
-		XMMATRIX inverseScaleMatrix = XMMatrixInverse(nullptr, m_scaleMatrix);
+		const XMMATRIX inverseScaleMatrix = XMMatrixInverse(nullptr, m_scaleMatrix);
 		m_inverseScaleMatrix = inverseScaleMatrix * inverseScaleMatrix;
 
 		if (m_parent)
@@ -287,7 +287,7 @@ void Object::RemoveChild(Object* child)
 {
 	if (!child) return;
 
-	auto it = find(m_childrens.begin(), m_childrens.end(), child);
+	const auto it = find(m_childrens.begin(), m_childrens.end(), child);
 	if (it != m_childrens.end())
 	{
 		m_childrens.erase(it);
