@@ -55,7 +55,7 @@ class Renderer
 
 	// Input layouts // well this is cursed
 	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
-	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
+	const static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
 
 	static D3D11_SAMPLER_DESC s_defaultSamplerDesc;
 	enum SamplerType
