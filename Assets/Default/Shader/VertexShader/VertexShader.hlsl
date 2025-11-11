@@ -40,7 +40,7 @@ struct VSOutput
     float3 tangent : TANGENT0;
     
     float4 posWorld : WORLDPOS0;
-    float4 light : COLOR1;
+    float4 light : COLOR0;
     float3 bitangent : BITANGENT0;
 };
 
