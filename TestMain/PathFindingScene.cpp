@@ -130,6 +130,7 @@ PathFindingScene::PathFindingScene()
 
 	m_player = make_unique<Object>(this);
 	m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Lilypads", L"LilypadsNormal");
+	m_player->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.5f }, 10.0f);
 	m_player->SetPosition
 	(
 		XMVECTOR
