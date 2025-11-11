@@ -109,7 +109,7 @@ void Renderer::CreateDepthStencil()
 		MessageBoxW(nullptr, L"Device is null", L"Error", MB_OK);
 		return;
 	}
-	if (m_deviceInfo.displayMode.Width == 0 || m_deviceInfo.displayMode.Height == 0)
+	if (!m_deviceInfo.displayMode.Width || !m_deviceInfo.displayMode.Height)
 	{
 		MessageBoxW(nullptr, L"Invalid display size", L"Error", MB_OK);
 		return;

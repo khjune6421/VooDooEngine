@@ -46,21 +46,21 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 
 	constexpr XMVECTOR CUBE_TARGET[6] =
 	{
-		{ 1.0f, 0.0f, 0.0f, 0.0f },   // +X
-		{ -1.0f, 0.0f, 0.0f, 0.0f },  // -X
-		{ 0.0f, 1.0f, 0.0f, 0.0f },   // +Y
-		{ 0.0f, -1.0f, 0.0f, 0.0f },  // -Y
-		{ 0.0f, 0.0f, 1.0f, 0.0f },   // +Z
-		{ 0.0f, 0.0f, -1.0f, 0.0f }   // -Z
+		{ 1.0f, 0.0f, 0.0f, 0.0f },		// +X
+		{ -1.0f, 0.0f, 0.0f, 0.0f },	// -X
+		{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Y
+		{ 0.0f, -1.0f, 0.0f, 0.0f },	// -Y
+		{ 0.0f, 0.0f, 1.0f, 0.0f },		// +Z
+		{ 0.0f, 0.0f, -1.0f, 0.0f }		// -Z
 	};
 	constexpr XMVECTOR CUBE_TARGET_UP[6] =
 	{
-		{ 0.0f, 1.0f, 0.0f, 0.0f },   // +X
-		{ 0.0f, 1.0f, 0.0f, 0.0f },   // -X
-		{ 0.0f, 0.0f, 1.0f, 0.0f },   // +Y
-		{ 0.0f, 0.0f, -1.0f, 0.0f },  // -Y
-		{ 0.0f, 1.0f, 0.0f, 0.0f },   // +Z
-		{ 0.0f, 1.0f, 0.0f, 0.0f }    // -Z
+		{ 0.0f, 1.0f, 0.0f, 0.0f },		// +X
+		{ 0.0f, 1.0f, 0.0f, 0.0f },		// -X
+		{ 0.0f, 0.0f, -1.0f, 0.0f },	// +Y
+		{ 0.0f, 0.0f, 1.0f, 0.0f },		// -Y
+		{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Z
+		{ 0.0f, 1.0f, 0.0f, 0.0f }		// -Z
 	};
 
 	XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPos), XMVectorGetY(lightPos), XMVectorGetZ(lightPos), lightRange);
