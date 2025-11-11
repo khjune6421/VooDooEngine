@@ -36,7 +36,6 @@ cbuffer AmbientFogConstBuffer : register(b2)
     float4 ambientFog; // w value is range
 }
 
-
 struct PSInput
 {
     float4 pos : SV_POSITION0;
