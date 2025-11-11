@@ -11,7 +11,7 @@ using namespace std;
 
 void Scene::CheckCollisions()
 {
-	for (auto& colliderGroup : m_collidersMap)
+	for (auto& colliderGroup : m_colliderMap)
 	{
 		for (auto& colliderA : colliderGroup.second.first)
 		{

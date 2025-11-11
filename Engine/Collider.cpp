@@ -40,20 +40,20 @@ void Collider::OnAttached(Object* owner)
 {
 	Component::OnAttached(owner);
 
-	for (const UINT group : m_collideTo) m_owner->m_scene->m_collidersMap[group].first.push_back(this);
-	for (const UINT group : m_collideFrom) m_owner->m_scene->m_collidersMap[group].second.push_back(this);
+	for (const UINT group : m_collideTo) m_owner->m_scene->m_colliderMap[group].first.push_back(this);
+	for (const UINT group : m_collideFrom) m_owner->m_scene->m_colliderMap[group].second.push_back(this);
 }
 
 void Collider::OnDetached()
 {
 	for (const UINT group : m_collideTo)
 	{
-		auto& vec = m_owner->m_scene->m_collidersMap[group].first;
+		auto& vec = m_owner->m_scene->m_colliderMap[group].first;
 		vec.erase(remove(vec.begin(), vec.end(), this), vec.end());
 	}
 	for (const UINT group : m_collideFrom)
 	{
-		auto& vec = m_owner->m_scene->m_collidersMap[group].second;
+		auto& vec = m_owner->m_scene->m_colliderMap[group].second;
 		vec.erase(remove(vec.begin(), vec.end(), this), vec.end());
 	}
 	Component::OnDetached();
