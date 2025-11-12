@@ -232,7 +232,7 @@ void Renderer::CreateShadowMap()
 	shadowArrayDesc.Width = SHADOW_MAP_SIZE;
 	shadowArrayDesc.Height = SHADOW_MAP_SIZE;
 	shadowArrayDesc.MipLevels = 1;
-	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6; // MAX_POINT_LIGHTS * 6
+	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6;
 	shadowArrayDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 	shadowArrayDesc.SampleDesc.Count = 1;
 	shadowArrayDesc.Usage = D3D11_USAGE_DEFAULT;
