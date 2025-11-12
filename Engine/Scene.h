@@ -26,7 +26,7 @@ struct PointLightArrayConstBuffer
 {
 	PointLightConstBuffer pointLights[MAX_POINT_LIGHTS] = {};
 
-	UINT numPointLights = 0;
+	UINT pointLightCount = 0;
 	UINT padding[3] = {};
 };
 
@@ -38,7 +38,7 @@ class Scene
 	friend class PointLight;
 
 	std::vector<Shape*> m_renderShapes = {};
-	std::unordered_map<UINT, std::pair<std::vector<Collider*>, std::vector<Collider*>>> m_colliderMap;
+	std::unordered_map<UINT, std::pair<std::vector<Collider*>, std::vector<Collider*>>> m_colliderMap = {};
 
 	std::vector<PointLight*> m_pointLights = {};
 
@@ -49,7 +49,7 @@ class Scene
 	void RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer);
 
 protected:
-	std::vector<std::unique_ptr<class Object>> m_objects;
+	std::vector<std::unique_ptr<class Object>> m_objects = {};
 
 	PointLightArrayConstBuffer m_pointLightBufferData = {};
 

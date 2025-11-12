@@ -47,8 +47,8 @@ void Scene::UpdateCamera()
 
 void Scene::UpdateLight(Renderer* renderer)
 {
-	m_pointLightBufferData.numPointLights = static_cast<UINT>(m_pointLights.size());
-	for (UINT i = 0; i < m_pointLightBufferData.numPointLights && i < MAX_POINT_LIGHTS; ++i) m_pointLightBufferData.pointLights[i] = m_pointLights[i]->GetLightData();
+	m_pointLightBufferData.pointLightCount = static_cast<UINT>(m_pointLights.size());
+	for (UINT i = 0; i < m_pointLightBufferData.pointLightCount && i < MAX_POINT_LIGHTS; ++i) m_pointLightBufferData.pointLights[i] = m_pointLights[i]->GetLightData();
 
 	UpdateShadowMap(renderer);
 }

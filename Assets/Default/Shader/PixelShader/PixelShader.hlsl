@@ -24,7 +24,7 @@ cbuffer PointLightConstBuffer : register(b0)
 {
     PointLight pointLights[8];
     
-    uint numPointLights;
+    uint pointLightCount;
     uint padding[3];
 }
 cbuffer CameraConstBuffer : register(b1)
@@ -99,7 +99,7 @@ float4 main(PSInput input) : SV_TARGET
     float3 viewDirection = vecToCamera / distanceFromCamera;
     
     [loop]
-    for (uint i = 0; i < numPointLights; i++) input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
+    for (uint i = 0; i < pointLightCount; i++) input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
     
     float fogFactor = pow(saturate(distanceFromCamera / ambientFog.w), 1.25f);
     float4 fogColor = float4(ambientFog.xyz, 1.0f);
