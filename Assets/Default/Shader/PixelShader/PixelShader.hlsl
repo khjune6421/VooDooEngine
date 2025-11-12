@@ -58,7 +58,8 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     if (distance > light.range) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     // Shadow
-    float shadowFactor = shadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), distance / (light.range * 1.05f));
+    float shadowFactor = shadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), distance / light.range);
+    if (shadowFactor <= 0.0f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     vecToLight /= distance;
     
@@ -80,7 +81,7 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     
     result += light.color * specularFactor;
     
-    return result * attenuation * shadowFactor;
+    return result * attenuation;
 }
 
 float4 main(PSInput input) : SV_TARGET

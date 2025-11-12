@@ -81,4 +81,31 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 
 		VDGM::g_currentScene->RenderShadows(renderer, &lightMatrixBuffer);
 	}
+
+	if (GetAsyncKeyState(VK_TAB) & 0x0001)
+	{
+		for (UINT face = 0; face < 6; ++face)
+		{
+			wstring filename = L"ShadowMap_Light" + to_wstring(index) + L"_Face" + to_wstring(face);
+			com_ptr<ID3D11Texture2D> shadowFaceTexture = nullptr;
+
+			D3D11_TEXTURE2D_DESC desc = {};
+			renderer->m_shadowMapArrayTexture->GetDesc(&desc);
+			desc.BindFlags = 0;
+			desc.Usage = D3D11_USAGE_STAGING;
+			desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+			desc.Format = DXGI_FORMAT_R32_FLOAT;
+
+			if (FAILED(renderer->m_device->CreateTexture2D(&desc, nullptr, shadowFaceTexture.GetAddressOf())))
+			{
+				MessageBoxW(nullptr, L"Failed to create shadow face texture for saving", L"Error", MB_OK);
+				return;
+			}
+
+			const UINT subresourceIndex = D3D11CalcSubresource(0, static_cast<UINT>(index) * 6 + face, 1);
+			renderer->m_deviceContext->CopySubresourceRegion(shadowFaceTexture.Get(), 0, 0, 0, 0, renderer->m_shadowMapArrayTexture.Get(), subresourceIndex, nullptr);
+
+			renderer->SaveTextureToFile(shadowFaceTexture, filename);
+		}
+	}
 }
