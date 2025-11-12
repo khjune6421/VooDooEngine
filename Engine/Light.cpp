@@ -86,7 +86,7 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 	{
 		for (UINT face = 0; face < 6; ++face)
 		{
-			wstring filename = L"ShadowMap_Light" + to_wstring(index) + L"_Face" + to_wstring(face);
+			const wstring filename = L"ShadowMap_Light" + to_wstring(index) + L"_Face" + to_wstring(face);
 			com_ptr<ID3D11Texture2D> shadowFaceTexture = nullptr;
 
 			D3D11_TEXTURE2D_DESC desc = {};
