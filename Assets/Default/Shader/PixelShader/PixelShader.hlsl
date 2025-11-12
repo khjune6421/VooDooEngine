@@ -61,7 +61,7 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     float shadowFactor = shadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), distance / light.range);
     if (shadowFactor <= 0.0f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
-    vecToLight /= distance;
+    vecToLight /= distance; // Normalize
     
     float spotDot = abs(dot(-vecToLight, light.directionAndAngle.xyz));
     if (spotDot < 0.0f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
