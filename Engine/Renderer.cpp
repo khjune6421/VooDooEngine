@@ -710,8 +710,6 @@ void Renderer::UpdateRenderer()
 	UpdateVertexShader();
 	UpdatePixelShader();
 
-	UpdateRenderMode();
-
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 }
 
@@ -867,6 +865,7 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 void Renderer::Render()
 {
 	ClearResources();
+	UpdateRenderMode();
 
 	VDGM::g_currentScene->PreRender(this);
 
