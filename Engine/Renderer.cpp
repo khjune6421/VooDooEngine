@@ -255,7 +255,7 @@ void Renderer::CreateShadowMap()
 	{
 		for (UINT faceIndex = 0; faceIndex < 6; ++faceIndex)
 		{
-			UINT arraySlice = lightIndex * 6 + faceIndex;
+			const UINT arraySlice = lightIndex * 6 + faceIndex;
 			dsvDesc.Texture2DArray.FirstArraySlice = arraySlice;
 
 			if (FAILED(m_device->CreateDepthStencilView(m_shadowMapArrayTexture.Get(), &dsvDesc, m_shadowMapDSVs[arraySlice].GetAddressOf())))

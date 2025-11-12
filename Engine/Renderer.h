@@ -2,6 +2,25 @@
 #include "pch.h"
 #include "Scene.h"
 
+constexpr DirectX::XMVECTOR CUBE_TARGET[6] =
+{
+	{ 1.0f, 0.0f, 0.0f, 0.0f },		// +X
+	{ -1.0f, 0.0f, 0.0f, 0.0f },	// -X
+	{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Y
+	{ 0.0f, -1.0f, 0.0f, 0.0f },	// -Y
+	{ 0.0f, 0.0f, 1.0f, 0.0f },		// +Z
+	{ 0.0f, 0.0f, -1.0f, 0.0f }		// -Z
+};
+constexpr DirectX::XMVECTOR CUBE_TARGET_UP[6] =
+{
+	{ 0.0f, 1.0f, 0.0f, 0.0f },		// +X
+	{ 0.0f, 1.0f, 0.0f, 0.0f },		// -X
+	{ 0.0f, 0.0f, -1.0f, 0.0f },	// +Y
+	{ 0.0f, 0.0f, 1.0f, 0.0f },		// -Y
+	{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Z
+	{ 0.0f, 1.0f, 0.0f, 0.0f }		// -Z
+};
+
 namespace VDGM
 {
 	extern float g_deltaTime;

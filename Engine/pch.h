@@ -42,3 +42,4 @@
 
 // Macro definitions
 #define com_ptr Microsoft::WRL::ComPtr
+#define verbose_cast(x) static_cast<vector<x, allocator<x>>::size_type>

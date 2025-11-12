@@ -75,6 +75,7 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 		0.0f, 1.0f
 	};
 	renderer->m_deviceContext->RSSetViewports(1, &shadowViewport);
+
 	constexpr D3D11_RECT shadowScissorRect =
 	{
 		0, 0,
