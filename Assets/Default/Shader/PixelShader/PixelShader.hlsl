@@ -36,7 +36,6 @@ cbuffer AmbientFogConstBuffer : register(b2)
     float4 ambientFog; // w value is range
 }
 
-
 struct PSInput
 {
     float4 pos : SV_POSITION0;
@@ -45,7 +44,7 @@ struct PSInput
     float3 tangent : TANGENT0;
     
     float4 posWorld : WORLDPOS0;
-    float4 light : COLOR1;
+    float4 light : COLOR0;
     float3 bitangent : BITANGENT0;
 };
 
@@ -101,7 +100,7 @@ float4 main(PSInput input) : SV_TARGET
     [loop]
     for (uint i = 0; i < numPointLights; i++) input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
     
-    float fogFactor = saturate(distanceFromCamera * rcp(ambientFog.w));
+    float fogFactor = pow(saturate(distanceFromCamera / ambientFog.w), 2.0f);
     float4 fogColor = float4(ambientFog.xyz, 1.0f);
     
     return lerp(texColor * input.light, fogColor, fogFactor);

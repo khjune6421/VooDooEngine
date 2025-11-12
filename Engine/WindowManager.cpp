@@ -23,8 +23,8 @@ namespace VDW
 		case WM_SIZE:
 			if (wParam != SIZE_MINIMIZED)
 			{
-				LONG width = LOWORD(lParam);
-				LONG height = HIWORD(lParam);
+				const LONG width = LOWORD(lParam);
+				const LONG height = HIWORD(lParam);
 				if (width != 0 && height != 0) ResizeWindow(hWnd, width, height);
 			}
 			return 0;
@@ -51,7 +51,7 @@ namespace VDW
 
 		case WM_RBUTTONUP:
 		{
-			POINT mousePos = { LOWORD(lParam), HIWORD(lParam) };
+			const POINT mousePos = { LOWORD(lParam), HIWORD(lParam) };
 			g_windows[hWnd]->ScreenPointToWorld(mousePos);
 			return 0;
 		}
@@ -62,14 +62,14 @@ namespace VDW
 				POINT currentMousePos = {};
 				GetCursorPos(&currentMousePos);
 
-				int deltaX = currentMousePos.x - lastMousePos.x;
-				int deltaY = currentMousePos.y - lastMousePos.y;
+				const int deltaX = currentMousePos.x - lastMousePos.x;
+				const int deltaY = currentMousePos.y - lastMousePos.y;
 
 				RECT rect = {};
 				GetWindowRect(hWnd, &rect);
 
-				int newLeft = rect.left + deltaX;
-				int newTop = rect.top + deltaY;
+				const int newLeft = rect.left + deltaX;
+				const int newTop = rect.top + deltaY;
 
 				SetWindowPos
 				(
@@ -123,7 +123,7 @@ namespace VDW
 
 	HWND CreateWindowAndRenderer(wstring className, wstring windowName, int width, int height, int posX, int posY, const wchar_t* resourcePath)
 	{
-		WNDCLASSEX wc =
+		const WNDCLASSEX wc =
 		{
 			sizeof(WNDCLASSEX),
 			CS_CLASSDC,
@@ -142,7 +142,7 @@ namespace VDW
 			return nullptr;
 		}
 
-		HWND hWnd = CreateWindow
+		const HWND hWnd = CreateWindow
 		(
 			className.c_str(),
 			windowName.c_str(),
@@ -175,15 +175,15 @@ namespace VDW
 	{
 		RECT oldRect = {};
 		GetWindowRect(hWnd, &oldRect);
-		DWORD style = static_cast<DWORD>(GetWindowLongW(hWnd, GWL_STYLE));
-		DWORD exStyle = static_cast<DWORD>(GetWindowLongW(hWnd, GWL_EXSTYLE));
+		const DWORD style = static_cast<DWORD>(GetWindowLongW(hWnd, GWL_STYLE));
+		const DWORD exStyle = static_cast<DWORD>(GetWindowLongW(hWnd, GWL_EXSTYLE));
 
 		RECT newRect = { 0, 0, width, height };
 
 		AdjustWindowRectEx(&newRect, style, FALSE, exStyle);
 
-		LONG newWidth = newRect.right - newRect.left;
-		LONG newHeight = newRect.bottom - newRect.top;
+		const LONG newWidth = newRect.right - newRect.left;
+		const LONG newHeight = newRect.bottom - newRect.top;
 
 		SetWindowPos
 		(

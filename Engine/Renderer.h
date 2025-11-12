@@ -28,7 +28,7 @@ class Renderer
 	// Device information structure containing Direct3D device, context, hardware, etc
 	struct DeviceInfo
 	{
-		DXGI_MODE_DESC displayMode = { 1920, 1080, { 0, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM };
+		DXGI_MODE_DESC displayMode = { 1920, 1080, { 0, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB };
 		D3D_FEATURE_LEVEL featureLevels = D3D_FEATURE_LEVEL_11_0;
 
 		bool isFullscreen = false;
@@ -55,9 +55,9 @@ class Renderer
 
 	// Input layouts // well this is cursed
 	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
-	static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
+	const static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
 
-	static D3D11_SAMPLER_DESC s_defaultSamplerDesc;
+	static const D3D11_SAMPLER_DESC s_defaultSamplerDesc;
 	enum SamplerType
 	{
 		DefaultSampler,

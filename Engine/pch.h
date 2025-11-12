@@ -1,5 +1,4 @@
 #pragma once
-
 // Standard library header
 #include <Windows.h>
 #include <iostream>

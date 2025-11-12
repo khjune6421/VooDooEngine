@@ -12,14 +12,14 @@ public:
 	template<std::integral T>
 	T GetRandom(T min, T max)
 	{
-		std::uniform_int_distribution<T> dist(min, max);
+		const std::uniform_int_distribution<T> dist(min, max);
 		return dist(m_generator);
 	}
 
 	template<std::floating_point T>
 	T GetRandom(T min, T max)
 	{
-		std::uniform_real_distribution<T> dist(min, max);
+		const std::uniform_real_distribution<T> dist(min, max);
 		return dist(m_generator);
 	}
 };
