@@ -11,6 +11,7 @@
 #include <fstream>
 #include <typeindex>
 #include <chrono>
+#include <wincodec.h>
 
 // DirectX header
 #include <d3d11.h>
@@ -22,6 +23,7 @@
 #include <SpriteFont.h>
 #include <DDSTextureLoader.h>
 #include <WICTextureLoader.h>
+#include <ScreenGrab.h>
 
 // Engine header
 #include "Singleton.h"
@@ -40,3 +42,4 @@
 
 // Macro definitions
 #define com_ptr Microsoft::WRL::ComPtr
+#define verbose_cast(x) static_cast<vector<x, allocator<x>>::size_type>

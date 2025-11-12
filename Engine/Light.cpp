@@ -44,33 +44,14 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 
 	const XMMATRIX lightProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.0f, 0.1f, lightRange);
 
-	constexpr XMVECTOR CUBE_TARGET[6] =
-	{
-		{ 1.0f, 0.0f, 0.0f, 0.0f },		// +X
-		{ -1.0f, 0.0f, 0.0f, 0.0f },	// -X
-		{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Y
-		{ 0.0f, -1.0f, 0.0f, 0.0f },	// -Y
-		{ 0.0f, 0.0f, 1.0f, 0.0f },		// +Z
-		{ 0.0f, 0.0f, -1.0f, 0.0f }		// -Z
-	};
-	constexpr XMVECTOR CUBE_TARGET_UP[6] =
-	{
-		{ 0.0f, 1.0f, 0.0f, 0.0f },		// +X
-		{ 0.0f, 1.0f, 0.0f, 0.0f },		// -X
-		{ 0.0f, 0.0f, -1.0f, 0.0f },	// +Y
-		{ 0.0f, 0.0f, 1.0f, 0.0f },		// -Y
-		{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Z
-		{ 0.0f, 1.0f, 0.0f, 0.0f }		// -Z
-	};
-
 	const XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPos), XMVectorGetY(lightPos), XMVectorGetZ(lightPos), lightRange);
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
 	renderer->m_deviceContext->PSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::LightPosBuffer].GetAddressOf());
 
 	for (UINT face = 0; face < 6; ++face)
 	{
- 		renderer->m_deviceContext->OMSetRenderTargets(1, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_shadowMapDSVs[static_cast<vector<com_ptr<ID3D11DepthStencilView>, allocator<com_ptr<ID3D11DepthStencilView>>>::size_type>(index) + face].Get());
-		renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSVs[static_cast<vector<com_ptr<ID3D11DepthStencilView>, allocator<com_ptr<ID3D11DepthStencilView>>>::size_type>(index) + face].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+		renderer->m_deviceContext->OMSetRenderTargets(0, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_shadowMapDSVs[verbose_cast(com_ptr<ID3D11DepthStencilView>)(index) + face].Get());
+		renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSVs[verbose_cast(com_ptr<ID3D11DepthStencilView>)(index) + face].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 		const XMVECTOR target = XMVectorAdd(lightPos, CUBE_TARGET[face]);
 		const XMMATRIX lightView = XMMatrixLookAtLH(lightPos, target, CUBE_TARGET_UP[face]);

@@ -232,7 +232,7 @@ void Renderer::CreateShadowMap()
 	shadowArrayDesc.Width = SHADOW_MAP_SIZE;
 	shadowArrayDesc.Height = SHADOW_MAP_SIZE;
 	shadowArrayDesc.MipLevels = 1;
-	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6; // MAX_POINT_LIGHTS * 6
+	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6;
 	shadowArrayDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 	shadowArrayDesc.SampleDesc.Count = 1;
 	shadowArrayDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -255,7 +255,7 @@ void Renderer::CreateShadowMap()
 	{
 		for (UINT faceIndex = 0; faceIndex < 6; ++faceIndex)
 		{
-			UINT arraySlice = lightIndex * 6 + faceIndex;
+			const UINT arraySlice = lightIndex * 6 + faceIndex;
 			dsvDesc.Texture2DArray.FirstArraySlice = arraySlice;
 
 			if (FAILED(m_device->CreateDepthStencilView(m_shadowMapArrayTexture.Get(), &dsvDesc, m_shadowMapDSVs[arraySlice].GetAddressOf())))
@@ -710,8 +710,6 @@ void Renderer::UpdateRenderer()
 	UpdateVertexShader();
 	UpdatePixelShader();
 
-	UpdateRenderMode();
-
 	ClearBackBuffer(D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, VDGM::g_currentScene->m_backgroundColor, 1.0f, 0);
 }
 
@@ -783,18 +781,18 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 
 	InitializeConstBuffers();
 
-	static const filesystem::path defaultPath(L"../Assets/Default/");
-	LoadAllShaders(defaultPath / L"Shader/", "main", "5_0");
-	LoadDefaultShapes(defaultPath / L"Shapes/");
-	LoadAllTextures(defaultPath / L"Texture/");
-	LoadFonts(defaultPath / L"Fonts/");
+	m_resourcePath = filesystem::path(L"../Assets/Default/");
+	LoadAllShaders(m_resourcePath / L"Shader/", "main", "5_0");
+	LoadDefaultShapes(m_resourcePath / L"Shapes/");
+	LoadAllTextures(m_resourcePath / L"Texture/");
+	LoadFonts(m_resourcePath / L"Fonts/");
 
 	if (resourcePath) // This will override the default assets if corrisponding files are found
 	{
-		filesystem::path resPath(resourcePath);
-		LoadAllShaders(resPath / L"Shader/", "main", "5_0");
-		LoadDefaultShapes(resPath / L"Shapes/");
-		LoadAllTextures(resPath / L"Texture/");
+		m_resourcePath = filesystem::path(resourcePath);
+		LoadAllShaders(m_resourcePath / L"Shader/", "main", "5_0");
+		LoadDefaultShapes(m_resourcePath / L"Shapes/");
+		LoadAllTextures(m_resourcePath / L"Texture/");
 	}
 }
 
@@ -867,6 +865,7 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 void Renderer::Render()
 {
 	ClearResources();
+	UpdateRenderMode();
 
 	VDGM::g_currentScene->PreRender(this);
 
@@ -919,4 +918,14 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 	);
 
 	if (VDGM::g_currentScene) VDGM::g_currentScene->Raycast(rayOrigin, rayEnd);
+}
+
+void Renderer::SaveTextureToFile(com_ptr<ID3D11Texture2D> texture, const wstring& filename) const
+{
+	filesystem::path fullPath = m_resourcePath / L"BakedTextures/" / filesystem::path(filename + L".png");
+	if (FAILED(SaveWICTextureToFile(m_deviceContext.Get(), texture.Get(), GUID_ContainerFormatPng, fullPath.c_str())))
+	{
+		MessageBoxW(nullptr, L"Failed to save texture to file", L"Error", MB_OK);
+		return;
+	}
 }
