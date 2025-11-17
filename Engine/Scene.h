@@ -13,7 +13,7 @@ struct MatrixConstBuffer
 	DirectX::XMMATRIX projection = DirectX::XMMatrixIdentity(); // projection matrix
 	DirectX::XMMATRIX WVP = DirectX::XMMatrixIdentity(); // world view projection matrix
 
-	DirectX::XMMATRIX normalMatrix = DirectX::XMMatrixIdentity(); // world matrix without scale for normal transformation
+	DirectX::XMMATRIX normalMatrix = DirectX::XMMatrixIdentity(); // world matrix without scale for normal transformation // needed because normals should not be scaled
 };
 struct DirectionalLightConstBuffer
 {
