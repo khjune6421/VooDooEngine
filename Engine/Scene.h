@@ -24,10 +24,10 @@ struct DirectionalLightConstBuffer
 constexpr int MAX_POINT_LIGHTS = 8;
 struct PointLightArrayConstBuffer
 {
-	PointLightConstBuffer pointLights[MAX_POINT_LIGHTS] = {};
+	std::array<PointLightConstBuffer, MAX_POINT_LIGHTS> pointLights = {};
 
 	UINT pointLightCount = 0;
-	UINT padding[3] = {};
+	std::array<UINT, 3> padding = {};
 };
 
 class Scene
