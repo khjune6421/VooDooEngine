@@ -21,18 +21,22 @@ struct PointLight
     float aQuadratic;
 };
 
-cbuffer PointLightConstBuffer : register(b0)
+cbuffer DirectionalLightConstBuffer : register(b0)
+{
+    float4 directionalLightPos;
+}
+cbuffer PointLightConstBuffer : register(b1)
 {
     PointLight pointLights[8];
     
     uint pointLightCount;
     uint padding[3];
 }
-cbuffer CameraConstBuffer : register(b1)
+cbuffer CameraConstBuffer : register(b2)
 {
     float4 cameraPos;
 }
-cbuffer AmbientFogConstBuffer : register(b2)
+cbuffer AmbientFogConstBuffer : register(b3)
 {
     float4 ambientFog; // w value is range
 }

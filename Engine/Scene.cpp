@@ -102,22 +102,6 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 	lightMatrixBuffer.projection = XMMatrixTranspose(lightProjectionMatrix);
 
 	RenderShadows(renderer, &lightMatrixBuffer);
-
-	com_ptr<ID3D11Texture2D> shadowFaceTexture = nullptr;
-	D3D11_TEXTURE2D_DESC desc = {};
-	renderer->m_shadowMapTexture->GetDesc(&desc);
-	desc.BindFlags = 0;
-	desc.Usage = D3D11_USAGE_STAGING;
-	desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	desc.Format = DXGI_FORMAT_R32_FLOAT;
-
-	if (FAILED(renderer->m_device->CreateTexture2D(&desc, nullptr, shadowFaceTexture.GetAddressOf())))
-	{
-		MessageBoxW(nullptr, L"Failed to create shadow face texture for readback", L"Error", MB_OK);
-		return;
-	}
-
-	renderer->SaveTextureToFile(shadowFaceTexture, L"DirectionalLightShadowMap");
 }
 
 void Scene::UpdateCubeShadowMap(Renderer* renderer)

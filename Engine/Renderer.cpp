@@ -770,15 +770,15 @@ void Renderer::UpdatePixelShader()
 {
 	// Point Lights
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_pointLightBufferData, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
 	// Camera
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[CameraBuffer].GetAddressOf());
 
 	// Ambient Fog
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientFog, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(3, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
 	// Shadow Map
 	m_deviceContext->PSSetSamplers(0, 1, m_shadowSampler.GetAddressOf());
