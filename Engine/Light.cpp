@@ -60,6 +60,6 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 		lightMatrixBuffer.view = XMMatrixTranspose(lightView);
 		lightMatrixBuffer.projection = XMMatrixTranspose(lightProjection);
 
-		VDGM::g_currentScene->RenderShadows(renderer, &lightMatrixBuffer);
+		VDGM::g_currentScene->RenderShadows(renderer, &lightMatrixBuffer); // TODO: this is cursed // needs fixing
 	}
 }

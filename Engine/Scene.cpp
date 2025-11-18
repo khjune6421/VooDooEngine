@@ -47,27 +47,9 @@ void Scene::UpdateCamera()
 
 void Scene::UpdateLight(Renderer* renderer)
 {
-	UpdateShadowMap(renderer);
-
 	m_pointLightBufferData.pointLightCount = static_cast<UINT>(m_pointLights.size());
 	for (UINT i = 0; i < m_pointLightBufferData.pointLightCount && i < MAX_POINT_LIGHTS; ++i) m_pointLightBufferData.pointLights[i] = m_pointLights[i]->GetLightData();
 
-	UpdateCubeShadowMap(renderer);
-}
-
-void Scene::UpdateShadowMap(Renderer* renderer)
-{
-	XMVECTOR lightPosition = m_directionalLight.direction * -100.0f;
-	lightPosition = XMVectorSetW(lightPosition, 1.0f);
-
-	constexpr XMVECTOR lightTarget = { 0.0f, 0.0f, 0.0f, 1.0f };
-	constexpr XMVECTOR lightUp = { 0.0f, 1.0f, 0.0f, 0.0f };
-	const XMMATRIX lightViewMatrix = XMMatrixLookAtLH(lightPosition, lightTarget, lightUp);
-	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(static_cast<float>(Renderer::SHADOW_MAP_SIZE), static_cast<float>(Renderer::SHADOW_MAP_SIZE), 0.1f, 250.0f);
-}
-
-void Scene::UpdateCubeShadowMap(Renderer* renderer)
-{
 	com_ptr<ID3D11RenderTargetView> originalRTV;
 	com_ptr<ID3D11DepthStencilView> originalDSV;
 	renderer->m_deviceContext->OMGetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.GetAddressOf());
@@ -88,11 +70,59 @@ void Scene::UpdateCubeShadowMap(Renderer* renderer)
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetSamplers(1, 1, renderer->m_samplers[Renderer::DefaultSampler].GetAddressOf());
 
-	for (UINT i = 0; i < static_cast<UINT>(m_pointLights.size()) && i < MAX_POINT_LIGHTS; ++i) m_pointLights[i]->CreateShadowMap(renderer, 6 * i);
+	UpdateShadowMap(renderer);
+	UpdateCubeShadowMap(renderer);
 
 	renderer->m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
 	renderer->m_deviceContext->RSSetViewports(1, &originalViewport);
 	renderer->m_deviceContext->RSSetScissorRects(1, &originalScissorRect);
+}
+
+void Scene::UpdateShadowMap(Renderer* renderer)
+{
+	XMVECTOR lightPosition = m_directionalLight.direction * -100.0f;
+	lightPosition = XMVectorSetW(lightPosition, 1.0f);
+
+	constexpr XMVECTOR LIGHT_TARGET = { 0.0f, 0.0f, 0.0f, 1.0f };
+	constexpr XMVECTOR LIGHT_UP = { 0.0f, 1.0f, 0.0f, 0.0f };
+	constexpr float LIGHT_RANGE = 250.0f; // Need for depth calculation in shader
+
+	const XMMATRIX lightViewMatrix = XMMatrixLookAtLH(lightPosition, LIGHT_TARGET, LIGHT_UP);
+	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(static_cast<float>(Renderer::SHADOW_MAP_SIZE), static_cast<float>(Renderer::SHADOW_MAP_SIZE), 0.1f, LIGHT_RANGE);
+
+	const XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPosition), XMVectorGetY(lightPosition), XMVectorGetZ(lightPosition), LIGHT_RANGE);
+	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
+	renderer->m_deviceContext->PSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::LightPosBuffer].GetAddressOf());
+
+	renderer->m_deviceContext->OMSetRenderTargets(0, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_shadowMapDSV.Get());
+	renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	MatrixConstBuffer lightMatrixBuffer = {};
+	lightMatrixBuffer.view = XMMatrixTranspose(lightViewMatrix);
+	lightMatrixBuffer.projection = XMMatrixTranspose(lightProjectionMatrix);
+
+	RenderShadows(renderer, &lightMatrixBuffer);
+
+	com_ptr<ID3D11Texture2D> shadowFaceTexture = nullptr;
+	D3D11_TEXTURE2D_DESC desc = {};
+	renderer->m_shadowMapTexture->GetDesc(&desc);
+	desc.BindFlags = 0;
+	desc.Usage = D3D11_USAGE_STAGING;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	desc.Format = DXGI_FORMAT_R32_FLOAT;
+
+	if (FAILED(renderer->m_device->CreateTexture2D(&desc, nullptr, shadowFaceTexture.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow face texture for readback", L"Error", MB_OK);
+		return;
+	}
+
+	renderer->SaveTextureToFile(shadowFaceTexture, L"DirectionalLightShadowMap");
+}
+
+void Scene::UpdateCubeShadowMap(Renderer* renderer)
+{
+	for (UINT i = 0; i < static_cast<UINT>(m_pointLights.size()) && i < MAX_POINT_LIGHTS; ++i) m_pointLights[i]->CreateShadowMap(renderer, 6 * i);
 }
 
 void Scene::RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer)
