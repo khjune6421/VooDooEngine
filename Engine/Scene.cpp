@@ -118,9 +118,14 @@ void Scene::PreRender(Renderer* renderer)
 
 void Scene::Render(Renderer* renderer)
 {
+	renderer->m_deviceContext->OMSetDepthStencilState(renderer->m_depthStencilStates[Renderer::MarkDepthStencil].Get(), 1);
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	renderer->m_deviceContext->OMSetBlendState(renderer->m_blendStates[Renderer::AlphaToCoverage].Get(), nullptr, 0xffffffff); // It just works // but only if it is sorted
-	for (const auto& shape : m_renderShapes) shape->Render(renderer, &m_matrixConstBuffer);
+
+	for (const auto& shape : m_renderShapes) if (shape->GetStencilRef() == 1) shape->Render(renderer, &m_matrixConstBuffer);
+
+	renderer->m_deviceContext->OMSetBlendState(renderer->m_blendStates[Renderer::AlphaToCoverage].Get(), nullptr, 0xffffffff);
+
+	for (const auto& shape : m_renderShapes) if (shape->GetStencilRef() != 1) shape->Render(renderer, &m_matrixConstBuffer);
 
 #ifdef _DEBUG
 	renderer->m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);

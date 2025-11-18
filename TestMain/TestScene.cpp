@@ -29,7 +29,7 @@ TestScene::TestScene()
 
 	m_lightObj = make_unique<Object>(this);
 	m_lightObj->SetPosition(XMVECTOR{ 2.5f, 1.5f, 2.5f, 1.0f });
-	//m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.75f }, 5.0f, 0.0f, 20.0f, 1.0f, 0.25f, 0.25f);
+	m_lightObj->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.75f }, 5.0f, 0.0f, 20.0f, 1.0f, 0.25f, 0.25f);
 
 	constexpr int treeCount = 1000;
 	for (int i = 0; i < treeCount; ++i)
@@ -42,7 +42,8 @@ TestScene::TestScene()
 	}
 
 	m_player = make_unique<Player>(this);
-	m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Lilypads", L"LilypadsNormal");
+	Shape* playerShape = m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Lilypads", L"LilypadsNormal");
+	playerShape->SetStencilRef(1);
 
 	m_player->AddChild(m_camera.get());
 	m_player->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });

@@ -17,6 +17,8 @@ class Shape : public Component
 	UINT m_textureId = 0;
 	UINT m_normalMapId = 0;
 
+	UINT m_stencilRef = 0;
+
 public:
 	Shape
 	(
@@ -40,6 +42,9 @@ public:
 
 	void SetTexture(const std::wstring& texture);
 	void SetNormalMap(const std::wstring& normalMap);
+
+	void SetStencilRef(UINT stencilRef) { m_stencilRef = stencilRef; }
+	UINT GetStencilRef() const { return m_stencilRef; }
 
 	void OnAttached(Object* owner) override;
 	void OnDetached() override;

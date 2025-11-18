@@ -24,6 +24,11 @@ void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 {
 	if (m_owner->m_isActive == false) return;
 
+	if (m_stencilRef == 1) renderer->m_deviceContext->OMSetDepthStencilState(renderer->m_depthStencilStates[Renderer::MarkDepthStencil].Get(), m_stencilRef);
+	else renderer->m_deviceContext->OMSetDepthStencilState(renderer->m_depthStencilStates[Renderer::RejectStencil].Get(), 1);
+
+	renderer->m_deviceContext->OMSetDepthStencilState(renderer->m_depthStencilStates[Renderer::IgnoreDepthStencil].Get(), m_stencilRef);
+
 	renderer->m_deviceContext->IASetVertexBuffers(0, 1, renderer->m_meshVertexBufferMap[m_meshId].first.GetAddressOf(), &stride, &offset);
 
 	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[m_vertexShaderId].first.Get(), nullptr, 0);

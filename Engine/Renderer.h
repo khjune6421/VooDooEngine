@@ -89,17 +89,28 @@ class Renderer
 	enum BlendState
 	{
 		NoBlend,
-		AlphaBlend,
 		AlphaToCoverage,
+		AlphaBlend,
 
 		BlendStateCount
 	};
 	std::array<com_ptr<ID3D11BlendState>, BlendStateCount> m_blendStates = {};
 
-	// Variables
-	HWND m_hWnd = nullptr;
+	enum DepthStencilState
+	{
+		DefaultDepthStencil,
+		MarkStencil,
+		RejectStencil,
+		IgnoreStencil,
+		MarkDepthStencil,
+		IgnoreDepthStencil,
 
-	// Device
+
+		DepthStencilStateCount
+	};
+	std::array<com_ptr<ID3D11DepthStencilState>, DepthStencilStateCount> m_depthStencilStates = {};
+
+	HWND m_hWnd = nullptr;
 	DeviceInfo m_deviceInfo = {};
 
 	com_ptr<ID3D11Device> m_device = nullptr;
@@ -185,6 +196,7 @@ class Renderer
 	void CreateBlendState();
 	void CreateShadowMap();
 	void CreateShadowSampler();
+	void CreateDepthStencilState();
 
 	void LoadObjFile(const std::filesystem::path filePath);
 	void LoadDefaultShapes(const std::filesystem::path folderPath);

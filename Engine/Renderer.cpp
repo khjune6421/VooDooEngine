@@ -120,7 +120,7 @@ void Renderer::CreateDepthStencil()
 	depthStencilDesc.Height = m_deviceInfo.displayMode.Height;
 	depthStencilDesc.ArraySize = 1;
 	depthStencilDesc.MipLevels = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 	depthStencilDesc.SampleDesc.Count = m_deviceInfo.antiAliasingLevel;
 	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	if (FAILED(m_device->CreateTexture2D(&depthStencilDesc, nullptr, m_depthStencilBuffer.GetAddressOf())))
@@ -142,9 +142,7 @@ void Renderer::CreateDepthStencil()
 
 void Renderer::CreateRasterState()
 {
-	D3D11_RASTERIZER_DESC rasterDesc = {};
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.CullMode = D3D11_CULL_BACK;
+	CD3D11_RASTERIZER_DESC rasterDesc(CD3D11_DEFAULT{});
 	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.MultisampleEnable = TRUE;
 	rasterDesc.AntialiasedLineEnable = TRUE;
@@ -183,43 +181,35 @@ void Renderer::CreateSamplerState()
 void Renderer::CreateBlendState()
 {
 	// No blend
-	D3D11_BLEND_DESC noBlendDesc = {};
-	noBlendDesc.RenderTarget[0].BlendEnable = FALSE;
-	noBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	if (FAILED(m_device->CreateBlendState(&noBlendDesc, m_blendStates[NoBlend].GetAddressOf())))
+	CD3D11_BLEND_DESC blendDesc(CD3D11_DEFAULT{});
+	if (FAILED(m_device->CreateBlendState(&blendDesc, m_blendStates[NoBlend].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create no blend state", L"Error", MB_OK);
 		return;
 	}
 
-	// Alpha blend
-	D3D11_BLEND_DESC alphaBlendDesc = {};
-	alphaBlendDesc.RenderTarget[0].BlendEnable = TRUE;
-	alphaBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	alphaBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	alphaBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	alphaBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	alphaBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	alphaBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	alphaBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	if (FAILED(m_device->CreateBlendState(&alphaBlendDesc, m_blendStates[AlphaBlend].GetAddressOf())))
+	// Alpha to coverage
+	blendDesc.AlphaToCoverageEnable = TRUE;
+	if (FAILED(m_device->CreateBlendState(&blendDesc, m_blendStates[AlphaToCoverage].GetAddressOf())))
 	{
-		MessageBoxW(nullptr, L"Failed to create alpha blend state", L"Error", MB_OK);
+		MessageBoxW(nullptr, L"Failed to create alpha-to-coverage blend state", L"Error", MB_OK);
 		return;
 	}
 
-	// Alpha to coverage
-	D3D11_BLEND_DESC alphaToCoverageDesc = {};
-	alphaToCoverageDesc.AlphaToCoverageEnable = TRUE;
-	alphaToCoverageDesc.IndependentBlendEnable = FALSE;
-	alphaToCoverageDesc.RenderTarget[0].BlendEnable = FALSE;
-	alphaToCoverageDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	// Alpha blend
+	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	if (FAILED(m_device->CreateBlendState(&alphaToCoverageDesc, m_blendStates[AlphaToCoverage].GetAddressOf())))
+	if (FAILED(m_device->CreateBlendState(&blendDesc, m_blendStates[AlphaBlend].GetAddressOf())))
 	{
-		MessageBoxW(nullptr, L"Failed to create alpha-to-coverage blend state", L"Error", MB_OK);
+		MessageBoxW(nullptr, L"Failed to create alpha blend state", L"Error", MB_OK);
 		return;
 	}
 
@@ -283,22 +273,117 @@ void Renderer::CreateShadowMap()
 
 void Renderer::CreateShadowSampler()
 {
-	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
+	CD3D11_SAMPLER_DESC shadowSamplerDesc(CD3D11_DEFAULT{});
 	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
 	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
-	shadowSamplerDesc.BorderColor[0] = 1.0f;
-	shadowSamplerDesc.BorderColor[1] = 1.0f;
-	shadowSamplerDesc.BorderColor[2] = 1.0f;
-	shadowSamplerDesc.BorderColor[3] = 1.0f;
 
 	if (FAILED(m_device->CreateSamplerState(&shadowSamplerDesc, m_shadowSampler.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create shadow sampler", L"Error", MB_OK);
 		return;
 	}
+}
+
+void Renderer::CreateDepthStencilState()
+{
+	CD3D11_DEPTH_STENCIL_DESC depthStencilDesc(CD3D11_DEFAULT{});
+	if (FAILED(m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[DefaultDepthStencil].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create depth stencil state", L"Error", MB_OK);
+		return;
+	}
+
+	// Mark stencil
+	depthStencilDesc.DepthEnable = FALSE;
+	depthStencilDesc.StencilEnable = TRUE;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthStencilDesc.BackFace = depthStencilDesc.FrontFace;
+	if (FAILED(m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[MarkStencil].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create mark stencil state", L"Error", MB_OK);
+		return;
+	}
+
+	// Reject stencil
+	depthStencilDesc = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT{});
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = TRUE;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0x00;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL; // Changed from EQUAL to NOT_EQUAL
+	depthStencilDesc.BackFace = depthStencilDesc.FrontFace;
+	if (FAILED(m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[RejectStencil].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create reject stencil state", L"Error", MB_OK);
+		return;
+	}
+
+	// Ignore stencil
+	depthStencilDesc = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT{});
+	depthStencilDesc.StencilEnable = TRUE;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0x00;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+	depthStencilDesc.BackFace = depthStencilDesc.FrontFace;
+	if (FAILED(m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[IgnoreStencil].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create ignore stencil state", L"Error", MB_OK);
+		return;
+	}
+
+	depthStencilDesc = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT{});
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = TRUE;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthStencilDesc.BackFace = depthStencilDesc.FrontFace;
+	if (FAILED(m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[MarkDepthStencil].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create occluder mark state", L"Error", MB_OK);
+		return;
+	}
+
+	depthStencilDesc = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT{});
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	depthStencilDesc.StencilEnable = TRUE;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0x00;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+	depthStencilDesc.BackFace = depthStencilDesc.FrontFace;
+	if (FAILED(m_device->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[IgnoreDepthStencil].GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create occluded test state", L"Error", MB_OK);
+		return;
+	}
+
+	m_deviceContext->OMSetDepthStencilState(m_depthStencilStates[DefaultDepthStencil].Get(), 0);
 }
 
 void Renderer::SetScissorRect(LONG width, LONG height)
@@ -771,6 +856,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	CreateBlendState();
 	CreateShadowMap();
 	CreateShadowSampler();
+	CreateDepthStencilState();
 
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 	SetViewport();
