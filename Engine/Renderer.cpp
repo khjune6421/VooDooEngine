@@ -741,6 +741,7 @@ void Renderer::ClearResources()
 	m_deviceContext->PSSetShaderResources(0, 1, &nullSRV);
 	m_deviceContext->PSSetShaderResources(1, 1, &nullSRV);
 	m_deviceContext->PSSetShaderResources(2, 1, &nullSRV);
+	m_deviceContext->PSSetShaderResources(3, 1, &nullSRV);
 }
 
 void Renderer::UpdateRenderer()
@@ -779,8 +780,10 @@ void Renderer::UpdatePixelShader()
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientFog, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
+	// Shadow Map
 	m_deviceContext->PSSetSamplers(0, 1, m_shadowSampler.GetAddressOf());
-	m_deviceContext->PSSetShaderResources(0, 1, m_cubeShadowMapArraySRV.GetAddressOf());
+	m_deviceContext->PSSetShaderResources(0, 1, m_shadowMapSRV.GetAddressOf()); // Shadow Map
+	m_deviceContext->PSSetShaderResources(1, 1, m_cubeShadowMapArraySRV.GetAddressOf()); // Cube Shadow Map
 
 	m_deviceContext->PSSetSamplers(1, 1, m_samplers[DefaultSampler].GetAddressOf());
 }

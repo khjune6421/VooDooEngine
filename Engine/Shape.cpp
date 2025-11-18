@@ -38,8 +38,8 @@ void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[m_vertexShaderId].second.Get());
 
-	renderer->m_deviceContext->PSSetShaderResources(1, 1, renderer->m_textureMap[m_textureId].GetAddressOf());
-	renderer->m_deviceContext->PSSetShaderResources(2, 1, renderer->m_textureMap[m_normalMapId].GetAddressOf());
+	renderer->m_deviceContext->PSSetShaderResources(2, 1, renderer->m_textureMap[m_textureId].GetAddressOf());
+	renderer->m_deviceContext->PSSetShaderResources(3, 1, renderer->m_textureMap[m_normalMapId].GetAddressOf());
 
 	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
 }

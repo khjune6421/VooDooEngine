@@ -1,9 +1,10 @@
 SamplerComparisonState shadowSampler : register(s0);
 SamplerState defaultTexSampler : register(s1);
 
-TextureCubeArray shadowMapArray : register(t0);
-Texture2D mainTex : register(t1);
-Texture2D normalMap : register(t2);
+Texture2D shadowMap : register(t0);
+TextureCubeArray cubeShadowMapArray : register(t1);
+Texture2D mainTex : register(t2);
+Texture2D normalMap : register(t3);
 
 struct PointLight
 {
@@ -58,7 +59,7 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     if (distance > light.range) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     // Shadow
-    float shadowFactor = shadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), distance / light.range);
+    float shadowFactor = cubeShadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), distance / light.range);
     if (shadowFactor <= 0.0f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     vecToLight /= distance; // Normalize

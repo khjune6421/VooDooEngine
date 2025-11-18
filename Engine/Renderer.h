@@ -146,6 +146,20 @@ class Renderer
 	RasterState m_currentRasterState = RasterState::Solid;
 
 	static constexpr UINT SHADOW_MAP_SIZE = 1024;
+	static constexpr D3D11_VIEWPORT SHADOW_VIWEPORT =
+	{
+		0.0f, 0.0f,
+		static_cast<FLOAT>(SHADOW_MAP_SIZE),
+		static_cast<FLOAT>(SHADOW_MAP_SIZE),
+		0.0f, 1.0f
+	};
+	static constexpr D3D11_RECT SHADOW_SCISSOR_REACT =
+	{
+		0, 0,
+		static_cast<LONG>(SHADOW_MAP_SIZE),
+		static_cast<LONG>(SHADOW_MAP_SIZE)
+	};
+
 	com_ptr<ID3D11RenderTargetView> m_shadowMapArrayRTV = nullptr; // Baseically nullptr for now
 
 	// Directional light shadow map

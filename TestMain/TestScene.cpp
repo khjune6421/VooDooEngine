@@ -13,7 +13,7 @@ TestScene::TestScene()
 	m_ambientLight = XMFLOAT4{ m_timeColors[m_timeOfDay].x * 0.5f, m_timeColors[m_timeOfDay].y * 0.5f, m_timeColors[m_timeOfDay].z * 0.5f, 1.0f };
 
 	m_directionalLight.color = XMFLOAT4{ m_timeColors[m_timeOfDay].x * 0.5f, m_timeColors[m_timeOfDay].y * 0.5f, m_timeColors[m_timeOfDay].z * 0.5f, 0.0f };
-	m_directionalLight.direction = XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f };
+	m_directionalLight.direction = XMVector3Normalize(XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
 
 	m_camera->SetPosition(XMVECTOR{ 0.0f, 10.0f, -20.0f, 1.0f });
 	m_camera->LookAt(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });
@@ -51,6 +51,7 @@ TestScene::TestScene()
 	m_torch->AddComponent<Shape>(L"Eye", L"VertexShader", L"PixelShader", L"Eye");
 	m_torch->SetScale(XMFLOAT3{ 0.25f, 0.25f, 0.25f });
 	m_torch->SetPosition(XMVECTOR{ 0.0f, 2.5f, 0.0f, 1.0f });
+	//m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.5f }, 2.5f, 0.0f, 50.0f, 1.0f, 0.5f, 0.5f);
 	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.5f }, 2.5f);
 	m_player->AddChild(m_torch.get());
 }

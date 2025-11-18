@@ -46,6 +46,7 @@ class Scene
 	void UpdateCamera();
 	void UpdateLight(Renderer* renderer);
 	void UpdateShadowMap(Renderer* renderer);
+	void UpdateCubeShadowMap(Renderer* renderer);
 	void RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer);
 
 protected:
