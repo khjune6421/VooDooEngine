@@ -65,6 +65,7 @@ class Renderer
 		CameraBuffer,
 		AmbientFogBuffer,
 		DirectionalLightBuffer,
+		DirectionalLightShadow,
 		PointLightBuffer,
 		LightPosBuffer,
 

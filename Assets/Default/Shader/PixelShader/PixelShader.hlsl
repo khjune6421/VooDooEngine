@@ -21,9 +21,9 @@ struct PointLight
     float aQuadratic;
 };
 
-cbuffer DirectionalLightConstBuffer : register(b0)
+cbuffer DirectionalLightShadowConstBuffer : register(b0)
 {
-    float4 directionalLightPos;
+    matrix lightVP;
 }
 cbuffer PointLightConstBuffer : register(b1)
 {
@@ -52,6 +52,27 @@ struct PSInput
     float4 light : COLOR0;
     float3 bitangent : BITANGENT0;
 };
+
+float CalculateDirectionalShadow(float4 worldPos)
+{
+    float4 lightSpacePos = mul(lightVP, worldPos);
+    if (lightSpacePos.w <= 0.0f) return 1.0f;
+    lightSpacePos.xyz /= lightSpacePos.w;
+    
+    float2 shadowTexCoord;
+    shadowTexCoord.x = lightSpacePos.x * 0.5f + 0.5f;
+    shadowTexCoord.y = -lightSpacePos.y * 0.5f + 0.5f;
+    
+    if (shadowTexCoord.x < 0.0f || shadowTexCoord.x > 1.0f || shadowTexCoord.y < 0.0f || shadowTexCoord.y > 1.0f) return 1.0f; // Not in shadow
+    
+    // Bias to prevent shadow acne
+    float bias = 1e-3f; // Need to find a sweetspot
+    float currentDepth = lightSpacePos.z - bias;
+    
+    float shadow = shadowMap.SampleCmpLevelZero(shadowSampler, shadowTexCoord, currentDepth);
+    
+    return shadow;
+}
 
 float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, float3 viewDirection)
 {
@@ -102,6 +123,8 @@ float4 main(PSInput input) : SV_TARGET
     float distanceFromCameraSq = dot(vecToCamera, vecToCamera);
     float distanceFromCamera = sqrt(distanceFromCameraSq);
     float3 viewDirection = vecToCamera / distanceFromCamera;
+    
+    input.light *= input.light * CalculateDirectionalShadow(input.posWorld);
     
     [loop]
     for (uint i = 0; i < pointLightCount; i++) input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);

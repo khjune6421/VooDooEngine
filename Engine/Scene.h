@@ -40,6 +40,8 @@ class Scene
 	std::vector<Shape*> m_renderShapes = {};
 	std::unordered_map<UINT, std::pair<std::vector<Collider*>, std::vector<Collider*>>> m_colliderMap = {};
 
+	DirectX::XMMATRIX m_lightViewProjectionMatrix = DirectX::XMMatrixIdentity();
+
 	std::vector<PointLight*> m_pointLights = {};
 
 	void CheckCollisions();

@@ -548,6 +548,7 @@ void Renderer::InitializeConstBuffers()
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientLightBuffer]); // Ambient light buffer
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientFogBuffer]); // Ambient fog buffer
 	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
+	CreateConstBuffer(sizeof(XMMATRIX), &m_constBuffers[DirectionalLightShadow]); // Spot light buffer
 	CreateConstBuffer(sizeof(PointLightArrayConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[LightPosBuffer]); // Light position buffer
 }
@@ -768,6 +769,10 @@ void Renderer::UpdateVertexShader()
 
 void Renderer::UpdatePixelShader()
 {
+	// Directional Light Shadow
+	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightShadow].Get(), 0, nullptr, &VDGM::g_currentScene->m_lightViewProjectionMatrix, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[DirectionalLightShadow].GetAddressOf());
+
 	// Point Lights
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_pointLightBufferData, 0, 0);
 	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[PointLightBuffer].GetAddressOf());

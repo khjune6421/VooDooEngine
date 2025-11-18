@@ -102,6 +102,8 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 	lightMatrixBuffer.view = XMMatrixTranspose(lightViewMatrix);
 	lightMatrixBuffer.projection = XMMatrixTranspose(lightProjectionMatrix);
 
+	m_lightViewProjectionMatrix = XMMatrixTranspose(lightMatrixBuffer.projection * lightMatrixBuffer.view);
+
 	RenderShadows(renderer, &lightMatrixBuffer);
 }
 
