@@ -12,6 +12,7 @@
 #include <typeindex>
 #include <chrono>
 #include <wincodec.h>
+#include <array>
 
 // DirectX header
 #include <d3d11.h>

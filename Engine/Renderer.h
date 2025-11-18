@@ -2,23 +2,24 @@
 #include "pch.h"
 #include "Scene.h"
 
-constexpr DirectX::XMVECTOR CUBE_TARGET[6] =
+constexpr std::array<DirectX::XMVECTOR, 6> CUBE_TARGET =
 {
-	{ 1.0f, 0.0f, 0.0f, 0.0f },		// +X
-	{ -1.0f, 0.0f, 0.0f, 0.0f },	// -X
-	{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Y
-	{ 0.0f, -1.0f, 0.0f, 0.0f },	// -Y
-	{ 0.0f, 0.0f, 1.0f, 0.0f },		// +Z
-	{ 0.0f, 0.0f, -1.0f, 0.0f }		// -Z
+	DirectX::XMVECTOR{ 1.0f, 0.0f, 0.0f, 0.0f },	// +X
+	DirectX::XMVECTOR{ -1.0f, 0.0f, 0.0f, 0.0f },	// -X
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f },	// +Y
+	DirectX::XMVECTOR{ 0.0f, -1.0f, 0.0f, 0.0f },	// -Y
+	DirectX::XMVECTOR{ 0.0f, 0.0f, 1.0f, 0.0f },	// +Z
+	DirectX::XMVECTOR{ 0.0f, 0.0f, -1.0f, 0.0f }	// -Z
 };
-constexpr DirectX::XMVECTOR CUBE_TARGET_UP[6] =
+
+constexpr std::array<DirectX::XMVECTOR, 6> CUBE_TARGET_UP =
 {
-	{ 0.0f, 1.0f, 0.0f, 0.0f },		// +X
-	{ 0.0f, 1.0f, 0.0f, 0.0f },		// -X
-	{ 0.0f, 0.0f, -1.0f, 0.0f },	// +Y
-	{ 0.0f, 0.0f, 1.0f, 0.0f },		// -Y
-	{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Z
-	{ 0.0f, 1.0f, 0.0f, 0.0f }		// -Z
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f },	// +X
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f },	// -X
+	DirectX::XMVECTOR{ 0.0f, 0.0f, -1.0f, 0.0f },	// +Y
+	DirectX::XMVECTOR{ 0.0f, 0.0f, 1.0f, 0.0f },	// -Y
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f },	// +Z
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }		// -Z
 };
 
 namespace VDGM
@@ -69,11 +70,11 @@ class Renderer
 
 		ConstBufferCount
 	};
-	com_ptr<ID3D11Buffer> m_constBuffers[ConstBufferCount] = {};
+	std::array<com_ptr<ID3D11Buffer>, ConstBufferCount> m_constBuffers = {};
 
 	// Input layouts // well this is cursed
 	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
-	const static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
+	const static std::array<D3D11_INPUT_ELEMENT_DESC, DEFAULT_LAYOUT_SIZE> s_defaultInputLayoutDesc;
 
 	static const D3D11_SAMPLER_DESC s_defaultSamplerDesc;
 	enum SamplerType
@@ -82,7 +83,7 @@ class Renderer
 
 		SamplerCount
 	};
-	com_ptr<ID3D11SamplerState> m_samplers[SamplerCount] = {};
+	std::array<com_ptr<ID3D11SamplerState>, SamplerCount> m_samplers = {};
 	com_ptr<ID3D11SamplerState> m_shadowSampler = nullptr;
 
 	enum BlendState
@@ -93,7 +94,7 @@ class Renderer
 
 		BlendStateCount
 	};
-	com_ptr<ID3D11BlendState> m_blendStates[BlendStateCount] = {};
+	std::array<com_ptr<ID3D11BlendState>, BlendStateCount> m_blendStates = {};
 
 	// Variables
 	HWND m_hWnd = nullptr;
@@ -141,7 +142,7 @@ class Renderer
 
 		RasterStateCount
 	};
-	com_ptr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
+	std::array<com_ptr<ID3D11RasterizerState>, RasterStateCount> m_rasterState;
 	RasterState m_currentRasterState = RasterState::Solid;
 
 	static constexpr UINT SHADOW_MAP_SIZE = 1024;

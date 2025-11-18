@@ -8,26 +8,26 @@ using namespace std;
 using namespace DirectX;
 
 UINT Renderer::s_nextMeshId = 0;
-unordered_map<wstring, UINT> g_meshIdMap;
+unordered_map<wstring, UINT> g_meshIdMap = {};
 
 UINT Renderer::s_vertexShaderId = 0;
-unordered_map<wstring, UINT> g_vertexShaderIdMap;
+unordered_map<wstring, UINT> g_vertexShaderIdMap = {};
 
 UINT Renderer::s_geometryShaderId = 0;
-unordered_map<wstring, UINT> g_geometryShaderIdMap;
+unordered_map<wstring, UINT> g_geometryShaderIdMap = {};
 
 UINT Renderer::s_pixelShaderId = 0;
-unordered_map<wstring, UINT> g_pixelShaderIdMap;
+unordered_map<wstring, UINT> g_pixelShaderIdMap = {};
 
 UINT Renderer::s_textureId = 0;
-unordered_map<wstring, UINT> g_textureIdMap;
+unordered_map<wstring, UINT> g_textureIdMap = {};
 
-const D3D11_INPUT_ELEMENT_DESC Renderer::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
+const array<D3D11_INPUT_ELEMENT_DESC, Renderer::DEFAULT_LAYOUT_SIZE> Renderer::s_defaultInputLayoutDesc =
 {
-	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	D3D11_INPUT_ELEMENT_DESC{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	D3D11_INPUT_ELEMENT_DESC{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	D3D11_INPUT_ELEMENT_DESC{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	D3D11_INPUT_ELEMENT_DESC{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 
 const D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
@@ -148,7 +148,7 @@ void Renderer::CreateRasterState()
 	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.MultisampleEnable = TRUE;
 	rasterDesc.AntialiasedLineEnable = TRUE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Solid].GetAddressOf())))
+	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, m_rasterState[Solid].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
@@ -156,17 +156,17 @@ void Renderer::CreateRasterState()
 
 	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
 	rasterDesc.CullMode = D3D11_CULL_NONE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Wireframe].GetAddressOf())))
+	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, m_rasterState[Wireframe].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
 	}
 
 #ifdef _DEBUG
-	m_deviceContext->RSSetState(g_rasterState[Wireframe].Get());
+	m_deviceContext->RSSetState(m_rasterState[Wireframe].Get());
 	m_currentRasterState = RasterState::Wireframe;
 #else
-	m_deviceContext->RSSetState(g_rasterState[Solid].Get());
+	m_deviceContext->RSSetState(m_rasterState[Solid].Get());
 	m_currentRasterState = RasterState::Solid;
 #endif
 }
@@ -421,7 +421,7 @@ void Renderer::ShowFPS()
 
 	if (elapsedTime >= 1.0)
 	{
-		m_deviceInfo.m_fps = static_cast<UINT>(frameCount * elapsedTime);
+		m_deviceInfo.m_fps = frameCount * static_cast<UINT>(elapsedTime);
 		frameCount = 0;
 		elapsedTime = 0.0;
 	}
@@ -436,68 +436,68 @@ void Renderer::DisplayDeviceInfo()
 	UINT posIndex = 1;
 
 	// System Information
-	DrawText(L"SYSTEM", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	DrawText(L"SYSTEM", XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	posIndex++;
 
 	wstring dxVersion = L"DX Version: " + to_wstring(m_DXVersion) + L"." + to_wstring(m_DXSubVersion);
-	DrawText(dxVersion.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	DrawText(dxVersion.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 	posIndex++;
 
 	wstring resolution = L"Resolution: " + to_wstring(m_deviceInfo.displayMode.Width) + L"x" + to_wstring(m_deviceInfo.displayMode.Height);
-	DrawText(resolution.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	DrawText(resolution.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 	posIndex++;
 
 	// Hardware Information
 	posIndex++;
-	DrawText(L"HARDWARE", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	DrawText(L"HARDWARE", XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	for (const auto& hardwareInfo : m_deviceInfo.hardwareInfos)
 	{
 		posIndex++;
 		wstring adapterIndex = L"GPU " + to_wstring(hardwareInfo.adapterIndex) + L": " + wstring(hardwareInfo.adapterDesc.Description);
-		DrawText(adapterIndex.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+		DrawText(adapterIndex.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
 
 		posIndex++;
 		wstring vendorId = L"Vendor ID: " + to_wstring(hardwareInfo.adapterDesc.VendorId);
-		DrawText(vendorId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(vendorId.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring deviceId = L"Device ID: " + to_wstring(hardwareInfo.adapterDesc.DeviceId);
-		DrawText(deviceId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(deviceId.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring subSysId = L"SubSystem ID: " + to_wstring(hardwareInfo.adapterDesc.SubSysId);
-		DrawText(subSysId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(subSysId.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring revision = L"Revision: " + to_wstring(hardwareInfo.adapterDesc.Revision);
-		DrawText(revision.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(revision.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring vram = L"VRAM: " + to_wstring(hardwareInfo.adapterDesc.DedicatedVideoMemory / (static_cast<unsigned long long>(1024) * 1024)) + L" MB";
-		DrawText(vram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(vram.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring sysram = L"System RAM: " + to_wstring(hardwareInfo.adapterDesc.DedicatedSystemMemory / (static_cast<unsigned long long>(1024) * 1024)) + L" MB";
-		DrawText(sysram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(sysram.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring sharedram = L"Shared RAM: " + to_wstring(hardwareInfo.adapterDesc.SharedSystemMemory / (static_cast<unsigned long long>(1024) * 1024)) + L" MB";
-		DrawText(sharedram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(sharedram.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring adapterLuid = L"Adapter LUID: " + to_wstring(hardwareInfo.adapterDesc.AdapterLuid.LowPart) + L"," + to_wstring(hardwareInfo.adapterDesc.AdapterLuid.HighPart);
-		DrawText(adapterLuid.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(adapterLuid.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		for (const auto& outputDesc : hardwareInfo.outputDescs)
 		{
 			posIndex++;
 			wstring outputInfo = L"Monitor: " + wstring(outputDesc.second.DeviceName);
-			DrawText(outputInfo.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+			DrawText(outputInfo.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
 
 			posIndex++;
 			wstring resolution = L"Resolution: " + to_wstring(outputDesc.second.DesktopCoordinates.right - outputDesc.second.DesktopCoordinates.left) + L"x" + to_wstring(outputDesc.second.DesktopCoordinates.bottom - outputDesc.second.DesktopCoordinates.top);
-			DrawText(resolution.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+			DrawText(resolution.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 		}
 		posIndex++;
 	}
@@ -574,7 +574,7 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 	}
 
 	com_ptr<ID3D11InputLayout> inputLayout;
-	if (FAILED(m_device->CreateInputLayout(s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE, VSCode->GetBufferPointer(), VSCode->GetBufferSize(), &inputLayout)))
+	if (FAILED(m_device->CreateInputLayout(s_defaultInputLayoutDesc.data(), DEFAULT_LAYOUT_SIZE, VSCode->GetBufferPointer(), VSCode->GetBufferSize(), &inputLayout)))
 	{
 		MessageBoxW(nullptr, L"Failed to create input layout", L"Error", MB_OK);
 		return;
@@ -749,7 +749,7 @@ void Renderer::UpdatePixelShader()
 
 void Renderer::UpdateRenderMode()
 {
-	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
+	m_deviceContext->RSSetState(m_rasterState[static_cast<int>(m_currentRasterState)].Get());
 }
 
 Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) : m_hWnd(hWnd)
@@ -824,7 +824,7 @@ void Renderer::Resize(UINT width, UINT height)
 	CreateRenderTarget();
 	CreateDepthStencil();
 
-	SetScissorRect(width, height);
+	SetScissorRect(static_cast<LONG>(width), static_cast<LONG>(height));
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }
 
@@ -843,8 +843,8 @@ void Renderer::SetViewport(float topLeftX, float topLeftY)
 
 void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)
 {
-	wchar_t buffer[256] = {};
-	wcsncpy_s(buffer, text, _TRUNCATE);
+	array<wchar_t, 256> buffer = {};
+	wcsncpy_s(buffer.data(), buffer.size(), text, _TRUNCATE);
 
 	FXMVECTOR colorVector = XMLoadFloat4(&color);
 
@@ -855,7 +855,7 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 
 		// This resets many param things without telling me
 		m_SpriteBatchMap[fontName]->Begin();
-		m_SpriteFontMap[fontName]->DrawString(m_SpriteBatchMap[fontName].get(), buffer, position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
+		m_SpriteFontMap[fontName]->DrawString(m_SpriteBatchMap[fontName].get(), buffer.data(), position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
 		m_SpriteBatchMap[fontName]->End();
 
 		m_deviceContext->OMSetDepthStencilState(currentDepthState.Get(), 0);

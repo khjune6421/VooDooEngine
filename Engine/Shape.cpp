@@ -85,7 +85,7 @@ void Shape::DebugRender(Renderer* renderer, struct MatrixConstBuffer* matrixBuff
 }
 #endif
 
-void Shape::SetMesh(const std::wstring& mesh)
+void Shape::SetMesh(const wstring& mesh)
 {
 	m_meshId = 0;
 #ifdef _DEBUG

@@ -39,8 +39,5 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		else if (GetAsyncKeyState('2') & 0x0001) VDGM::ChangeScene(L"PathFindingScene");
 	}
 
-	VDW::g_windows.clear();
-	for (auto& renderer : VDW::g_renderers) delete renderer;
-
 	return 0;
 }
