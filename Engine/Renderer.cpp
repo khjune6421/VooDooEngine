@@ -228,6 +228,48 @@ void Renderer::CreateBlendState()
 
 void Renderer::CreateShadowMap()
 {
+	D3D11_TEXTURE2D_DESC shadowMapDesc = {};
+	shadowMapDesc.Width = SHADOW_MAP_SIZE;
+	shadowMapDesc.Height = SHADOW_MAP_SIZE;
+	shadowMapDesc.MipLevels = 1;
+	shadowMapDesc.ArraySize = 1;
+	shadowMapDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	shadowMapDesc.SampleDesc.Count = 1;
+	shadowMapDesc.SampleDesc.Quality = 0;
+	shadowMapDesc.Usage = D3D11_USAGE_DEFAULT;
+	shadowMapDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	shadowMapDesc.CPUAccessFlags = 0;
+	shadowMapDesc.MiscFlags = 0;
+	if (FAILED(m_device->CreateTexture2D(&shadowMapDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map texture", L"Error", MB_OK);
+		return;
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Texture2D.MipSlice = 0;
+	if (FAILED(m_device->CreateDepthStencilView(m_shadowMapTexture.Get(), &dsvDesc, m_shadowMapDSV.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map DSV", L"Error", MB_OK);
+		return;
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+	if (FAILED(m_device->CreateShaderResourceView(m_shadowMapTexture.Get(), &srvDesc, m_shadowMapSRV.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map SRV", L"Error", MB_OK);
+		return;
+	}
+}
+
+void Renderer::CreateCubeShadowMap()
+{
 	D3D11_TEXTURE2D_DESC shadowArrayDesc = {};
 	shadowArrayDesc.Width = SHADOW_MAP_SIZE;
 	shadowArrayDesc.Height = SHADOW_MAP_SIZE;
@@ -238,8 +280,7 @@ void Renderer::CreateShadowMap()
 	shadowArrayDesc.Usage = D3D11_USAGE_DEFAULT;
 	shadowArrayDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	shadowArrayDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
-
-	if (FAILED(m_device->CreateTexture2D(&shadowArrayDesc, nullptr, m_shadowMapArrayTexture.GetAddressOf())))
+	if (FAILED(m_device->CreateTexture2D(&shadowArrayDesc, nullptr, m_cubeShadowMapArrayTexture.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create shadow cube map array texture", L"Error", MB_OK);
 		return;
@@ -250,7 +291,6 @@ void Renderer::CreateShadowMap()
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 	dsvDesc.Texture2DArray.MipSlice = 0;
 	dsvDesc.Texture2DArray.ArraySize = 1;
-
 	for (UINT lightIndex = 0; lightIndex < MAX_POINT_LIGHTS; ++lightIndex)
 	{
 		for (UINT faceIndex = 0; faceIndex < 6; ++faceIndex)
@@ -258,7 +298,7 @@ void Renderer::CreateShadowMap()
 			const UINT arraySlice = lightIndex * 6 + faceIndex;
 			dsvDesc.Texture2DArray.FirstArraySlice = arraySlice;
 
-			if (FAILED(m_device->CreateDepthStencilView(m_shadowMapArrayTexture.Get(), &dsvDesc, m_shadowMapDSVs[arraySlice].GetAddressOf())))
+			if (FAILED(m_device->CreateDepthStencilView(m_cubeShadowMapArrayTexture.Get(), &dsvDesc, m_cubeShadowMapDSVs[arraySlice].GetAddressOf())))
 			{
 				MessageBoxW(nullptr, L"Failed to create shadow array DSV", L"Error", MB_OK);
 				return;
@@ -273,8 +313,7 @@ void Renderer::CreateShadowMap()
 	srvDesc.TextureCubeArray.MostDetailedMip = 0;
 	srvDesc.TextureCubeArray.First2DArrayFace = 0;
 	srvDesc.TextureCubeArray.NumCubes = MAX_POINT_LIGHTS;
-
-	if (FAILED(m_device->CreateShaderResourceView(m_shadowMapArrayTexture.Get(), &srvDesc, m_shadowMapArraySRV.GetAddressOf())))
+	if (FAILED(m_device->CreateShaderResourceView(m_cubeShadowMapArrayTexture.Get(), &srvDesc, m_cubeShadowMapArraySRV.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create shadow cube map array SRV", L"Error", MB_OK);
 		return;
@@ -293,7 +332,6 @@ void Renderer::CreateShadowSampler()
 	shadowSamplerDesc.BorderColor[1] = 1.0f;
 	shadowSamplerDesc.BorderColor[2] = 1.0f;
 	shadowSamplerDesc.BorderColor[3] = 1.0f;
-
 	if (FAILED(m_device->CreateSamplerState(&shadowSamplerDesc, m_shadowSampler.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create shadow sampler", L"Error", MB_OK);
@@ -742,7 +780,7 @@ void Renderer::UpdatePixelShader()
 	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
 	m_deviceContext->PSSetSamplers(0, 1, m_shadowSampler.GetAddressOf());
-	m_deviceContext->PSSetShaderResources(0, 1, m_shadowMapArraySRV.GetAddressOf());
+	m_deviceContext->PSSetShaderResources(0, 1, m_cubeShadowMapArraySRV.GetAddressOf());
 
 	m_deviceContext->PSSetSamplers(1, 1, m_samplers[DefaultSampler].GetAddressOf());
 }
@@ -770,6 +808,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	CreateSamplerState();
 	CreateBlendState();
 	CreateShadowMap();
+	CreateCubeShadowMap();
 	CreateShadowSampler();
 
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());

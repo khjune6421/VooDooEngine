@@ -147,9 +147,16 @@ class Renderer
 
 	static constexpr UINT SHADOW_MAP_SIZE = 1024;
 	com_ptr<ID3D11RenderTargetView> m_shadowMapArrayRTV = nullptr; // Baseically nullptr for now
-	com_ptr<ID3D11Texture2D> m_shadowMapArrayTexture = nullptr;
-	std::vector<com_ptr<ID3D11DepthStencilView>> m_shadowMapDSVs{ SHADOW_MAP_SIZE * 6 };
-	com_ptr<ID3D11ShaderResourceView> m_shadowMapArraySRV = nullptr;
+
+	// Directional light shadow map
+	com_ptr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
+	com_ptr<ID3D11DepthStencilView> m_shadowMapDSV = nullptr;
+	com_ptr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
+
+	// Cube shadow map for point lights
+	com_ptr<ID3D11Texture2D> m_cubeShadowMapArrayTexture = nullptr;
+	std::vector<com_ptr<ID3D11DepthStencilView>> m_cubeShadowMapDSVs{ SHADOW_MAP_SIZE * 6 };
+	com_ptr<ID3D11ShaderResourceView> m_cubeShadowMapArraySRV = nullptr;
 	bool m_shouldUpdateLights = true;
 
 	// Functions
@@ -184,6 +191,7 @@ class Renderer
 	void CreateSamplerState();
 	void CreateBlendState();
 	void CreateShadowMap();
+	void CreateCubeShadowMap();
 	void CreateShadowSampler();
 
 	void LoadObjFile(const std::filesystem::path filePath);
