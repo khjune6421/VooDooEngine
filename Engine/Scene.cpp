@@ -65,9 +65,6 @@ void Scene::UpdateLight(Renderer* renderer)
 	renderer->m_deviceContext->RSSetViewports(1, &Renderer::SHADOW_VIWEPORT);
 	renderer->m_deviceContext->RSSetScissorRects(1, &Renderer::SHADOW_SCISSOR_REACT);
 
-	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
-	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
-	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetSamplers(1, 1, renderer->m_samplers[Renderer::DefaultSampler].GetAddressOf());
 
 	UpdateShadowMap(renderer);
@@ -80,6 +77,10 @@ void Scene::UpdateLight(Renderer* renderer)
 
 void Scene::UpdateShadowMap(Renderer* renderer)
 {
+	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].second.Get());
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].first.Get(), nullptr, 0);
+	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthPixelShader"]].Get(), nullptr, 0);
+
 	XMVECTOR lightPosition = m_directionalLight.direction * -100.0f;
 	lightPosition = XMVectorSetW(lightPosition, 1.0f);
 
@@ -106,6 +107,10 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 
 void Scene::UpdateCubeShadowMap(Renderer* renderer)
 {
+	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
+	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
+
 	for (UINT i = 0; i < static_cast<UINT>(m_pointLights.size()) && i < MAX_POINT_LIGHTS; ++i) m_pointLights[i]->CreateShadowMap(renderer, 6 * i);
 }
 
