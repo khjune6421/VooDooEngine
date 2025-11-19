@@ -269,8 +269,8 @@ void Renderer::CreateShadowMap()
 void Renderer::CreateCubeShadowMap()
 {
 	D3D11_TEXTURE2D_DESC shadowArrayDesc = {};
-	shadowArrayDesc.Width = SHADOW_MAP_SIZE;
-	shadowArrayDesc.Height = SHADOW_MAP_SIZE;
+	shadowArrayDesc.Width = CUBE_SHADOW_MAP_SIZE;
+	shadowArrayDesc.Height = CUBE_SHADOW_MAP_SIZE;
 	shadowArrayDesc.MipLevels = 1;
 	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6;
 	shadowArrayDesc.Format = DXGI_FORMAT_R32_TYPELESS;
@@ -322,9 +322,9 @@ void Renderer::CreateShadowSampler()
 {
 	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
 	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	shadowSamplerDesc.BorderColor[0] = 1.0f;
 	shadowSamplerDesc.BorderColor[1] = 1.0f;
@@ -756,10 +756,6 @@ void Renderer::UpdateVertexShader()
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
 
-	// Ambient Light
-	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0);
-	m_deviceContext->VSSetConstantBuffers(2, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
-
 	// Directional Light
 	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_directionalLight, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(3, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
@@ -767,21 +763,25 @@ void Renderer::UpdateVertexShader()
 
 void Renderer::UpdatePixelShader()
 {
+	// Ambient Light
+	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
+
 	// Directional Light Shadow
 	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightShadow].Get(), 0, nullptr, &VDGM::g_currentScene->m_lightViewProjectionMatrix, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[DirectionalLightShadow].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[DirectionalLightShadow].GetAddressOf());
 
 	// Point Lights
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_pointLightBufferData, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
 	// Camera
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[CameraBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(3, 1, m_constBuffers[CameraBuffer].GetAddressOf());
 
 	// Ambient Fog
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientFog, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(3, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(4, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
 	// Shadow Map
 	m_deviceContext->PSSetSamplers(0, 1, m_shadowSampler.GetAddressOf());

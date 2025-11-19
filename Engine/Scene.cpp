@@ -62,12 +62,14 @@ void Scene::UpdateLight(Renderer* renderer)
 	UINT numScissorRects = 1;
 	renderer->m_deviceContext->RSGetScissorRects(&numScissorRects, &originalScissorRect);
 
-	renderer->m_deviceContext->RSSetViewports(1, &Renderer::SHADOW_VIWEPORT);
-	renderer->m_deviceContext->RSSetScissorRects(1, &Renderer::SHADOW_SCISSOR_REACT);
-
 	renderer->m_deviceContext->PSSetSamplers(1, 1, renderer->m_samplers[Renderer::DefaultSampler].GetAddressOf());
 
+	renderer->m_deviceContext->RSSetViewports(1, &Renderer::SHADOW_VIWEPORT);
+	renderer->m_deviceContext->RSSetScissorRects(1, &Renderer::SHADOW_SCISSOR_REACT);
 	UpdateDirectionalLightShadowMap(renderer);
+
+	renderer->m_deviceContext->RSSetViewports(1, &Renderer::CUBE_SHADOW_VIWEPORT);
+	renderer->m_deviceContext->RSSetScissorRects(1, &Renderer::CUBE_SHADOW_SCISSOR_REACT);
 	UpdateCubeShadowMap(renderer);
 
 	renderer->m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
@@ -77,21 +79,24 @@ void Scene::UpdateLight(Renderer* renderer)
 
 void Scene::UpdateDirectionalLightShadowMap(Renderer* renderer)
 {
+	if (!m_mainCamera) return;
+
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].second.Get());
 	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].first.Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthPixelShader"]].Get(), nullptr, 0);
 
-	XMVECTOR lightPosition = m_directionalLight.direction * -100.0f;
+	const float cameraFarPlane = m_mainCamera->GetFarPlane();
+	XMVECTOR lightPosition = m_directionalLight.direction * -cameraFarPlane;
+	lightPosition += m_mainCameraPosition;
 	lightPosition = XMVectorSetW(lightPosition, 1.0f);
 
-	constexpr XMVECTOR LIGHT_TARGET = { 0.0f, 0.0f, 0.0f, 1.0f };
 	constexpr XMVECTOR LIGHT_UP = { 0.0f, 1.0f, 0.0f, 0.0f };
-	constexpr float LIGHT_RANGE = 150.0f; // Need for depth calculation in shader
+	const XMMATRIX lightViewMatrix = XMMatrixLookAtLH(lightPosition, m_mainCameraPosition, LIGHT_UP);
 
-	const XMMATRIX lightViewMatrix = XMMatrixLookAtLH(lightPosition, LIGHT_TARGET, LIGHT_UP);
-	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(static_cast<float>(50), static_cast<float>(50), 0.1f, LIGHT_RANGE);
+	const float lightRange = cameraFarPlane * 2.0f;
+	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(lightRange, lightRange, 0.1f, lightRange);
 
-	const XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPosition), XMVectorGetY(lightPosition), XMVectorGetZ(lightPosition), LIGHT_RANGE);
+	const XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPosition), XMVectorGetY(lightPosition), XMVectorGetZ(lightPosition), lightRange);
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
 	renderer->m_deviceContext->PSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::LightPosBuffer].GetAddressOf());
 

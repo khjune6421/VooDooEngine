@@ -146,7 +146,7 @@ class Renderer
 	std::array<com_ptr<ID3D11RasterizerState>, RasterStateCount> m_rasterState;
 	RasterState m_currentRasterState = RasterState::Solid;
 
-	static constexpr UINT SHADOW_MAP_SIZE = 1024;
+	static constexpr UINT SHADOW_MAP_SIZE = 4096;
 	static constexpr D3D11_VIEWPORT SHADOW_VIWEPORT =
 	{
 		0.0f, 0.0f,
@@ -161,6 +161,21 @@ class Renderer
 		static_cast<LONG>(SHADOW_MAP_SIZE)
 	};
 
+	static constexpr UINT CUBE_SHADOW_MAP_SIZE = 1024;
+	static constexpr D3D11_VIEWPORT CUBE_SHADOW_VIWEPORT =
+	{
+		0.0f, 0.0f,
+		static_cast<FLOAT>(CUBE_SHADOW_MAP_SIZE),
+		static_cast<FLOAT>(CUBE_SHADOW_MAP_SIZE),
+		0.0f, 1.0f
+	};
+	static constexpr D3D11_RECT CUBE_SHADOW_SCISSOR_REACT =
+	{
+		0, 0,
+		static_cast<LONG>(CUBE_SHADOW_MAP_SIZE),
+		static_cast<LONG>(CUBE_SHADOW_MAP_SIZE)
+	};
+
 	com_ptr<ID3D11RenderTargetView> m_shadowMapArrayRTV = nullptr; // Baseically nullptr for now
 
 	// Directional light shadow map
@@ -170,7 +185,7 @@ class Renderer
 
 	// Cube shadow map for point lights
 	com_ptr<ID3D11Texture2D> m_cubeShadowMapArrayTexture = nullptr;
-	std::vector<com_ptr<ID3D11DepthStencilView>> m_cubeShadowMapDSVs{ SHADOW_MAP_SIZE * 6 };
+	std::vector<com_ptr<ID3D11DepthStencilView>> m_cubeShadowMapDSVs{ CUBE_SHADOW_MAP_SIZE * 6 };
 	com_ptr<ID3D11ShaderResourceView> m_cubeShadowMapArraySRV = nullptr;
 	bool m_shouldUpdateLights = true;
 

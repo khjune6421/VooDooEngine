@@ -50,8 +50,9 @@ void PointLight::CreateShadowMap(Renderer* renderer, UINT index) const
 
 	for (UINT face = 0; face < 6; ++face)
 	{
-		renderer->m_deviceContext->OMSetRenderTargets(0, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_cubeShadowMapDSVs[verbose_cast(com_ptr<ID3D11DepthStencilView>)(index) + face].Get());
-		renderer->m_deviceContext->ClearDepthStencilView(renderer->m_cubeShadowMapDSVs[verbose_cast(com_ptr<ID3D11DepthStencilView>)(index) + face].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+		UINT dsvIndex = index + face;
+		renderer->m_deviceContext->OMSetRenderTargets(0, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_cubeShadowMapDSVs[dsvIndex].Get());
+		renderer->m_deviceContext->ClearDepthStencilView(renderer->m_cubeShadowMapDSVs[dsvIndex].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 		const XMVECTOR target = XMVectorAdd(lightPos, CUBE_TARGET[face]);
 		const XMMATRIX lightView = XMMatrixLookAtLH(lightPos, target, CUBE_TARGET_UP[face]);

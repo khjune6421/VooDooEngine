@@ -122,6 +122,9 @@ PathFindingScene::PathFindingScene()
 	m_camera->AddComponent<Camera>(3400, 1440, 0.1f, 200.0f, XM_PIDIV4);
 	m_ambientFog.w = 200.0f;
 
+	m_directionalLight.color = XMFLOAT4{ 0.8f, 0.8f, 0.8f, 1.0f };
+	m_directionalLight.direction = XMVector3Normalize(XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
+
 	m_camRotator->AddChild(m_camera.get());
 
 	unique_ptr<Object> plane = make_unique<Object>(this);
