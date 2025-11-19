@@ -8,26 +8,26 @@ using namespace std;
 using namespace DirectX;
 
 UINT Renderer::s_nextMeshId = 0;
-unordered_map<wstring, UINT> g_meshIdMap;
+unordered_map<wstring, UINT> g_meshIdMap = {};
 
 UINT Renderer::s_vertexShaderId = 0;
-unordered_map<wstring, UINT> g_vertexShaderIdMap;
+unordered_map<wstring, UINT> g_vertexShaderIdMap = {};
 
 UINT Renderer::s_geometryShaderId = 0;
-unordered_map<wstring, UINT> g_geometryShaderIdMap;
+unordered_map<wstring, UINT> g_geometryShaderIdMap = {};
 
 UINT Renderer::s_pixelShaderId = 0;
-unordered_map<wstring, UINT> g_pixelShaderIdMap;
+unordered_map<wstring, UINT> g_pixelShaderIdMap = {};
 
 UINT Renderer::s_textureId = 0;
-unordered_map<wstring, UINT> g_textureIdMap;
+unordered_map<wstring, UINT> g_textureIdMap = {};
 
-const D3D11_INPUT_ELEMENT_DESC Renderer::s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE] =
+const array<D3D11_INPUT_ELEMENT_DESC, Renderer::DEFAULT_LAYOUT_SIZE> Renderer::s_defaultInputLayoutDesc =
 {
-	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	D3D11_INPUT_ELEMENT_DESC{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	D3D11_INPUT_ELEMENT_DESC{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	D3D11_INPUT_ELEMENT_DESC{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	D3D11_INPUT_ELEMENT_DESC{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 };
 
 const D3D11_SAMPLER_DESC Renderer::s_defaultSamplerDesc =
@@ -148,7 +148,7 @@ void Renderer::CreateRasterState()
 	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.MultisampleEnable = TRUE;
 	rasterDesc.AntialiasedLineEnable = TRUE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Solid].GetAddressOf())))
+	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, m_rasterState[Solid].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
@@ -156,17 +156,17 @@ void Renderer::CreateRasterState()
 
 	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
 	rasterDesc.CullMode = D3D11_CULL_NONE;
-	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, g_rasterState[Wireframe].GetAddressOf())))
+	if (FAILED(m_device->CreateRasterizerState(&rasterDesc, m_rasterState[Wireframe].GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create rasterizer state", L"Error", MB_OK);
 		return;
 	}
 
 #ifdef _DEBUG
-	m_deviceContext->RSSetState(g_rasterState[Wireframe].Get());
+	m_deviceContext->RSSetState(m_rasterState[Wireframe].Get());
 	m_currentRasterState = RasterState::Wireframe;
 #else
-	m_deviceContext->RSSetState(g_rasterState[Solid].Get());
+	m_deviceContext->RSSetState(m_rasterState[Solid].Get());
 	m_currentRasterState = RasterState::Solid;
 #endif
 }
@@ -228,9 +228,49 @@ void Renderer::CreateBlendState()
 
 void Renderer::CreateShadowMap()
 {
+	D3D11_TEXTURE2D_DESC shadowMapDesc = {};
+	shadowMapDesc.Width = SHADOW_MAP_SIZE;
+	shadowMapDesc.Height = SHADOW_MAP_SIZE;
+	shadowMapDesc.MipLevels = 1;
+	shadowMapDesc.ArraySize = 1;
+	shadowMapDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	shadowMapDesc.SampleDesc.Count = 1;
+	shadowMapDesc.SampleDesc.Quality = 0;
+	shadowMapDesc.Usage = D3D11_USAGE_DEFAULT;
+	shadowMapDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	if (FAILED(m_device->CreateTexture2D(&shadowMapDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map texture", L"Error", MB_OK);
+		return;
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Texture2D.MipSlice = 0;
+	if (FAILED(m_device->CreateDepthStencilView(m_shadowMapTexture.Get(), &dsvDesc, m_shadowMapDSV.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map DSV", L"Error", MB_OK);
+		return;
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+	if (FAILED(m_device->CreateShaderResourceView(m_shadowMapTexture.Get(), &srvDesc, m_shadowMapSRV.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create shadow map SRV", L"Error", MB_OK);
+		return;
+	}
+}
+
+void Renderer::CreateCubeShadowMap()
+{
 	D3D11_TEXTURE2D_DESC shadowArrayDesc = {};
-	shadowArrayDesc.Width = SHADOW_MAP_SIZE;
-	shadowArrayDesc.Height = SHADOW_MAP_SIZE;
+	shadowArrayDesc.Width = CUBE_SHADOW_MAP_SIZE;
+	shadowArrayDesc.Height = CUBE_SHADOW_MAP_SIZE;
 	shadowArrayDesc.MipLevels = 1;
 	shadowArrayDesc.ArraySize = MAX_POINT_LIGHTS * 6;
 	shadowArrayDesc.Format = DXGI_FORMAT_R32_TYPELESS;
@@ -238,8 +278,7 @@ void Renderer::CreateShadowMap()
 	shadowArrayDesc.Usage = D3D11_USAGE_DEFAULT;
 	shadowArrayDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	shadowArrayDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
-
-	if (FAILED(m_device->CreateTexture2D(&shadowArrayDesc, nullptr, m_shadowMapArrayTexture.GetAddressOf())))
+	if (FAILED(m_device->CreateTexture2D(&shadowArrayDesc, nullptr, m_cubeShadowMapArrayTexture.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create shadow cube map array texture", L"Error", MB_OK);
 		return;
@@ -250,7 +289,6 @@ void Renderer::CreateShadowMap()
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 	dsvDesc.Texture2DArray.MipSlice = 0;
 	dsvDesc.Texture2DArray.ArraySize = 1;
-
 	for (UINT lightIndex = 0; lightIndex < MAX_POINT_LIGHTS; ++lightIndex)
 	{
 		for (UINT faceIndex = 0; faceIndex < 6; ++faceIndex)
@@ -258,7 +296,7 @@ void Renderer::CreateShadowMap()
 			const UINT arraySlice = lightIndex * 6 + faceIndex;
 			dsvDesc.Texture2DArray.FirstArraySlice = arraySlice;
 
-			if (FAILED(m_device->CreateDepthStencilView(m_shadowMapArrayTexture.Get(), &dsvDesc, m_shadowMapDSVs[arraySlice].GetAddressOf())))
+			if (FAILED(m_device->CreateDepthStencilView(m_cubeShadowMapArrayTexture.Get(), &dsvDesc, m_cubeShadowMapDSVs[arraySlice].GetAddressOf())))
 			{
 				MessageBoxW(nullptr, L"Failed to create shadow array DSV", L"Error", MB_OK);
 				return;
@@ -273,8 +311,7 @@ void Renderer::CreateShadowMap()
 	srvDesc.TextureCubeArray.MostDetailedMip = 0;
 	srvDesc.TextureCubeArray.First2DArrayFace = 0;
 	srvDesc.TextureCubeArray.NumCubes = MAX_POINT_LIGHTS;
-
-	if (FAILED(m_device->CreateShaderResourceView(m_shadowMapArrayTexture.Get(), &srvDesc, m_shadowMapArraySRV.GetAddressOf())))
+	if (FAILED(m_device->CreateShaderResourceView(m_cubeShadowMapArrayTexture.Get(), &srvDesc, m_cubeShadowMapArraySRV.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create shadow cube map array SRV", L"Error", MB_OK);
 		return;
@@ -285,15 +322,14 @@ void Renderer::CreateShadowSampler()
 {
 	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
 	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	shadowSamplerDesc.BorderColor[0] = 1.0f;
 	shadowSamplerDesc.BorderColor[1] = 1.0f;
 	shadowSamplerDesc.BorderColor[2] = 1.0f;
 	shadowSamplerDesc.BorderColor[3] = 1.0f;
-
 	if (FAILED(m_device->CreateSamplerState(&shadowSamplerDesc, m_shadowSampler.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create shadow sampler", L"Error", MB_OK);
@@ -421,7 +457,7 @@ void Renderer::ShowFPS()
 
 	if (elapsedTime >= 1.0)
 	{
-		m_deviceInfo.m_fps = static_cast<UINT>(frameCount * elapsedTime);
+		m_deviceInfo.m_fps = frameCount * static_cast<UINT>(elapsedTime);
 		frameCount = 0;
 		elapsedTime = 0.0;
 	}
@@ -436,68 +472,68 @@ void Renderer::DisplayDeviceInfo()
 	UINT posIndex = 1;
 
 	// System Information
-	DrawText(L"SYSTEM", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	DrawText(L"SYSTEM", XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	posIndex++;
 
 	wstring dxVersion = L"DX Version: " + to_wstring(m_DXVersion) + L"." + to_wstring(m_DXSubVersion);
-	DrawText(dxVersion.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	DrawText(dxVersion.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 	posIndex++;
 
 	wstring resolution = L"Resolution: " + to_wstring(m_deviceInfo.displayMode.Width) + L"x" + to_wstring(m_deviceInfo.displayMode.Height);
-	DrawText(resolution.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	DrawText(resolution.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 	posIndex++;
 
 	// Hardware Information
 	posIndex++;
-	DrawText(L"HARDWARE", XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	DrawText(L"HARDWARE", XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	for (const auto& hardwareInfo : m_deviceInfo.hardwareInfos)
 	{
 		posIndex++;
 		wstring adapterIndex = L"GPU " + to_wstring(hardwareInfo.adapterIndex) + L": " + wstring(hardwareInfo.adapterDesc.Description);
-		DrawText(adapterIndex.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+		DrawText(adapterIndex.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
 
 		posIndex++;
 		wstring vendorId = L"Vendor ID: " + to_wstring(hardwareInfo.adapterDesc.VendorId);
-		DrawText(vendorId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(vendorId.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring deviceId = L"Device ID: " + to_wstring(hardwareInfo.adapterDesc.DeviceId);
-		DrawText(deviceId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(deviceId.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring subSysId = L"SubSystem ID: " + to_wstring(hardwareInfo.adapterDesc.SubSysId);
-		DrawText(subSysId.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(subSysId.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring revision = L"Revision: " + to_wstring(hardwareInfo.adapterDesc.Revision);
-		DrawText(revision.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(revision.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring vram = L"VRAM: " + to_wstring(hardwareInfo.adapterDesc.DedicatedVideoMemory / (static_cast<unsigned long long>(1024) * 1024)) + L" MB";
-		DrawText(vram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(vram.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring sysram = L"System RAM: " + to_wstring(hardwareInfo.adapterDesc.DedicatedSystemMemory / (static_cast<unsigned long long>(1024) * 1024)) + L" MB";
-		DrawText(sysram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(sysram.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring sharedram = L"Shared RAM: " + to_wstring(hardwareInfo.adapterDesc.SharedSystemMemory / (static_cast<unsigned long long>(1024) * 1024)) + L" MB";
-		DrawText(sharedram.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(sharedram.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		posIndex++;
 		wstring adapterLuid = L"Adapter LUID: " + to_wstring(hardwareInfo.adapterDesc.AdapterLuid.LowPart) + L"," + to_wstring(hardwareInfo.adapterDesc.AdapterLuid.HighPart);
-		DrawText(adapterLuid.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		DrawText(adapterLuid.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		for (const auto& outputDesc : hardwareInfo.outputDescs)
 		{
 			posIndex++;
 			wstring outputInfo = L"Monitor: " + wstring(outputDesc.second.DeviceName);
-			DrawText(outputInfo.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+			DrawText(outputInfo.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
 
 			posIndex++;
 			wstring resolution = L"Resolution: " + to_wstring(outputDesc.second.DesktopCoordinates.right - outputDesc.second.DesktopCoordinates.left) + L"x" + to_wstring(outputDesc.second.DesktopCoordinates.bottom - outputDesc.second.DesktopCoordinates.top);
-			DrawText(resolution.c_str(), XMFLOAT2(offset, offset * posIndex), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+			DrawText(resolution.c_str(), XMFLOAT2(offset, offset * static_cast<float>(posIndex)), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 		}
 		posIndex++;
 	}
@@ -510,6 +546,7 @@ void Renderer::InitializeConstBuffers()
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientLightBuffer]); // Ambient light buffer
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[AmbientFogBuffer]); // Ambient fog buffer
 	CreateConstBuffer(sizeof(DirectionalLightConstBuffer), &m_constBuffers[DirectionalLightBuffer]); // Directional light buffer
+	CreateConstBuffer(sizeof(XMMATRIX), &m_constBuffers[DirectionalLightShadow]); // Spot light buffer
 	CreateConstBuffer(sizeof(PointLightArrayConstBuffer), &m_constBuffers[PointLightBuffer]); // Point light buffer
 	CreateConstBuffer(sizeof(XMFLOAT4), &m_constBuffers[LightPosBuffer]); // Light position buffer
 }
@@ -574,7 +611,7 @@ void Renderer::LoadVertexShader(const wchar_t* file, const char* entryPoint, con
 	}
 
 	com_ptr<ID3D11InputLayout> inputLayout;
-	if (FAILED(m_device->CreateInputLayout(s_defaultInputLayoutDesc, DEFAULT_LAYOUT_SIZE, VSCode->GetBufferPointer(), VSCode->GetBufferSize(), &inputLayout)))
+	if (FAILED(m_device->CreateInputLayout(s_defaultInputLayoutDesc.data(), DEFAULT_LAYOUT_SIZE, VSCode->GetBufferPointer(), VSCode->GetBufferSize(), &inputLayout)))
 	{
 		MessageBoxW(nullptr, L"Failed to create input layout", L"Error", MB_OK);
 		return;
@@ -637,29 +674,48 @@ void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, cons
 	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
 }
 
-void Renderer::LoadAllTextures(const std::filesystem::path texturePath)
+void Renderer::LoadAllTextures(const filesystem::path texturePath)
 {
-	if (filesystem::exists(texturePath) && filesystem::is_directory(texturePath))
-	{
-		for (const auto& entry : filesystem::directory_iterator(texturePath))
-		{
-			const wstring textureName = entry.path().stem().wstring();
-			if (g_textureIdMap.find(textureName) == g_textureIdMap.end()) g_textureIdMap[textureName] = s_textureId++;
+	if (!filesystem::exists(texturePath) || !filesystem::is_directory(texturePath)) return;
 
-			com_ptr<ID3D11ShaderResourceView> texture;
-			HRESULT hr = DirectX::CreateWICTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, texture.GetAddressOf());
+	const filesystem::path diffusePath = texturePath / L"Diffuse/";
+	for (const auto& entry : filesystem::directory_iterator(diffusePath))
+	{
+		const wstring textureName = entry.path().stem().wstring();
+		if (g_textureIdMap.find(textureName) == g_textureIdMap.end()) g_textureIdMap[textureName] = s_textureId++;
+		com_ptr<ID3D11ShaderResourceView> diffuseTexture;
+
+		HRESULT hr = CreateWICTextureFromFileEx(m_device.Get(), entry.path().c_str(), 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, WIC_LOADER_DEFAULT | WIC_LOADER_FORCE_SRGB, nullptr, diffuseTexture.GetAddressOf());
+		if (FAILED(hr))
+		{
+			hr = CreateDDSTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, diffuseTexture.GetAddressOf());
 			if (FAILED(hr))
 			{
-				hr = DirectX::CreateDDSTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, texture.GetAddressOf());
-				if (FAILED(hr))
-				{
-					MessageBoxW(nullptr, (L"Failed to load texture: " + entry.path().wstring()).c_str(), L"Error", MB_OK);
-					continue;
-				}
+				MessageBoxW(nullptr, (L"Failed to load texture: " + entry.path().wstring()).c_str(), L"Error", MB_OK);
+				continue;
 			}
-
-			m_textureMap[g_textureIdMap[textureName]] = texture;
 		}
+		get<Diffuse>(m_textureMap[g_textureIdMap[textureName]]) = diffuseTexture;
+	}
+
+	const filesystem::path normalPath = texturePath / L"Normal/";
+	for (const auto& entry : filesystem::directory_iterator(normalPath))
+	{
+		const wstring textureName = entry.path().stem().wstring();
+		if (g_textureIdMap.find(textureName) == g_textureIdMap.end()) g_textureIdMap[textureName] = s_textureId++;
+		com_ptr<ID3D11ShaderResourceView> normalTexture;
+
+		HRESULT hr = CreateWICTextureFromFileEx(m_device.Get(), entry.path().c_str(), 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, WIC_LOADER_DEFAULT | WIC_LOADER_IGNORE_SRGB, nullptr, normalTexture.GetAddressOf());
+		if (FAILED(hr))
+		{
+			hr = CreateDDSTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, normalTexture.GetAddressOf());
+			if (FAILED(hr))
+			{
+				MessageBoxW(nullptr, (L"Failed to load texture: " + entry.path().wstring()).c_str(), L"Error", MB_OK);
+				continue;
+			}
+		}
+		get<Normal>(m_textureMap[g_textureIdMap[textureName]]) = normalTexture;
 	}
 }
 
@@ -703,6 +759,7 @@ void Renderer::ClearResources()
 	m_deviceContext->PSSetShaderResources(0, 1, &nullSRV);
 	m_deviceContext->PSSetShaderResources(1, 1, &nullSRV);
 	m_deviceContext->PSSetShaderResources(2, 1, &nullSRV);
+	m_deviceContext->PSSetShaderResources(3, 1, &nullSRV);
 }
 
 void Renderer::UpdateRenderer()
@@ -718,10 +775,6 @@ void Renderer::UpdateVertexShader()
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
 
-	// Ambient Light
-	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0);
-	m_deviceContext->VSSetConstantBuffers(2, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
-
 	// Directional Light
 	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_directionalLight, 0, 0);
 	m_deviceContext->VSSetConstantBuffers(3, 1, m_constBuffers[DirectionalLightBuffer].GetAddressOf());
@@ -729,27 +782,37 @@ void Renderer::UpdateVertexShader()
 
 void Renderer::UpdatePixelShader()
 {
+	// Ambient Light
+	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientLight, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[AmbientLightBuffer].GetAddressOf());
+
+	// Directional Light Shadow
+	m_deviceContext->UpdateSubresource(m_constBuffers[DirectionalLightShadow].Get(), 0, nullptr, &VDGM::g_currentScene->m_lightViewProjectionMatrix, 0, 0);
+	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[DirectionalLightShadow].GetAddressOf());
+
 	// Point Lights
 	m_deviceContext->UpdateSubresource(m_constBuffers[PointLightBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_pointLightBufferData, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(0, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[PointLightBuffer].GetAddressOf());
 
 	// Camera
 	m_deviceContext->UpdateSubresource(m_constBuffers[CameraBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_mainCameraPosition, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(1, 1, m_constBuffers[CameraBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(3, 1, m_constBuffers[CameraBuffer].GetAddressOf());
 
 	// Ambient Fog
 	m_deviceContext->UpdateSubresource(m_constBuffers[AmbientFogBuffer].Get(), 0, nullptr, &VDGM::g_currentScene->m_ambientFog, 0, 0);
-	m_deviceContext->PSSetConstantBuffers(2, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
+	m_deviceContext->PSSetConstantBuffers(4, 1, m_constBuffers[AmbientFogBuffer].GetAddressOf());
 
+	// Shadow Map
 	m_deviceContext->PSSetSamplers(0, 1, m_shadowSampler.GetAddressOf());
-	m_deviceContext->PSSetShaderResources(0, 1, m_shadowMapArraySRV.GetAddressOf());
+	m_deviceContext->PSSetShaderResources(0, 1, m_shadowMapSRV.GetAddressOf()); // Shadow Map
+	m_deviceContext->PSSetShaderResources(1, 1, m_cubeShadowMapArraySRV.GetAddressOf()); // Cube Shadow Map
 
 	m_deviceContext->PSSetSamplers(1, 1, m_samplers[DefaultSampler].GetAddressOf());
 }
 
 void Renderer::UpdateRenderMode()
 {
-	m_deviceContext->RSSetState(g_rasterState[static_cast<int>(m_currentRasterState)].Get());
+	m_deviceContext->RSSetState(m_rasterState[static_cast<int>(m_currentRasterState)].Get());
 }
 
 Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePath) : m_hWnd(hWnd)
@@ -770,6 +833,7 @@ Renderer::Renderer(HWND hWnd, LONG width, LONG height, const wchar_t* resourcePa
 	CreateSamplerState();
 	CreateBlendState();
 	CreateShadowMap();
+	CreateCubeShadowMap();
 	CreateShadowSampler();
 
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
@@ -824,7 +888,7 @@ void Renderer::Resize(UINT width, UINT height)
 	CreateRenderTarget();
 	CreateDepthStencil();
 
-	SetScissorRect(width, height);
+	SetScissorRect(static_cast<LONG>(width), static_cast<LONG>(height));
 	m_deviceContext->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 }
 
@@ -843,8 +907,8 @@ void Renderer::SetViewport(float topLeftX, float topLeftY)
 
 void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, float scale, const wchar_t* fontName)
 {
-	wchar_t buffer[256] = {};
-	wcsncpy_s(buffer, text, _TRUNCATE);
+	array<wchar_t, 256> buffer = {};
+	wcsncpy_s(buffer.data(), buffer.size(), text, _TRUNCATE);
 
 	FXMVECTOR colorVector = XMLoadFloat4(&color);
 
@@ -855,7 +919,7 @@ void Renderer::DrawText(const wchar_t* text, XMFLOAT2 position, XMFLOAT4 color, 
 
 		// This resets many param things without telling me
 		m_SpriteBatchMap[fontName]->Begin();
-		m_SpriteFontMap[fontName]->DrawString(m_SpriteBatchMap[fontName].get(), buffer, position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
+		m_SpriteFontMap[fontName]->DrawString(m_SpriteBatchMap[fontName].get(), buffer.data(), position, colorVector, 0.0f, XMFLOAT2(0.0f, 0.0f), scale);
 		m_SpriteBatchMap[fontName]->End();
 
 		m_deviceContext->OMSetDepthStencilState(currentDepthState.Get(), 0);
@@ -920,10 +984,26 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 	if (VDGM::g_currentScene) VDGM::g_currentScene->Raycast(rayOrigin, rayEnd);
 }
 
-void Renderer::SaveTextureToFile(com_ptr<ID3D11Texture2D> texture, const wstring& filename) const
+void Renderer::SaveShadowMapToFile(com_ptr<ID3D11Texture2D> texture, const wstring& filename) const
 {
-	filesystem::path fullPath = m_resourcePath / L"BakedTextures/" / filesystem::path(filename + L".png");
-	if (FAILED(SaveWICTextureToFile(m_deviceContext.Get(), texture.Get(), GUID_ContainerFormatPng, fullPath.c_str())))
+	D3D11_TEXTURE2D_DESC desc = {};
+	texture->GetDesc(&desc);
+	desc.BindFlags = 0;
+	desc.Usage = D3D11_USAGE_STAGING;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	desc.Format = DXGI_FORMAT_R32_FLOAT;
+
+	com_ptr<ID3D11Texture2D> saveTexture = nullptr;
+	if (FAILED(m_device->CreateTexture2D(&desc, nullptr, saveTexture.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create staging texture for saving", L"Error", MB_OK);
+		return;
+	}
+
+	m_deviceContext->CopyResource(saveTexture.Get(), texture.Get());
+
+	filesystem::path fullPath = m_resourcePath / L"BakedTextures/" / filesystem::path(L"ShadowMap" + filename + L".png");
+	if (FAILED(SaveWICTextureToFile(m_deviceContext.Get(), saveTexture.Get(), GUID_ContainerFormatPng, fullPath.c_str())))
 	{
 		MessageBoxW(nullptr, L"Failed to save texture to file", L"Error", MB_OK);
 		return;

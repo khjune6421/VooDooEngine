@@ -50,11 +50,6 @@ void Scene::UpdateLight(Renderer* renderer)
 	m_pointLightBufferData.pointLightCount = static_cast<UINT>(m_pointLights.size());
 	for (UINT i = 0; i < m_pointLightBufferData.pointLightCount && i < MAX_POINT_LIGHTS; ++i) m_pointLightBufferData.pointLights[i] = m_pointLights[i]->GetLightData();
 
-	UpdateShadowMap(renderer);
-}
-
-void Scene::UpdateShadowMap(Renderer* renderer)
-{
 	com_ptr<ID3D11RenderTargetView> originalRTV;
 	com_ptr<ID3D11DepthStencilView> originalDSV;
 	renderer->m_deviceContext->OMGetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.GetAddressOf());
@@ -67,33 +62,69 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 	UINT numScissorRects = 1;
 	renderer->m_deviceContext->RSGetScissorRects(&numScissorRects, &originalScissorRect);
 
-	constexpr D3D11_VIEWPORT shadowViewport =
-	{
-		0.0f, 0.0f,
-		static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE),
-		static_cast<FLOAT>(Renderer::SHADOW_MAP_SIZE),
-		0.0f, 1.0f
-	};
-	renderer->m_deviceContext->RSSetViewports(1, &shadowViewport);
-
-	constexpr D3D11_RECT shadowScissorRect =
-	{
-		0, 0,
-		static_cast<LONG>(Renderer::SHADOW_MAP_SIZE),
-		static_cast<LONG>(Renderer::SHADOW_MAP_SIZE)
-	};
-	renderer->m_deviceContext->RSSetScissorRects(1, &shadowScissorRect);
-
-	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
-	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
-	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
 	renderer->m_deviceContext->PSSetSamplers(1, 1, renderer->m_samplers[Renderer::DefaultSampler].GetAddressOf());
 
-	for (UINT i = 0; i < static_cast<UINT>(m_pointLights.size()) && i < MAX_POINT_LIGHTS; ++i) m_pointLights[i]->CreateShadowMap(renderer, 6 * i);
+	renderer->m_deviceContext->RSSetViewports(1, &Renderer::SHADOW_VIWEPORT);
+	renderer->m_deviceContext->RSSetScissorRects(1, &Renderer::SHADOW_SCISSOR_REACT);
+	UpdateDirectionalLightShadowMap(renderer);
+
+	renderer->m_deviceContext->RSSetViewports(1, &Renderer::CUBE_SHADOW_VIWEPORT);
+	renderer->m_deviceContext->RSSetScissorRects(1, &Renderer::CUBE_SHADOW_SCISSOR_REACT);
+	UpdateCubeShadowMap(renderer);
 
 	renderer->m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
 	renderer->m_deviceContext->RSSetViewports(1, &originalViewport);
 	renderer->m_deviceContext->RSSetScissorRects(1, &originalScissorRect);
+}
+
+void Scene::UpdateDirectionalLightShadowMap(Renderer* renderer)
+{
+	if (!m_mainCamera) return;
+
+	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].second.Get());
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].first.Get(), nullptr, 0);
+	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthPixelShader"]].Get(), nullptr, 0);
+
+	const float cameraFarPlane = m_mainCamera->GetFarPlane();
+	XMVECTOR lightPosition = m_directionalLight.direction * -cameraFarPlane;
+	lightPosition += m_mainCameraPosition;
+	lightPosition = XMVectorSetW(lightPosition, 1.0f);
+
+	constexpr XMVECTOR LIGHT_UP = { 0.0f, 1.0f, 0.0f, 0.0f };
+	const XMMATRIX lightViewMatrix = XMMatrixLookAtLH(lightPosition, m_mainCameraPosition, LIGHT_UP);
+
+	const float lightRange = cameraFarPlane * 2.0f;
+	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(lightRange, lightRange, 0.1f, lightRange);
+
+	const XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPosition), XMVectorGetY(lightPosition), XMVectorGetZ(lightPosition), lightRange);
+	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
+	renderer->m_deviceContext->PSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::LightPosBuffer].GetAddressOf());
+
+	renderer->m_deviceContext->OMSetRenderTargets(0, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_shadowMapDSV.Get());
+	renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	MatrixConstBuffer lightMatrixBuffer = {};
+	lightMatrixBuffer.view = XMMatrixTranspose(lightViewMatrix);
+	lightMatrixBuffer.projection = XMMatrixTranspose(lightProjectionMatrix);
+
+	m_lightViewProjectionMatrix = XMMatrixTranspose(lightMatrixBuffer.projection * lightMatrixBuffer.view);
+
+	RenderShadows(renderer, &lightMatrixBuffer);
+
+	if (GetAsyncKeyState(VK_TAB) & 0x0001)
+	{
+		wstring shadowFaceTexture = L"Dir";
+		renderer->SaveShadowMapToFile(renderer->m_shadowMapTexture, shadowFaceTexture);
+	}
+}
+
+void Scene::UpdateCubeShadowMap(Renderer* renderer)
+{
+	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
+	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
+
+	for (UINT i = 0; i < static_cast<UINT>(m_pointLights.size()) && i < MAX_POINT_LIGHTS; ++i) m_pointLights[i]->CreateShadowMap(renderer, 6 * i);
 }
 
 void Scene::RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer)

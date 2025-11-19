@@ -132,5 +132,11 @@
     <FxCompile Include="..\Assets\Default\Shader\PixelShader\DepthOnlyPixelShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\VertexShader\DepthVertexShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\PixelShader\DepthPixelShader.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

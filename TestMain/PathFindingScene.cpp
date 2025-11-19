@@ -122,15 +122,18 @@ PathFindingScene::PathFindingScene()
 	m_camera->AddComponent<Camera>(3400, 1440, 0.1f, 200.0f, XM_PIDIV4);
 	m_ambientFog.w = 200.0f;
 
+	m_directionalLight.color = XMFLOAT4{ 0.8f, 0.8f, 0.8f, 1.0f };
+	m_directionalLight.direction = XMVector3Normalize(XMVECTOR{ 1.0f, -1.0f, 1.0f, 0.0f });
+
 	m_camRotator->AddChild(m_camera.get());
 
 	unique_ptr<Object> plane = make_unique<Object>(this);
-	plane->AddComponent<Shape>(L"Shape_Plane", L"VertexShader", L"PixelShader", L"Plain", L"PlainNormal");
+	plane->AddComponent<Shape>(L"Shape_Plane", L"VertexShader", L"PixelShader", L"Plain");
 	plane->SetScale(XMFLOAT3{ 25.0f, 1.0f, 25.0f });
 	m_objects.emplace_back(move(plane));
 
 	m_player = make_unique<Object>(this);
-	m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Lilypads", L"LilypadsNormal");
+	m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Lilypads");
 	m_player->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.5f }, 10.0f);
 	m_player->SetPosition
 	(

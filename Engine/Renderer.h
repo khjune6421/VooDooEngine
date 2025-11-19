@@ -2,23 +2,24 @@
 #include "pch.h"
 #include "Scene.h"
 
-constexpr DirectX::XMVECTOR CUBE_TARGET[6] =
+constexpr std::array<DirectX::XMVECTOR, 6> CUBE_TARGET =
 {
-	{ 1.0f, 0.0f, 0.0f, 0.0f },		// +X
-	{ -1.0f, 0.0f, 0.0f, 0.0f },	// -X
-	{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Y
-	{ 0.0f, -1.0f, 0.0f, 0.0f },	// -Y
-	{ 0.0f, 0.0f, 1.0f, 0.0f },		// +Z
-	{ 0.0f, 0.0f, -1.0f, 0.0f }		// -Z
+	DirectX::XMVECTOR{ 1.0f, 0.0f, 0.0f, 0.0f },	// +X
+	DirectX::XMVECTOR{ -1.0f, 0.0f, 0.0f, 0.0f },	// -X
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f },	// +Y
+	DirectX::XMVECTOR{ 0.0f, -1.0f, 0.0f, 0.0f },	// -Y
+	DirectX::XMVECTOR{ 0.0f, 0.0f, 1.0f, 0.0f },	// +Z
+	DirectX::XMVECTOR{ 0.0f, 0.0f, -1.0f, 0.0f }	// -Z
 };
-constexpr DirectX::XMVECTOR CUBE_TARGET_UP[6] =
+
+constexpr std::array<DirectX::XMVECTOR, 6> CUBE_TARGET_UP =
 {
-	{ 0.0f, 1.0f, 0.0f, 0.0f },		// +X
-	{ 0.0f, 1.0f, 0.0f, 0.0f },		// -X
-	{ 0.0f, 0.0f, -1.0f, 0.0f },	// +Y
-	{ 0.0f, 0.0f, 1.0f, 0.0f },		// -Y
-	{ 0.0f, 1.0f, 0.0f, 0.0f },		// +Z
-	{ 0.0f, 1.0f, 0.0f, 0.0f }		// -Z
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f },	// +X
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f },	// -X
+	DirectX::XMVECTOR{ 0.0f, 0.0f, -1.0f, 0.0f },	// +Y
+	DirectX::XMVECTOR{ 0.0f, 0.0f, 1.0f, 0.0f },	// -Y
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f },	// +Z
+	DirectX::XMVECTOR{ 0.0f, 1.0f, 0.0f, 0.0f }		// -Z
 };
 
 namespace VDGM
@@ -64,16 +65,17 @@ class Renderer
 		CameraBuffer,
 		AmbientFogBuffer,
 		DirectionalLightBuffer,
+		DirectionalLightShadow,
 		PointLightBuffer,
 		LightPosBuffer,
 
 		ConstBufferCount
 	};
-	com_ptr<ID3D11Buffer> m_constBuffers[ConstBufferCount] = {};
+	std::array<com_ptr<ID3D11Buffer>, ConstBufferCount> m_constBuffers = {};
 
 	// Input layouts // well this is cursed
 	constexpr static UINT DEFAULT_LAYOUT_SIZE = 4;
-	const static D3D11_INPUT_ELEMENT_DESC s_defaultInputLayoutDesc[DEFAULT_LAYOUT_SIZE];
+	const static std::array<D3D11_INPUT_ELEMENT_DESC, DEFAULT_LAYOUT_SIZE> s_defaultInputLayoutDesc;
 
 	static const D3D11_SAMPLER_DESC s_defaultSamplerDesc;
 	enum SamplerType
@@ -82,7 +84,7 @@ class Renderer
 
 		SamplerCount
 	};
-	com_ptr<ID3D11SamplerState> m_samplers[SamplerCount] = {};
+	std::array<com_ptr<ID3D11SamplerState>, SamplerCount> m_samplers = {};
 	com_ptr<ID3D11SamplerState> m_shadowSampler = nullptr;
 
 	enum BlendState
@@ -93,7 +95,7 @@ class Renderer
 
 		BlendStateCount
 	};
-	com_ptr<ID3D11BlendState> m_blendStates[BlendStateCount] = {};
+	std::array<com_ptr<ID3D11BlendState>, BlendStateCount> m_blendStates = {};
 
 	// Variables
 	HWND m_hWnd = nullptr;
@@ -131,7 +133,12 @@ class Renderer
 	std::unordered_map<UINT, com_ptr<ID3D11PixelShader>> m_pixelShaderMap;
 
 	static UINT s_textureId;
-	std::unordered_map<UINT, com_ptr<ID3D11ShaderResourceView>> m_textureMap;
+	enum TextureType
+	{
+		Diffuse,
+		Normal
+	};
+	std::unordered_map<UINT, std::tuple<com_ptr<ID3D11ShaderResourceView>, com_ptr<ID3D11ShaderResourceView>>> m_textureMap; // Diffuse, Normal
 
 	// Render
 	enum RasterState
@@ -141,14 +148,50 @@ class Renderer
 
 		RasterStateCount
 	};
-	com_ptr<ID3D11RasterizerState> g_rasterState[RasterStateCount] = {};
+	std::array<com_ptr<ID3D11RasterizerState>, RasterStateCount> m_rasterState;
 	RasterState m_currentRasterState = RasterState::Solid;
 
-	static constexpr UINT SHADOW_MAP_SIZE = 1024;
+	static constexpr UINT SHADOW_MAP_SIZE = 4096;
+	static constexpr D3D11_VIEWPORT SHADOW_VIWEPORT =
+	{
+		0.0f, 0.0f,
+		static_cast<FLOAT>(SHADOW_MAP_SIZE),
+		static_cast<FLOAT>(SHADOW_MAP_SIZE),
+		0.0f, 1.0f
+	};
+	static constexpr D3D11_RECT SHADOW_SCISSOR_REACT =
+	{
+		0, 0,
+		static_cast<LONG>(SHADOW_MAP_SIZE),
+		static_cast<LONG>(SHADOW_MAP_SIZE)
+	};
+
+	static constexpr UINT CUBE_SHADOW_MAP_SIZE = 1024;
+	static constexpr D3D11_VIEWPORT CUBE_SHADOW_VIWEPORT =
+	{
+		0.0f, 0.0f,
+		static_cast<FLOAT>(CUBE_SHADOW_MAP_SIZE),
+		static_cast<FLOAT>(CUBE_SHADOW_MAP_SIZE),
+		0.0f, 1.0f
+	};
+	static constexpr D3D11_RECT CUBE_SHADOW_SCISSOR_REACT =
+	{
+		0, 0,
+		static_cast<LONG>(CUBE_SHADOW_MAP_SIZE),
+		static_cast<LONG>(CUBE_SHADOW_MAP_SIZE)
+	};
+
 	com_ptr<ID3D11RenderTargetView> m_shadowMapArrayRTV = nullptr; // Baseically nullptr for now
-	com_ptr<ID3D11Texture2D> m_shadowMapArrayTexture = nullptr;
-	std::vector<com_ptr<ID3D11DepthStencilView>> m_shadowMapDSVs{ SHADOW_MAP_SIZE * 6 };
-	com_ptr<ID3D11ShaderResourceView> m_shadowMapArraySRV = nullptr;
+
+	// Directional light shadow map
+	com_ptr<ID3D11Texture2D> m_shadowMapTexture = nullptr;
+	com_ptr<ID3D11DepthStencilView> m_shadowMapDSV = nullptr;
+	com_ptr<ID3D11ShaderResourceView> m_shadowMapSRV = nullptr;
+
+	// Cube shadow map for point lights
+	com_ptr<ID3D11Texture2D> m_cubeShadowMapArrayTexture = nullptr;
+	std::vector<com_ptr<ID3D11DepthStencilView>> m_cubeShadowMapDSVs{ CUBE_SHADOW_MAP_SIZE * 6 };
+	com_ptr<ID3D11ShaderResourceView> m_cubeShadowMapArraySRV = nullptr;
 	bool m_shouldUpdateLights = true;
 
 	// Functions
@@ -183,6 +226,7 @@ class Renderer
 	void CreateSamplerState();
 	void CreateBlendState();
 	void CreateShadowMap();
+	void CreateCubeShadowMap();
 	void CreateShadowSampler();
 
 	void LoadObjFile(const std::filesystem::path filePath);
@@ -213,5 +257,5 @@ public:
 	void ChangeState();
 
 	void ScreenPointToWorld(POINT screenPos) const;
-	void SaveTextureToFile(com_ptr<ID3D11Texture2D> texture, const std::wstring& filename) const;
+	void SaveShadowMapToFile(com_ptr<ID3D11Texture2D> texture, const std::wstring& filename) const;
 };

@@ -8,13 +8,12 @@
 using namespace std;
 using namespace DirectX;
 
-Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader, const wstring& texture, const wstring& normalMap)
+Shape::Shape(const wstring& mesh, const wstring& vertexShader, const wstring& pixelShader, const wstring& texture)
 {
 	SetMesh(mesh);
 	SetVertexShader(vertexShader);
 	SetPixelShader(pixelShader);
 	SetTexture(texture);
-	SetNormalMap(normalMap);
 }
 
 constexpr UINT stride = sizeof(Vertex);
@@ -38,8 +37,12 @@ void Shape::Render(Renderer* renderer, MatrixConstBuffer* matrixBuffer)
 
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[m_vertexShaderId].second.Get());
 
-	renderer->m_deviceContext->PSSetShaderResources(1, 1, renderer->m_textureMap[m_textureId].GetAddressOf());
-	renderer->m_deviceContext->PSSetShaderResources(2, 1, renderer->m_textureMap[m_normalMapId].GetAddressOf());
+	ID3D11ShaderResourceView* textureArray[2] =
+	{
+		get<Renderer::Diffuse>(renderer->m_textureMap[m_textureId]).Get(),
+		get<Renderer::Normal>(renderer->m_textureMap[m_textureId]).Get()
+	};
+	renderer->m_deviceContext->PSSetShaderResources(2, 2, textureArray);
 
 	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
 }
@@ -55,7 +58,7 @@ void Shape::RenderShadow(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffe
 
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::MatrixBuffer].Get(), 0, nullptr, lightMatrixBuffer, 0, 0);
 	renderer->m_deviceContext->VSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::MatrixBuffer].GetAddressOf());
-	renderer->m_deviceContext->PSSetShaderResources(1, 1, renderer->m_textureMap[m_textureId].GetAddressOf());
+	renderer->m_deviceContext->PSSetShaderResources(1, 1, get<Renderer::Diffuse>(renderer->m_textureMap[m_textureId]).GetAddressOf());
 
 	renderer->m_deviceContext->Draw(renderer->m_meshVertexBufferMap[m_meshId].second, 0);
 }
@@ -85,7 +88,7 @@ void Shape::DebugRender(Renderer* renderer, struct MatrixConstBuffer* matrixBuff
 }
 #endif
 
-void Shape::SetMesh(const std::wstring& mesh)
+void Shape::SetMesh(const wstring& mesh)
 {
 	m_meshId = 0;
 #ifdef _DEBUG
@@ -119,15 +122,6 @@ void Shape::SetTexture(const wstring& texture)
 	if (g_textureIdMap.find(texture) == g_textureIdMap.end()) MessageBoxW(nullptr, (L"Texture not found: " + texture).c_str(), L"Error", MB_OK);
 #endif
 	m_textureId = g_textureIdMap[texture];
-}
-
-void Shape::SetNormalMap(const std::wstring& normalMap)
-{
-	m_normalMapId = 0;
-#ifdef _DEBUG
-	if (g_textureIdMap.find(normalMap) == g_textureIdMap.end()) MessageBoxW(nullptr, (L"Normal map not found: " + normalMap).c_str(), L"Error", MB_OK);
-#endif
-	m_normalMapId = g_textureIdMap[normalMap];
 }
 
 void Shape::OnAttached(Object* owner)

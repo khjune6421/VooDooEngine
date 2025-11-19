@@ -27,6 +27,8 @@ public:
 
 	void SetScreen(UINT screenWidth = 0, UINT screenHeight = 0, float nearPlane = -1.0f, float farPlane = -1.0f, float fov = -1.0f);
 
+	float GetFarPlane() const { return m_farPlane; }
+
 	DirectX::XMVECTOR GetPosition() const { return m_cameraPosition; }
 	DirectX::XMMATRIX GetViewMatrix();
 	DirectX::XMMATRIX GetProjectionMatrix() const { return m_projectionMatrix; }

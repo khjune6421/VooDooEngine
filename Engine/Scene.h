@@ -24,10 +24,10 @@ struct DirectionalLightConstBuffer
 constexpr int MAX_POINT_LIGHTS = 8;
 struct PointLightArrayConstBuffer
 {
-	PointLightConstBuffer pointLights[MAX_POINT_LIGHTS] = {};
+	std::array<PointLightConstBuffer, MAX_POINT_LIGHTS> pointLights = {};
 
 	UINT pointLightCount = 0;
-	UINT padding[3] = {};
+	std::array<UINT, 3> padding = {};
 };
 
 class Scene
@@ -40,12 +40,15 @@ class Scene
 	std::vector<Shape*> m_renderShapes = {};
 	std::unordered_map<UINT, std::pair<std::vector<Collider*>, std::vector<Collider*>>> m_colliderMap = {};
 
+	DirectX::XMMATRIX m_lightViewProjectionMatrix = DirectX::XMMatrixIdentity();
+
 	std::vector<PointLight*> m_pointLights = {};
 
 	void CheckCollisions();
 	void UpdateCamera();
 	void UpdateLight(Renderer* renderer);
-	void UpdateShadowMap(Renderer* renderer);
+	void UpdateDirectionalLightShadowMap(Renderer* renderer);
+	void UpdateCubeShadowMap(Renderer* renderer);
 	void RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer);
 
 protected:
