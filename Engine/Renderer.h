@@ -136,9 +136,11 @@ class Renderer
 	enum TextureType
 	{
 		Diffuse,
-		Normal
+		Normal,
+
+		TextureTypeCount
 	};
-	std::unordered_map<UINT, std::tuple<com_ptr<ID3D11ShaderResourceView>, com_ptr<ID3D11ShaderResourceView>>> m_textureMap; // Diffuse, Normal
+	std::unordered_map<UINT, std::array<com_ptr<ID3D11ShaderResourceView>, TextureTypeCount>> m_textureMap;
 
 	// Render
 	enum RasterState

@@ -695,7 +695,7 @@ void Renderer::LoadAllTextures(const filesystem::path texturePath)
 				continue;
 			}
 		}
-		get<Diffuse>(m_textureMap[g_textureIdMap[textureName]]) = diffuseTexture;
+		m_textureMap[g_textureIdMap[textureName]][Diffuse] = diffuseTexture;
 	}
 
 	const filesystem::path normalPath = texturePath / L"Normal/";
@@ -715,7 +715,7 @@ void Renderer::LoadAllTextures(const filesystem::path texturePath)
 				continue;
 			}
 		}
-		get<Normal>(m_textureMap[g_textureIdMap[textureName]]) = normalTexture;
+		m_textureMap[g_textureIdMap[textureName]][Normal] = normalTexture;
 	}
 }
 
