@@ -674,7 +674,7 @@ void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, cons
 	m_pixelShaderMap[g_pixelShaderIdMap[shaderName]] = pixelShader;
 }
 
-void Renderer::LoadAllTextures(const std::filesystem::path texturePath)
+void Renderer::LoadAllTextures(const filesystem::path texturePath)
 {
 	if (filesystem::exists(texturePath) && filesystem::is_directory(texturePath))
 	{
