@@ -89,7 +89,7 @@ void Scene::UpdateDirectionalLightShadowMap(Renderer* renderer)
 	constexpr float LIGHT_RANGE = 150.0f; // Need for depth calculation in shader
 
 	const XMMATRIX lightViewMatrix = XMMatrixLookAtLH(lightPosition, LIGHT_TARGET, LIGHT_UP);
-	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(static_cast<float>(100), static_cast<float>(100), 0.1f, LIGHT_RANGE);
+	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(static_cast<float>(50), static_cast<float>(50), 0.1f, LIGHT_RANGE);
 
 	const XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPosition), XMVectorGetY(lightPosition), XMVectorGetZ(lightPosition), LIGHT_RANGE);
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);

@@ -40,7 +40,8 @@ struct VSOutput
     float3 tangent : TANGENT0;
     
     float4 posWorld : WORLDPOS0;
-    float4 light : COLOR0;
+    float4 ambientLight : COLOR0;
+    float4 directionalLight : COLOR1;
     float3 bitangent : BITANGENT0;
 };
 
@@ -56,9 +57,10 @@ VSOutput main(VSInput input)
     output.tangent = normalize(mul(float4(input.tangent0, 0.0f), normalMatrix).xyz);
     
     output.posWorld = mul(input.pos0, world);
+    output.ambientLight = ambientLight;
     
     float diffuseFactor = dot(output.norm, -directionalLightNormal.xyz);
-    output.light = ambientLight + directionalLightColor * diffuseFactor;
+    output.directionalLight = directionalLightColor * diffuseFactor;
     
     output.bitangent = normalize(cross(output.norm, output.tangent));
     
@@ -68,7 +70,7 @@ VSOutput main(VSInput input)
         float3 blinnPhongHalfVector = normalize(-directionalLightNormal.xyz + viewDirection);
 
         float specularFactor = pow(max(dot(output.norm, blinnPhongHalfVector), 0.0f), 32.0f); // pow value is shininess
-        output.light += directionalLightColor * specularFactor;
+        output.directionalLight += directionalLightColor * specularFactor;
     }
     
     return output;

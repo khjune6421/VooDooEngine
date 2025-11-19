@@ -49,7 +49,8 @@ struct PSInput
     float3 tangent : TANGENT0;
     
     float4 posWorld : WORLDPOS0;
-    float4 light : COLOR0;
+    float4 ambientLight : COLOR0;
+    float4 directionalLight : COLOR1;
     float3 bitangent : BITANGENT0;
 };
 
@@ -66,7 +67,7 @@ float CalculateDirectionalShadow(float4 worldPos)
     if (shadowTexCoord.x < 0.0f || shadowTexCoord.x > 1.0f || shadowTexCoord.y < 0.0f || shadowTexCoord.y > 1.0f) return 1.0f; // Not in shadow
     
     // Bias to prevent shadow acne
-    float bias = 1e-5f; // Need to find a sweetspot
+    float bias = 1e-3f; // Need to find a sweetspot
     float currentDepth = lightSpacePos.z - bias;
     
     float shadow = shadowMap.SampleCmpLevelZero(shadowSampler, shadowTexCoord, currentDepth);
@@ -124,13 +125,13 @@ float4 main(PSInput input) : SV_TARGET
     float distanceFromCamera = sqrt(distanceFromCameraSq);
     float3 viewDirection = vecToCamera / distanceFromCamera;
     
-    input.light *= input.light * CalculateDirectionalShadow(input.posWorld);
+    input.ambientLight += input.directionalLight * CalculateDirectionalShadow(input.posWorld);
     
     [loop]
-    for (uint i = 0; i < pointLightCount; i++) input.light += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
+    for (uint i = 0; i < pointLightCount; i++) input.ambientLight += CalculatePointLight(i, input.posWorld.xyz, worldNormal, viewDirection);
     
     float fogFactor = pow(saturate(distanceFromCamera / ambientFog.w), 1.25f);
     float4 fogColor = float4(ambientFog.xyz, 1.0f);
     
-    return lerp(texColor * input.light, fogColor, fogFactor);
+    return lerp(texColor * input.ambientLight, fogColor, fogFactor);
 }
