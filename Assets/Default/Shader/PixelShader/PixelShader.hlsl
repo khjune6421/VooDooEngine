@@ -3,8 +3,7 @@ SamplerState defaultTexSampler : register(s1);
 
 Texture2D shadowMap : register(t0);
 TextureCubeArray cubeShadowMapArray : register(t1);
-Texture2D mainTex : register(t2);
-Texture2D normalMap : register(t3);
+Texture2D textureArray[2] : register(t2); // t2 = diffuse map, t3 = normal map
 
 struct PointLight
 {
@@ -117,8 +116,8 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
 
 float4 main(PSInput input) : SV_TARGET
 {
-    float4 texColor = mainTex.Sample(defaultTexSampler, input.uv);
-    float3 normalMapSample = normalMap.Sample(defaultTexSampler, input.uv).xyz;
+    float4 texColor = textureArray[0].Sample(defaultTexSampler, input.uv);
+    float3 normalMapSample = textureArray[1].Sample(defaultTexSampler, input.uv).xyz;
     
     normalMapSample = normalMapSample * 2.0f - 1.0f;
     float3x3 TBN = float3x3(input.tangent, input.bitangent, input.norm);
