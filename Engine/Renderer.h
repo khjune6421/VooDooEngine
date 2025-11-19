@@ -237,5 +237,5 @@ public:
 	void ChangeState();
 
 	void ScreenPointToWorld(POINT screenPos) const;
-	void SaveTextureToFile(com_ptr<ID3D11Texture2D> texture, const std::wstring& filename) const;
+	void SaveShadowMapToFile(com_ptr<ID3D11Texture2D> texture, const std::wstring& filename) const;
 };

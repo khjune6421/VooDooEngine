@@ -47,7 +47,7 @@ class Scene
 	void CheckCollisions();
 	void UpdateCamera();
 	void UpdateLight(Renderer* renderer);
-	void UpdateShadowMap(Renderer* renderer);
+	void UpdateDirectionalLightShadowMap(Renderer* renderer);
 	void UpdateCubeShadowMap(Renderer* renderer);
 	void RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer);
 

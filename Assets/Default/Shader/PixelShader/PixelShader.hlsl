@@ -66,7 +66,7 @@ float CalculateDirectionalShadow(float4 worldPos)
     if (shadowTexCoord.x < 0.0f || shadowTexCoord.x > 1.0f || shadowTexCoord.y < 0.0f || shadowTexCoord.y > 1.0f) return 1.0f; // Not in shadow
     
     // Bias to prevent shadow acne
-    float bias = 1e-3f; // Need to find a sweetspot
+    float bias = 1e-5f; // Need to find a sweetspot
     float currentDepth = lightSpacePos.z - bias;
     
     float shadow = shadowMap.SampleCmpLevelZero(shadowSampler, shadowTexCoord, currentDepth);

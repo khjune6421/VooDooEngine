@@ -52,7 +52,7 @@ TestScene::TestScene()
 	m_torch->SetScale(XMFLOAT3{ 0.25f, 0.25f, 0.25f });
 	m_torch->SetPosition(XMVECTOR{ 0.0f, 2.5f, 0.0f, 1.0f });
 	//m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.5f }, 2.5f, 0.0f, 50.0f, 1.0f, 0.5f, 0.5f);
-	//m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.5f }, 2.5f);
+	m_torch->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.5f }, 2.5f);
 	m_player->AddChild(m_torch.get());
 }
 

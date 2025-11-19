@@ -67,7 +67,7 @@ void Scene::UpdateLight(Renderer* renderer)
 
 	renderer->m_deviceContext->PSSetSamplers(1, 1, renderer->m_samplers[Renderer::DefaultSampler].GetAddressOf());
 
-	UpdateShadowMap(renderer);
+	UpdateDirectionalLightShadowMap(renderer);
 	UpdateCubeShadowMap(renderer);
 
 	renderer->m_deviceContext->OMSetRenderTargets(1, originalRTV.GetAddressOf(), originalDSV.Get());
@@ -75,7 +75,7 @@ void Scene::UpdateLight(Renderer* renderer)
 	renderer->m_deviceContext->RSSetScissorRects(1, &originalScissorRect);
 }
 
-void Scene::UpdateShadowMap(Renderer* renderer)
+void Scene::UpdateDirectionalLightShadowMap(Renderer* renderer)
 {
 	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].second.Get());
 	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].first.Get(), nullptr, 0);
@@ -86,10 +86,10 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 
 	constexpr XMVECTOR LIGHT_TARGET = { 0.0f, 0.0f, 0.0f, 1.0f };
 	constexpr XMVECTOR LIGHT_UP = { 0.0f, 1.0f, 0.0f, 0.0f };
-	constexpr float LIGHT_RANGE = 250.0f; // Need for depth calculation in shader
+	constexpr float LIGHT_RANGE = 150.0f; // Need for depth calculation in shader
 
 	const XMMATRIX lightViewMatrix = XMMatrixLookAtLH(lightPosition, LIGHT_TARGET, LIGHT_UP);
-	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(static_cast<float>(Renderer::SHADOW_MAP_SIZE), static_cast<float>(Renderer::SHADOW_MAP_SIZE), 0.1f, LIGHT_RANGE);
+	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(static_cast<float>(100), static_cast<float>(100), 0.1f, LIGHT_RANGE);
 
 	const XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPosition), XMVectorGetY(lightPosition), XMVectorGetZ(lightPosition), LIGHT_RANGE);
 	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
@@ -105,6 +105,12 @@ void Scene::UpdateShadowMap(Renderer* renderer)
 	m_lightViewProjectionMatrix = XMMatrixTranspose(lightMatrixBuffer.projection * lightMatrixBuffer.view);
 
 	RenderShadows(renderer, &lightMatrixBuffer);
+
+	if (GetAsyncKeyState(VK_TAB) & 0x0001)
+	{
+		wstring shadowFaceTexture = L"Dir";
+		renderer->SaveShadowMapToFile(renderer->m_shadowMapTexture, shadowFaceTexture);
+	}
 }
 
 void Scene::UpdateCubeShadowMap(Renderer* renderer)

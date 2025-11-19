@@ -238,8 +238,6 @@ void Renderer::CreateShadowMap()
 	shadowMapDesc.SampleDesc.Quality = 0;
 	shadowMapDesc.Usage = D3D11_USAGE_DEFAULT;
 	shadowMapDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	shadowMapDesc.CPUAccessFlags = 0;
-	shadowMapDesc.MiscFlags = 0;
 	if (FAILED(m_device->CreateTexture2D(&shadowMapDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
 	{
 		MessageBoxW(nullptr, L"Failed to create shadow map texture", L"Error", MB_OK);
@@ -967,10 +965,26 @@ void Renderer::ScreenPointToWorld(POINT screenPos) const
 	if (VDGM::g_currentScene) VDGM::g_currentScene->Raycast(rayOrigin, rayEnd);
 }
 
-void Renderer::SaveTextureToFile(com_ptr<ID3D11Texture2D> texture, const wstring& filename) const
+void Renderer::SaveShadowMapToFile(com_ptr<ID3D11Texture2D> texture, const wstring& filename) const
 {
-	filesystem::path fullPath = m_resourcePath / L"BakedTextures/" / filesystem::path(filename + L".png");
-	if (FAILED(SaveWICTextureToFile(m_deviceContext.Get(), texture.Get(), GUID_ContainerFormatPng, fullPath.c_str())))
+	D3D11_TEXTURE2D_DESC desc = {};
+	texture->GetDesc(&desc);
+	desc.BindFlags = 0;
+	desc.Usage = D3D11_USAGE_STAGING;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	desc.Format = DXGI_FORMAT_R32_FLOAT;
+
+	com_ptr<ID3D11Texture2D> saveTexture = nullptr;
+	if (FAILED(m_device->CreateTexture2D(&desc, nullptr, saveTexture.GetAddressOf())))
+	{
+		MessageBoxW(nullptr, L"Failed to create staging texture for saving", L"Error", MB_OK);
+		return;
+	}
+
+	m_deviceContext->CopyResource(saveTexture.Get(), texture.Get());
+
+	filesystem::path fullPath = m_resourcePath / L"BakedTextures/" / filesystem::path(L"ShadowMap" + filename + L".png");
+	if (FAILED(SaveWICTextureToFile(m_deviceContext.Get(), saveTexture.Get(), GUID_ContainerFormatPng, fullPath.c_str())))
 	{
 		MessageBoxW(nullptr, L"Failed to save texture to file", L"Error", MB_OK);
 		return;
