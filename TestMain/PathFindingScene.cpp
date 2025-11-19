@@ -128,12 +128,12 @@ PathFindingScene::PathFindingScene()
 	m_camRotator->AddChild(m_camera.get());
 
 	unique_ptr<Object> plane = make_unique<Object>(this);
-	plane->AddComponent<Shape>(L"Shape_Plane", L"VertexShader", L"PixelShader", L"Plain", L"PlainNormal");
+	plane->AddComponent<Shape>(L"Shape_Plane", L"VertexShader", L"PixelShader", L"Plain");
 	plane->SetScale(XMFLOAT3{ 25.0f, 1.0f, 25.0f });
 	m_objects.emplace_back(move(plane));
 
 	m_player = make_unique<Object>(this);
-	m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Lilypads", L"LilypadsNormal");
+	m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Lilypads");
 	m_player->AddComponent<PointLight>(XMFLOAT3{ 1.0f, 0.75f, 0.5f }, 10.0f);
 	m_player->SetPosition
 	(

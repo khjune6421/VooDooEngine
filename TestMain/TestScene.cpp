@@ -23,7 +23,7 @@ TestScene::TestScene()
 	m_windmill->SetScale(XMFLOAT3{ 1.5f, 1.5f, 1.5f });
 
 	unique_ptr<Object> plane = make_unique<Object>(this);
-	plane->AddComponent<Shape>(L"PlaneX10", L"VertexShader", L"PixelShader", L"Plain", L"PlainNormal");
+	plane->AddComponent<Shape>(L"PlaneX10", L"VertexShader", L"PixelShader", L"Plain");
 	plane->SetScale(XMFLOAT3{ 100.0f, 1.0f, 100.0f });
 	m_objects.emplace_back(move(plane));
 
@@ -42,7 +42,7 @@ TestScene::TestScene()
 	}
 
 	m_player = make_unique<Player>(this);
-	m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Lilypads", L"LilypadsNormal");
+	m_player->AddComponent<Shape>(L"Player", L"VertexShader", L"PixelShader", L"Lilypads");
 
 	m_player->AddChild(m_camera.get());
 	m_player->SetPosition(XMVECTOR{ 0.0f, 0.0f, 0.0f, 1.0f });

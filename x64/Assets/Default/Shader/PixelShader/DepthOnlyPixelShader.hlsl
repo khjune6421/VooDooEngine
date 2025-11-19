@@ -10,6 +10,7 @@ struct PSInput
 {
     float4 pos : SV_POSITION0;
     float2 uv : TEXCOORD0;
+    
     float3 worldPos : TEXCOORD1;
 };
 
@@ -21,5 +22,5 @@ float main(PSInput input) : SV_DEPTH
     float3 lightToPixel = input.worldPos - lightPositionAndRange.xyz;
     float distance = length(lightToPixel);
     
-    return distance / lightPositionAndRange.w;
+    return (distance / lightPositionAndRange.w) * 1.05f;
 }

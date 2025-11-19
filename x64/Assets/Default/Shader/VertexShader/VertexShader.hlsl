@@ -13,11 +13,6 @@ cbuffer CameraConstBuffer : register(b1)
     float4 cameraPos;
 }
 
-cbuffer AmbientLightConstBuffer : register(b2)
-{
-    float4 ambientLight;
-}
-
 cbuffer DirectionalLightConstBuffer : register(b3) // Just one directional light
 {
     float4 directionalLightNormal;
@@ -40,7 +35,7 @@ struct VSOutput
     float3 tangent : TANGENT0;
     
     float4 posWorld : WORLDPOS0;
-    float4 light : COLOR1;
+    float4 light : COLOR0;
     float3 bitangent : BITANGENT0;
 };
 
@@ -58,7 +53,7 @@ VSOutput main(VSInput input)
     output.posWorld = mul(input.pos0, world);
     
     float diffuseFactor = dot(output.norm, -directionalLightNormal.xyz);
-    output.light = ambientLight + directionalLightColor * diffuseFactor;
+    output.light = directionalLightColor * diffuseFactor;
     
     output.bitangent = normalize(cross(output.norm, output.tangent));
     

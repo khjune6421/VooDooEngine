@@ -133,7 +133,12 @@ class Renderer
 	std::unordered_map<UINT, com_ptr<ID3D11PixelShader>> m_pixelShaderMap;
 
 	static UINT s_textureId;
-	std::unordered_map<UINT, com_ptr<ID3D11ShaderResourceView>> m_textureMap;
+	enum TextureType
+	{
+		Diffuse,
+		Normal
+	};
+	std::unordered_map<UINT, std::tuple<com_ptr<ID3D11ShaderResourceView>, com_ptr<ID3D11ShaderResourceView>>> m_textureMap; // Diffuse, Normal
 
 	// Render
 	enum RasterState

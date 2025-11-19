@@ -676,27 +676,46 @@ void Renderer::LoadPixelShader(const wchar_t* file, const char* entryPoint, cons
 
 void Renderer::LoadAllTextures(const filesystem::path texturePath)
 {
-	if (filesystem::exists(texturePath) && filesystem::is_directory(texturePath))
-	{
-		for (const auto& entry : filesystem::directory_iterator(texturePath))
-		{
-			const wstring textureName = entry.path().stem().wstring();
-			if (g_textureIdMap.find(textureName) == g_textureIdMap.end()) g_textureIdMap[textureName] = s_textureId++;
+	if (!filesystem::exists(texturePath) || !filesystem::is_directory(texturePath)) return;
 
-			com_ptr<ID3D11ShaderResourceView> texture;
-			HRESULT hr = DirectX::CreateWICTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, texture.GetAddressOf());
+	const filesystem::path diffusePath = texturePath / L"Diffuse/";
+	for (const auto& entry : filesystem::directory_iterator(diffusePath))
+	{
+		const wstring textureName = entry.path().stem().wstring();
+		if (g_textureIdMap.find(textureName) == g_textureIdMap.end()) g_textureIdMap[textureName] = s_textureId++;
+		com_ptr<ID3D11ShaderResourceView> diffuseTexture;
+
+		HRESULT hr = CreateWICTextureFromFileEx(m_device.Get(), entry.path().c_str(), 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, WIC_LOADER_DEFAULT | WIC_LOADER_FORCE_SRGB, nullptr, diffuseTexture.GetAddressOf());
+		if (FAILED(hr))
+		{
+			hr = CreateDDSTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, diffuseTexture.GetAddressOf());
 			if (FAILED(hr))
 			{
-				hr = DirectX::CreateDDSTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, texture.GetAddressOf());
-				if (FAILED(hr))
-				{
-					MessageBoxW(nullptr, (L"Failed to load texture: " + entry.path().wstring()).c_str(), L"Error", MB_OK);
-					continue;
-				}
+				MessageBoxW(nullptr, (L"Failed to load texture: " + entry.path().wstring()).c_str(), L"Error", MB_OK);
+				continue;
 			}
-
-			m_textureMap[g_textureIdMap[textureName]] = texture;
 		}
+		get<Diffuse>(m_textureMap[g_textureIdMap[textureName]]) = diffuseTexture;
+	}
+
+	const filesystem::path normalPath = texturePath / L"Normal/";
+	for (const auto& entry : filesystem::directory_iterator(normalPath))
+	{
+		const wstring textureName = entry.path().stem().wstring();
+		if (g_textureIdMap.find(textureName) == g_textureIdMap.end()) g_textureIdMap[textureName] = s_textureId++;
+		com_ptr<ID3D11ShaderResourceView> normalTexture;
+
+		HRESULT hr = CreateWICTextureFromFileEx(m_device.Get(), entry.path().c_str(), 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, WIC_LOADER_DEFAULT | WIC_LOADER_IGNORE_SRGB, nullptr, normalTexture.GetAddressOf());
+		if (FAILED(hr))
+		{
+			hr = CreateDDSTextureFromFile(m_device.Get(), entry.path().c_str(), nullptr, normalTexture.GetAddressOf());
+			if (FAILED(hr))
+			{
+				MessageBoxW(nullptr, (L"Failed to load texture: " + entry.path().wstring()).c_str(), L"Error", MB_OK);
+				continue;
+			}
+		}
+		get<Normal>(m_textureMap[g_textureIdMap[textureName]]) = normalTexture;
 	}
 }
 

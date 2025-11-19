@@ -71,8 +71,8 @@ float CalculateDirectionalShadow(float4 worldPos)
     if (shadowTexCoord.x < 0.0f || shadowTexCoord.x > 1.0f || shadowTexCoord.y < 0.0f || shadowTexCoord.y > 1.0f) return 1.0f; // Not in shadow
     
     // Bias to prevent shadow acne
-    float bias = 1e-3f; // Need to find a sweetspot
-    float currentDepth = lightSpacePos.z - bias;
+    float bias = 0.999f; // Need to find a sweetspot
+    float currentDepth = lightSpacePos.z * bias;
     
     float shadow = shadowMap.SampleCmpLevelZero(shadowSampler, shadowTexCoord, currentDepth);
     
@@ -136,7 +136,7 @@ float4 main(PSInput input) : SV_TARGET
     
     input.light += ambientLight;
     
-    float fogFactor = pow(saturate(distanceFromCamera / ambientFog.w), 1.25f);
+    float fogFactor = pow(saturate(distanceFromCamera / ambientFog.w), 2.0f);
     float4 fogColor = float4(ambientFog.xyz, 1.0f);
     
     return lerp(texColor * input.light, fogColor, fogFactor);

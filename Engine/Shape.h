@@ -15,7 +15,6 @@ class Shape : public Component
 	UINT m_pixelShaderId = 0;
 
 	UINT m_textureId = 0;
-	UINT m_normalMapId = 0;
 
 public:
 	Shape
@@ -24,8 +23,7 @@ public:
 		const std::wstring& vertexShader = L"VertexShader",
 		const std::wstring& pixelShader = L"PixelShader",
 
-		const std::wstring& texture = L"NoTexture",
-		const std::wstring& normalMap = L"NoNormal"
+		const std::wstring& texture = L"NoTexture"
 	);
 
 	void Render(class Renderer* renderer, struct MatrixConstBuffer* matrixBuffer);
@@ -39,7 +37,6 @@ public:
 	void SetPixelShader(const std::wstring& pixelShader);
 
 	void SetTexture(const std::wstring& texture);
-	void SetNormalMap(const std::wstring& normalMap);
 
 	void OnAttached(Object* owner) override;
 	void OnDetached() override;
