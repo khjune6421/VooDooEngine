@@ -131,10 +131,6 @@ void Scene::UpdateCubeShadowMap(Renderer* renderer)
 
 			D3D11_TEXTURE2D_DESC desc = {};
 			renderer->m_cubeShadowMapArrayTexture->GetDesc(&desc);
-			desc.BindFlags = 0;
-			desc.Usage = D3D11_USAGE_STAGING;
-			desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-			desc.Format = DXGI_FORMAT_R32_FLOAT;
 
 			renderer->m_device->CreateTexture2D(&desc, nullptr, shadowFaceTexture.GetAddressOf());
 
