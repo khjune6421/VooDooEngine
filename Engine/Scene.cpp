@@ -97,10 +97,6 @@ void Scene::UpdateDirectionalLightShadowMap(Renderer* renderer)
 	const float lightRange = cameraFarPlane * 2.0f;
 	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(lightRange, lightRange, 0.1f, lightRange);
 
-	const XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPosition), XMVectorGetY(lightPosition), XMVectorGetZ(lightPosition), lightRange);
-	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
-	renderer->m_deviceContext->PSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::LightPosBuffer].GetAddressOf());
-
 	renderer->m_deviceContext->OMSetRenderTargets(0, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_shadowMapDSV.Get());
 	renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 

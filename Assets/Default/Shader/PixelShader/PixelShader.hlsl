@@ -27,7 +27,7 @@ cbuffer AmbientLightConstBuffer : register(b0)
 }
 cbuffer DirectionalLightShadowConstBuffer : register(b1)
 {
-    matrix lightVP;
+    matrix directionalLightVP;
 }
 cbuffer PointLightConstBuffer : register(b2)
 {
@@ -59,7 +59,7 @@ struct PSInput
 
 float CalculateDirectionalShadow(float4 worldPos)
 {
-    float4 lightSpacePos = mul(lightVP, worldPos);
+    float4 lightSpacePos = mul(directionalLightVP, worldPos);
     if (lightSpacePos.w <= 0.0f) return 1.0f;
     lightSpacePos.xyz /= lightSpacePos.w;
     
