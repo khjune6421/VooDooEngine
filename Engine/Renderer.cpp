@@ -584,7 +584,7 @@ void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* ent
 
 
 #ifdef _DEBUG
-constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR | D3DCOMPILE_DEBUG;
 #else
 constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 #endif
