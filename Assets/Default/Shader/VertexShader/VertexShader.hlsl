@@ -1,4 +1,4 @@
-cbuffer MatrixConstBuffer : register(b0)
+cbuffer MatrixConstBuffer : register(b0) // TODO: Split world, view and set const buffer once per frame
 {
     matrix world;
     matrix view;
