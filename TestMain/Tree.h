@@ -1,6 +1,7 @@
 #pragma once
-
-#include "pch.h"
+#include "Object.h"
+#include "Shape.h"
+#include "Collider.h"
 
 class Tree : public Object
 {

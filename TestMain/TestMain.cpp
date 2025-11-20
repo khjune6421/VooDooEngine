@@ -1,4 +1,6 @@
-#include "pch.h"
+#include "cPch.h"
+#include "GameManager.h"
+#include "WindowManager.h"
 
 #include "TestScene.h"
 #include "PathFindingScene.h"

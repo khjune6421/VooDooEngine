@@ -1,5 +1,8 @@
-#include "pch.h"
+#include "cPch.h"
 #include "TestScene.h"
+
+#include "Object.h"
+#include "Camera.h"
 
 using namespace std;
 using namespace DirectX;

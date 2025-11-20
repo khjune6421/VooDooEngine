@@ -23,7 +23,7 @@
     <ClCompile Include="Node.cpp">
       <Filter>Scene\PathFindingScene\Object</Filter>
     </ClCompile>
-    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="cPch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Scene">
@@ -64,7 +64,7 @@
     <ClInclude Include="Node.h">
       <Filter>Scene\PathFindingScene\Object</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h" />
+    <ClInclude Include="cPch.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

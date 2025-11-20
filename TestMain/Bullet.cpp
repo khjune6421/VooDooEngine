@@ -1,5 +1,8 @@
-#include "pch.h"
+#include "cPch.h"
 #include "Bullet.h"
+
+#include "Shape.h"
+#include "Collider.h"
 
 using namespace std;
 using namespace DirectX;

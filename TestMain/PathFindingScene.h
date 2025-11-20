@@ -1,5 +1,6 @@
 #pragma once
-#include "pch.h"
+#include "Scene.h"
+
 #include "Node.h"
 
 class PathFindingScene : public Scene

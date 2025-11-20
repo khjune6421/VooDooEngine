@@ -1,5 +1,7 @@
 #pragma once
-#include "pch.h"
+#include "Object.h"
+
+class Shape;
 
 class Node : public Object
 {

@@ -1,5 +1,7 @@
-#include "pch.h"
+#include "cPch.h"
 #include "Tree.h"
+
+#include "Collider.h"
 
 using namespace std;
 using namespace DirectX;

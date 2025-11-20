@@ -1,5 +1,7 @@
-#include "pch.h"
+#include "cPch.h"
 #include "Player.h"
+
+#include "Component.h"
 
 using namespace DirectX;
 using namespace std;

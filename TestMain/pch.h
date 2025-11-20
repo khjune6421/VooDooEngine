@@ -1,9 +1,0 @@
-#pragma once
-#include "pch.h"
-#include "Object.h"
-#include "Camera.h"
-#include "Renderer.h"
-#include "Scene.h"
-#include "WindowManager.h"
-#include "GameManager.h"
-#include "Collider.h"

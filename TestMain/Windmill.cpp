@@ -1,5 +1,7 @@
-#include "pch.h"
+#include "cPch.h"
 #include "Windmill.h"
+
+#include "Shape.h"
 
 using namespace DirectX;
 using namespace std;

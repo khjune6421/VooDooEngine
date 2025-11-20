@@ -1,6 +1,6 @@
 #pragma once
+#include "Object.h"
 
-#include "pch.h"
 #include "Bullet.h"
 
 class Player : public Object

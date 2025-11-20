@@ -1,6 +1,5 @@
 #pragma once
-
-#include "pch.h"
+#include "Object.h"
 
 class Windmill : public Object
 {
