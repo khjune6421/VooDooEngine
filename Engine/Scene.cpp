@@ -82,9 +82,9 @@ void Scene::UpdateDirectionalLightShadowMap(Renderer* renderer)
 {
 	if (!m_mainCamera) return;
 
-	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].second.Get());
-	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthVertexShader"]].first.Get(), nullptr, 0);
-	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthPixelShader"]].Get(), nullptr, 0);
+	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"VSOrthographicDepth"]].second.Get());
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"VSOrthographicDepth"]].first.Get(), nullptr, 0);
+	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"PSOrthographicDepth"]].Get(), nullptr, 0);
 
 	const float cameraFarPlane = m_mainCamera->GetFarPlane();
 	XMVECTOR lightPosition = m_directionalLight.direction * -cameraFarPlane;
@@ -97,10 +97,6 @@ void Scene::UpdateDirectionalLightShadowMap(Renderer* renderer)
 	const float lightRange = cameraFarPlane * 2.0f;
 	const XMMATRIX lightProjectionMatrix = XMMatrixOrthographicLH(lightRange, lightRange, 0.1f, lightRange);
 
-	const XMFLOAT4 lightData = XMFLOAT4(XMVectorGetX(lightPosition), XMVectorGetY(lightPosition), XMVectorGetZ(lightPosition), lightRange);
-	renderer->m_deviceContext->UpdateSubresource(renderer->m_constBuffers[Renderer::LightPosBuffer].Get(), 0, nullptr, &lightData, 0, 0);
-	renderer->m_deviceContext->PSSetConstantBuffers(0, 1, renderer->m_constBuffers[Renderer::LightPosBuffer].GetAddressOf());
-
 	renderer->m_deviceContext->OMSetRenderTargets(0, renderer->m_shadowMapArrayRTV.GetAddressOf(), renderer->m_shadowMapDSV.Get());
 	renderer->m_deviceContext->ClearDepthStencilView(renderer->m_shadowMapDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
@@ -112,20 +108,39 @@ void Scene::UpdateDirectionalLightShadowMap(Renderer* renderer)
 
 	RenderShadows(renderer, &lightMatrixBuffer);
 
-	if (GetAsyncKeyState(VK_TAB) & 0x0001)
-	{
-		wstring shadowFaceTexture = L"Dir";
-		renderer->SaveShadowMapToFile(renderer->m_shadowMapTexture, shadowFaceTexture);
-	}
+	//if (GetAsyncKeyState(VK_TAB) & 0x0001)
+	//{
+	//	wstring shadowFaceTexture = L"Dir";
+	//	renderer->SaveShadowMapToFile(renderer->m_shadowMapTexture, shadowFaceTexture);
+	//}
 }
 
 void Scene::UpdateCubeShadowMap(Renderer* renderer)
 {
-	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].second.Get());
-	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"DepthOnlyVertexShader"]].first.Get(), nullptr, 0);
-	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"DepthOnlyPixelShader"]].Get(), nullptr, 0);
+	renderer->m_deviceContext->IASetInputLayout(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"VSPerspectiveDepth"]].second.Get());
+	renderer->m_deviceContext->VSSetShader(renderer->m_vertexShaderMap[g_vertexShaderIdMap[L"VSPerspectiveDepth"]].first.Get(), nullptr, 0);
+	renderer->m_deviceContext->PSSetShader(renderer->m_pixelShaderMap[g_pixelShaderIdMap[L"PSPerspectiveDepth"]].Get(), nullptr, 0);
 
 	for (UINT i = 0; i < static_cast<UINT>(m_pointLights.size()) && i < MAX_POINT_LIGHTS; ++i) m_pointLights[i]->CreateShadowMap(renderer, 6 * i);
+
+	if (GetAsyncKeyState(VK_TAB) & 0x0001)
+	{
+		for (UINT face = 0; face < 6; ++face)
+		{
+			com_ptr<ID3D11Texture2D> shadowFaceTexture = nullptr;
+
+			D3D11_TEXTURE2D_DESC desc = {};
+			renderer->m_cubeShadowMapArrayTexture->GetDesc(&desc);
+
+			renderer->m_device->CreateTexture2D(&desc, nullptr, shadowFaceTexture.GetAddressOf());
+
+			const UINT subresourceIndex = D3D11CalcSubresource(0, face, 1);
+			renderer->m_deviceContext->CopySubresourceRegion(shadowFaceTexture.Get(), 0, 0, 0, 0, renderer->m_cubeShadowMapArrayTexture.Get(), subresourceIndex, nullptr);
+
+			wstring shadowFaceFilename = L"PointLightFace_" + to_wstring(face);
+			renderer->SaveShadowMapToFile(shadowFaceTexture, shadowFaceFilename);
+		}
+	}
 }
 
 void Scene::RenderShadows(Renderer* renderer, MatrixConstBuffer* lightMatrixBuffer)

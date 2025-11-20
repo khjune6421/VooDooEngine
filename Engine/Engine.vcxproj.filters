@@ -64,6 +64,12 @@
     <Filter Include="Game">
       <UniqueIdentifier>{4a85e406-59ed-4989-98f1-5cb1121c66b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\Shadow">
+      <UniqueIdentifier>{0e560bbc-77ca-4656-979b-e21b6ea5caea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Debug">
+      <UniqueIdentifier>{555f52a6-6015-41ce-848e-97d893136732}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h">
@@ -114,29 +120,29 @@
     <FxCompile Include="..\Assets\Default\Shader\PixelShader\PixelShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="..\Assets\Default\Shader\GeometryShader\GSShowNormal.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PSShowNormal.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
     <FxCompile Include="..\Assets\Default\Shader\VertexShader\VertexShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PSPerspectiveDepth.hlsl">
+      <Filter>Shader\Shadow</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\VertexShader\VSPerspectiveDepth.hlsl">
+      <Filter>Shader\Shadow</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PSOrthographicDepth.hlsl">
+      <Filter>Shader\Shadow</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\VertexShader\VSOrthographicDepth.hlsl">
+      <Filter>Shader\Shadow</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\GeometryShader\GSShowNormal.hlsl">
+      <Filter>Shader\Debug</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Assets\Default\Shader\PixelShader\PSShowNormal.hlsl">
+      <Filter>Shader\Debug</Filter>
+    </FxCompile>
     <FxCompile Include="..\Assets\Default\Shader\VertexShader\VSShowNormal.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Assets\Default\Shader\VertexShader\DepthOnlyVertexShader.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Assets\Default\Shader\PixelShader\DepthOnlyPixelShader.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Assets\Default\Shader\VertexShader\DepthVertexShader.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Assets\Default\Shader\PixelShader\DepthPixelShader.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>Shader\Debug</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

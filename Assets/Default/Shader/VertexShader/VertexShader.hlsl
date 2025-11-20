@@ -46,6 +46,10 @@ VSOutput main(VSInput input)
     input.pos0.w = 1.0f;
     
     output.pos = mul(input.pos0, WVP);
+    
+    //output.pos.xyz /= output.pos.w; // Odd effect // could be useful
+    //output.pos.w = 1.0f;
+    
     output.norm = normalize(mul(float4(input.norm0, 0.0f), normalMatrix).xyz); // Inverse scale matrix
     output.uv = input.uv0;
     output.tangent = normalize(mul(float4(input.tangent0, 0.0f), normalMatrix).xyz);

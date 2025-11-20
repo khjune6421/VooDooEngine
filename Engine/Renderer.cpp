@@ -236,7 +236,6 @@ void Renderer::CreateShadowMap()
 	shadowMapDesc.ArraySize = 1;
 	shadowMapDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 	shadowMapDesc.SampleDesc.Count = 1;
-	shadowMapDesc.SampleDesc.Quality = 0;
 	shadowMapDesc.Usage = D3D11_USAGE_DEFAULT;
 	shadowMapDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	if (FAILED(m_device->CreateTexture2D(&shadowMapDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
@@ -585,7 +584,7 @@ void Renderer::LoadAllShaders(const filesystem::path shaderPath, const char* ent
 
 
 #ifdef _DEBUG
-constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR | D3DCOMPILE_DEBUG;
 #else
 constexpr UINT compileFlags = D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR;
 #endif

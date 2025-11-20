@@ -3,7 +3,8 @@ SamplerState defaultTexSampler : register(s1);
 
 Texture2D shadowMap : register(t0);
 TextureCubeArray cubeShadowMapArray : register(t1);
-Texture2D textureArray[2] : register(t2); // t2 = diffuse map, t3 = normal map
+
+Texture2D textureArray[2] : register(t2); // t2 = diffuse map, t3 = normal map, etc.
 
 struct PointLight
 {
@@ -27,7 +28,7 @@ cbuffer AmbientLightConstBuffer : register(b0)
 }
 cbuffer DirectionalLightShadowConstBuffer : register(b1)
 {
-    matrix lightVP;
+    matrix directionalLightVP;
 }
 cbuffer PointLightConstBuffer : register(b2)
 {
@@ -59,7 +60,7 @@ struct PSInput
 
 float CalculateDirectionalShadow(float4 worldPos)
 {
-    float4 lightSpacePos = mul(lightVP, worldPos);
+    float4 lightSpacePos = mul(directionalLightVP, worldPos);
     if (lightSpacePos.w <= 0.0f) return 1.0f;
     lightSpacePos.xyz /= lightSpacePos.w;
     
