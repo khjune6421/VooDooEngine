@@ -236,7 +236,6 @@ void Renderer::CreateShadowMap()
 	shadowMapDesc.ArraySize = 1;
 	shadowMapDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 	shadowMapDesc.SampleDesc.Count = 1;
-	shadowMapDesc.SampleDesc.Quality = 0;
 	shadowMapDesc.Usage = D3D11_USAGE_DEFAULT;
 	shadowMapDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	if (FAILED(m_device->CreateTexture2D(&shadowMapDesc, nullptr, m_shadowMapTexture.GetAddressOf())))
