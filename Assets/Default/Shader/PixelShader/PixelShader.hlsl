@@ -3,7 +3,8 @@ SamplerState defaultTexSampler : register(s1);
 
 Texture2D shadowMap : register(t0);
 TextureCubeArray cubeShadowMapArray : register(t1);
-Texture2D textureArray[2] : register(t2); // t2 = diffuse map, t3 = normal map
+
+Texture2D textureArray[2] : register(t2); // t2 = diffuse map, t3 = normal map, etc.
 
 struct PointLight
 {
