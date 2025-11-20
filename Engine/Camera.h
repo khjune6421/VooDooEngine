@@ -5,8 +5,8 @@ class Camera : public Component
 {
 	float m_fov;
 
-	UINT m_screenWidth;
-	UINT m_screenHeight;
+	float m_screenWidth;
+	float m_screenHeight;
 	float m_aspectRatio;
 
 	float m_nearPlane;
