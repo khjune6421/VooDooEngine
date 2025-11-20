@@ -1,6 +1,7 @@
 #pragma once
-#include "pch.h"
 #include "Component.h"
+
+constexpr int MAX_POINT_LIGHTS = 8;
 
 constexpr float DEFAULT_CONSTANT_ATTENUATION = 1.0f;
 constexpr float DEFAULT_LINEAR_ATTENUATION = 0.01f;
@@ -14,7 +15,6 @@ struct PointLightConstBuffer // Is also a SpotLightConstBuffer
 	DirectX::XMFLOAT4 directionAndAngle = { 0.0f, 0.0f, 1.0f, 0.0f }; // w is the angle // it's not radian or digree // Im not sure what it is // set to 0 for PointLight
 
 	float range = 100.0f;
-
 	float constant = DEFAULT_CONSTANT_ATTENUATION;
 	float linear = DEFAULT_LINEAR_ATTENUATION;
 	float quadratic = DEFAULT_QUADRATIC_ATTENUATION;
@@ -29,7 +29,7 @@ class PointLight : public Component
 
 	PointLightConstBuffer m_lightData = {};
 
-	void UpdateColor() { m_lightData.color = DirectX::XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f }; }
+	void UpdateColor();
 
 public:
 	PointLight
@@ -41,17 +41,7 @@ public:
 		const float constantAttenuation = DEFAULT_CONSTANT_ATTENUATION,
 		const float linearAttenuation = DEFAULT_LINEAR_ATTENUATION,
 		const float quadraticAttenuation = DEFAULT_QUADRATIC_ATTENUATION
-	)
-	{
-		m_color = color;
-		m_intensity = intensity;
-		UpdateColor();
-		m_lightData.directionAndAngle = DirectX::XMFLOAT4{ 0.0f, 0.0f, 1.0f, spotAngle };
-		m_lightData.range = range;
-		m_lightData.constant = constantAttenuation;
-		m_lightData.linear = linearAttenuation;
-		m_lightData.quadratic = quadraticAttenuation;
-	}
+	);
 
 	void OnAttached(Object* owner) override;
 	void OnDetached() override;

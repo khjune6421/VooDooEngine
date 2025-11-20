@@ -1,8 +1,10 @@
 #pragma once
-#include "pch.h"
 
-#include "Shape.h"
-#include "Light.h"
+extern std::unordered_map<std::wstring, UINT> g_meshIdMap;
+extern std::unordered_map<std::wstring, UINT> g_vertexShaderIdMap;
+extern std::unordered_map<std::wstring, UINT> g_geometryShaderIdMap;
+extern std::unordered_map<std::wstring, UINT> g_pixelShaderIdMap;
+extern std::unordered_map<std::wstring, UINT> g_textureIdMap;
 
 enum class Directions
 {

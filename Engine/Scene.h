@@ -1,10 +1,6 @@
 #pragma once
-#include "pch.h"
-#include "Light.h"
 
-class Collider;
-class PointLight;
-class Renderer;
+#include "Light.h"
 
 struct MatrixConstBuffer
 {
@@ -20,8 +16,6 @@ struct DirectionalLightConstBuffer
 	DirectX::XMVECTOR direction = { 0.0f, -1.0f, 0.0f, 0.0f };
 	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
-
-constexpr int MAX_POINT_LIGHTS = 8;
 struct PointLightArrayConstBuffer
 {
 	std::array<PointLightConstBuffer, MAX_POINT_LIGHTS> pointLights = {};

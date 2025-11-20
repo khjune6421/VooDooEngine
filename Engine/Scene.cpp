@@ -5,6 +5,7 @@
 #include "Collider.h"
 #include "Camera.h"
 #include "Object.h"
+#include "Shape.h"
 
 using namespace DirectX;
 using namespace std;

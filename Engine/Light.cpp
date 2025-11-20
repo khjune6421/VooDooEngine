@@ -8,6 +8,23 @@
 using namespace std;
 using namespace DirectX;
 
+void PointLight::UpdateColor()
+{
+	m_lightData.color = XMFLOAT4{ m_color.x * m_intensity, m_color.y * m_intensity, m_color.z * m_intensity, 0.0f };
+}
+
+PointLight::PointLight(const XMFLOAT3& color, const float intensity, const float spotAngle, const float range, const float constantAttenuation, const float linearAttenuation, const float quadraticAttenuation)
+{
+	m_color = color;
+	m_intensity = intensity;
+	UpdateColor();
+	m_lightData.directionAndAngle = XMFLOAT4{ 0.0f, 0.0f, 1.0f, spotAngle };
+	m_lightData.range = range;
+	m_lightData.constant = constantAttenuation;
+	m_lightData.linear = linearAttenuation;
+	m_lightData.quadratic = quadraticAttenuation;
+}
+
 void PointLight::OnAttached(Object* owner)
 {
 	Component::OnAttached(owner);

@@ -3,6 +3,7 @@
 
 #include "ObjFileParser.h"
 #include "Light.h"
+#include "Scene.h"
 
 using namespace std;
 using namespace DirectX;

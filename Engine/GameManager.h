@@ -1,6 +1,5 @@
 #pragma once
-
-#include "WindowManager.h"
+class Scene;
 
 namespace VDGM
 {

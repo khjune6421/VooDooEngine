@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "Object.h"
 #include "ObjFileParser.h"
+#include "Scene.h"
 
 using namespace std;
 using namespace DirectX;

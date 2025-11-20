@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "GameManager.h"
 
-#include "Object.h"
+#include "WindowManager.h"
 #include "Scene.h"
+#include "Renderer.h"
 
 using namespace std;
 

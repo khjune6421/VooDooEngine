@@ -1,22 +1,15 @@
 #pragma once
 // Standard library header
-#include <Windows.h>
-#include <iostream>
-#include <vector>
-#include <deque>
-#include <wrl/client.h>
-#include <memory>
-#include <unordered_map>
+#include <typeindex>
 #include <filesystem>
 #include <fstream>
-#include <typeindex>
-#include <chrono>
-#include <wincodec.h>
 #include <array>
 
+// Windows header
+#include <wrl/client.h>
+#include <wincodec.h>
+
 // DirectX header
-#include <d3d11.h>
-#include <DirectXMath.h>
 #include <d3dcompiler.h>
 
 // DirectXTK header
@@ -25,10 +18,6 @@
 #include <DDSTextureLoader.h>
 #include <WICTextureLoader.h>
 #include <ScreenGrab.h>
-
-// Engine header
-#include "Singleton.h"
-#include "RandomNumberGenerator.h"
 
 // Windows libraries
 #pragma comment(lib, "winmm.lib")

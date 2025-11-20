@@ -1,6 +1,6 @@
 #pragma once
-#include "pch.h"
-#include "Scene.h"
+
+class Scene;
 
 constexpr std::array<DirectX::XMVECTOR, 6> CUBE_TARGET =
 {

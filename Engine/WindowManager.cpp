@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "WindowManager.h"
 
+#include "Renderer.h"
+
 using namespace std;
 
 namespace VDW

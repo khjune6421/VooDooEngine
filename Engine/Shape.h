@@ -1,5 +1,4 @@
 #pragma once
-#include "pch.h"
 #include "Component.h"
 
 extern std::unordered_map<std::wstring, UINT> g_meshIdMap;
