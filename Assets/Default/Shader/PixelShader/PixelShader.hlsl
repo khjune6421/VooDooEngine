@@ -46,18 +46,6 @@ cbuffer AmbientFogConstBuffer : register(b4)
     float4 ambientFog; // w value is range
 }
 
-struct PSInput
-{
-    float4 pos : SV_POSITION0;
-    float3 norm : NORMAL0;
-    float2 uv : TEXCOORD0;
-    float3 tangent : TANGENT0;
-    
-    float4 posWorld : WORLDPOS0;
-    float4 light : COLOR0;
-    float3 bitangent : BITANGENT0;
-};
-
 float CalculateDirectionalShadow(float4 worldPos)
 {
     float4 lightSpacePos = mul(directionalLightVP, worldPos);
@@ -114,6 +102,18 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     
     return result * attenuation;
 }
+
+struct PSInput
+{
+    float4 pos : SV_POSITION0;
+    float3 norm : NORMAL0;
+    float2 uv : TEXCOORD0;
+    float3 tangent : TANGENT0;
+    
+    float4 posWorld : WORLDPOS0;
+    float4 light : COLOR0;
+    float3 bitangent : BITANGENT0;
+};
 
 float4 main(PSInput input) : SV_TARGET
 {
