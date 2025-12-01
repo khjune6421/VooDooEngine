@@ -15,8 +15,6 @@ Debug/
 Release/
 */Debug/
 */Release/
-#*/x64/
-*/Win32/
 
 # Precompiled Headers
 *.gch
