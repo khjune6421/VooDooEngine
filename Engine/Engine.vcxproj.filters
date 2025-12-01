@@ -114,9 +114,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <FxCompile Include="..\Assets\Default\Shader\PixelShader\PixelShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
@@ -144,5 +141,8 @@
     <FxCompile Include="..\Assets\Default\Shader\VertexShader\VSShowNormal.hlsl">
       <Filter>Shader\Debug</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
