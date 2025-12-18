@@ -76,8 +76,7 @@ float4 CalculatePointLight(uint index, float3 worldPos, float3 worldNormal, floa
     float distance = sqrt(distanceSq);
     if (distance > pLight.range) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
-    // Shadow
-    float shadowFactor = cubeShadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), distance / pLight.range);
+    float shadowFactor = cubeShadowMapArray.SampleCmpLevelZero(shadowSampler, float4(-vecToLight, index), (distance / pLight.range) * 1.05f);
     if (shadowFactor <= 0.0f) return float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     vecToLight /= distance; // Normalize
